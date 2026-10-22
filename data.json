@@ -1,0 +1,616 @@
+{
+ "meta": {
+  "built": "2026-10-22",
+  "note": "Every figure carries source URL + date, or status UNSOURCED (no number used)."
+ },
+ "origins": [
+  {
+   "name": "New York",
+   "elecCents": 29.9
+  },
+  {
+   "name": "New Jersey",
+   "elecCents": 25.19
+  },
+  {
+   "name": "Pennsylvania",
+   "elecCents": 21.72
+  },
+  {
+   "name": "Ohio",
+   "elecCents": 19.45
+  },
+  {
+   "name": "Michigan",
+   "elecCents": 23.05
+  },
+  {
+   "name": "Illinois",
+   "elecCents": 19.22
+  },
+  {
+   "name": "Indiana",
+   "elecCents": 16.73
+  },
+  {
+   "name": "Wisconsin",
+   "elecCents": 19.06
+  },
+  {
+   "name": "Minnesota",
+   "elecCents": 17.45
+  },
+  {
+   "name": "Massachusetts",
+   "elecCents": 30.49
+  },
+  {
+   "name": "Connecticut",
+   "elecCents": 24.16
+  },
+  {
+   "name": "Maryland",
+   "elecCents": 21.41
+  },
+  {
+   "name": "Virginia",
+   "elecCents": 17.55
+  },
+  {
+   "name": "North Carolina",
+   "elecCents": 15.16
+  },
+  {
+   "name": "Georgia",
+   "elecCents": 16.27
+  },
+  {
+   "name": "Texas",
+   "elecCents": 15.88
+  },
+  {
+   "name": "California",
+   "elecCents": 33.61
+  },
+  {
+   "name": "Colorado",
+   "elecCents": 17.0
+  },
+  {
+   "name": "Other / not listed",
+   "elecCents": null
+  }
+ ],
+ "elecSource": {
+  "value": 15.03,
+  "label": "FL residential electricity price (c/kWh); origin states same table",
+  "source": "EIA Electric Power Monthly Table 5.6.A",
+  "url": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a",
+  "asOf": "July 2026 (released 2026-09-24)",
+  "checked": "2026-10-22",
+  "status": "SOURCED"
+ },
+ "fmr": {
+  "NPBS": {
+   "value": [
+    1418,
+    1686,
+    1958,
+    2537,
+    3027
+   ],
+   "label": "HUD FMR North Port-Bradenton-Sarasota MSA",
+   "source": "HUD FY2026 FMR Schedule",
+   "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY2026_FMR_Schedule.pdf",
+   "asOf": "FY2026",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "PG": {
+   "value": [
+    1159,
+    1167,
+    1470,
+    2041,
+    2326
+   ],
+   "label": "HUD FMR Punta Gorda MSA",
+   "source": "HUD FY2026 FMR Schedule",
+   "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY2026_FMR_Schedule.pdf",
+   "asOf": "FY2026",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "CCFM": {
+   "value": [
+    1629,
+    1638,
+    1961,
+    2560,
+    2836
+   ],
+   "label": "HUD FMR Cape Coral-Fort Myers MSA",
+   "source": "HUD FY2026 FMR Schedule",
+   "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY2026_FMR_Schedule.pdf",
+   "asOf": "FY2026",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  }
+ },
+ "areas": [
+  {
+   "id": "sarasota",
+   "name": "Sarasota",
+   "county": "Sarasota",
+   "fmr": "NPBS"
+  },
+  {
+   "id": "northport",
+   "name": "North Port",
+   "county": "Sarasota",
+   "fmr": "NPBS"
+  },
+  {
+   "id": "venice",
+   "name": "Venice",
+   "county": "Sarasota",
+   "fmr": "NPBS"
+  },
+  {
+   "id": "wellenpark",
+   "name": "Wellen Park",
+   "county": "Sarasota",
+   "fmr": "NPBS"
+  },
+  {
+   "id": "lwr",
+   "name": "Lakewood Ranch",
+   "county": "Manatee/Sarasota",
+   "fmr": "NPBS"
+  },
+  {
+   "id": "parrish",
+   "name": "Parrish",
+   "county": "Manatee",
+   "fmr": "NPBS"
+  },
+  {
+   "id": "portcharlotte",
+   "name": "Port Charlotte",
+   "county": "Charlotte",
+   "fmr": "PG"
+  },
+  {
+   "id": "fortmyers",
+   "name": "Fort Myers",
+   "county": "Lee",
+   "fmr": "CCFM"
+  },
+  {
+   "id": "capecoral",
+   "name": "Cape Coral",
+   "county": "Lee",
+   "fmr": "CCFM"
+  }
+ ],
+ "movers": {
+  "value": {
+   "bands": [
+    "100-499",
+    "500-999",
+    "1000-1499",
+    "1500-1999",
+    "2000+"
+   ],
+   "sizes": [
+    "Studio/1BR",
+    "2BR",
+    "3BR",
+    "4+BR"
+   ],
+   "median": [
+    [
+     1980,
+     2990,
+     4920,
+     7220
+    ],
+    [
+     2130,
+     3130,
+     5160,
+     7590
+    ],
+    [
+     2120,
+     3400,
+     5390,
+     9000
+    ],
+    [
+     2540,
+     3640,
+     5970,
+     9470
+    ],
+    [
+     2590,
+     4010,
+     5850,
+     null
+    ]
+   ]
+  },
+  "label": "Full-service long-distance mover, median booked price",
+  "source": "ConsumerMovingReviews (CMR) Moving Cost Report 2026, price bands CSV (booked estimates, not invoices)",
+  "url": "https://www.consumermovingreviews.com/data/cmr-price-bands-2026.csv",
+  "asOf": "Jan 2025-Sep 2026",
+  "checked": "2026-10-22",
+  "status": "SOURCED",
+  "caveat": "2000+ mi / 4+BR cell not read; small samples flagged by CMR."
+ },
+ "fl": {
+  "dl": {
+   "value": 48,
+   "label": "FL driver license, original Class E",
+   "source": "FLHSMV fee schedule",
+   "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED",
+   "caveat": "+$6.25 tax-collector service fee may apply"
+  },
+  "initReg": {
+   "value": 225,
+   "label": "FL initial registration fee (per vehicle new to FL)",
+   "source": "FLHSMV fee schedule",
+   "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "title": {
+   "value": 85.25,
+   "label": "FL title, original used (electronic)",
+   "source": "FLHSMV fee schedule",
+   "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "plate": {
+   "value": 28,
+   "label": "FL original license plate fee",
+   "source": "FLHSMV fee schedule",
+   "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "regTax": {
+   "value": 22.5,
+   "label": "FL base vehicle tax, auto 2,500-3,499 lb",
+   "source": "FLHSMV fee schedule",
+   "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED",
+   "caveat": "Base tax only; other statutory fees apply"
+  }
+ },
+ "gas": {
+  "value": 4.057,
+  "label": "FL avg regular gasoline $/gal",
+  "source": "AAA Gas Prices, state averages",
+  "url": "https://gasprices.aaa.com/todays-state-averages/",
+  "asOf": "2026-10-22",
+  "checked": "2026-10-22",
+  "status": "SOURCED"
+ },
+ "lodging": {
+  "value": 110,
+  "label": "Lodging per night (proxy)",
+  "source": "GSA FY2026 standard CONUS lodging per diem",
+  "url": "https://www.gsa.gov/policy-regulations/regulations/federal-travel-regulation/ftr-and-related-files/gsa-per-diem-bulletin-ftr-2601",
+  "asOf": "FY2026",
+  "checked": "2026-10-22",
+  "status": "SOURCED",
+  "caveat": "Federal reimbursement cap, used as a lodging proxy"
+ },
+ "ce": {
+  "elec": {
+   "value": 2042,
+   "label": "Electricity, avg household $/yr (South)",
+   "source": "BLS Consumer Expenditure Survey 2024, South region (via FRED)",
+   "url": "https://fred.stlouisfed.org/release/tables?eid=1215073&rid=479",
+   "asOf": "2024",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "water": {
+   "value": 805,
+   "label": "Water & other public services $/yr (South)",
+   "source": "BLS CE 2024, South region (via FRED)",
+   "url": "https://fred.stlouisfed.org/release/tables?eid=1215073&rid=479",
+   "asOf": "2024",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "food": {
+   "value": 5502,
+   "label": "Groceries (food at home) $/yr (South)",
+   "source": "BLS CE 2024, South region (FRED CXUFOODHOMELB1104M)",
+   "url": "https://fred.stlouisfed.org/series/CXUFOODHOMELB1104M",
+   "asOf": "2024",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "cell": {
+   "value": 1352,
+   "label": "Cellular phone service $/yr (South)",
+   "source": "BLS CE 2024, South region (via FRED)",
+   "url": "https://fred.stlouisfed.org/release/tables?eid=1215073&rid=479",
+   "asOf": "2024",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  }
+ },
+ "rpp": {
+  "value": {
+   "NPBS": 102.4,
+   "CCFM": 102.3,
+   "PG": 100.5
+  },
+  "label": "BEA Regional Price Parity, all items, 2024",
+  "source": "BEA RPP 2024 (released 2026-02-19), metro values via PlainCost compilation",
+  "url": "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area",
+  "asOf": "2024",
+  "checked": "2026-10-22",
+  "status": "SOURCED",
+  "caveat": "Metro values read from a third-party compilation of BEA data; verify on bea.gov"
+ },
+ "ins": {
+  "ho": {
+   "value": 3644,
+   "label": "Homeowners insurance, FL statewide avg $/yr",
+   "source": "FL OIR data Q4 2024 (via Sun Sentinel; snippet, not full read)",
+   "url": "https://www.sun-sentinel.com/2025/02/04/find-out-the-average-price-of-home-insurance-in-your-county-and-how-much-it-increased-since-2022/",
+   "asOf": "Q4 2024",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "flood": {
+   "value": 970,
+   "label": "Flood (NFIP) FL avg $/yr",
+   "source": "FEMA NFIP policy info by state (premium+fee / policies, our arithmetic)",
+   "url": "https://www.agents.floodsmart.gov/sites/default/files/media/document/2026-10/nfip_policy-information-by-state_20260930.xlsx",
+   "asOf": "2026-09-30",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "renters": {
+   "value": null,
+   "label": "Renters insurance FL avg",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "auto": {
+   "value": null,
+   "label": "Auto insurance FL avg",
+   "source": "Not yet sourced (NAIC/III)",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  }
+ },
+ "tax": {
+  "fl": {
+   "value": 0,
+   "label": "Florida state income tax",
+   "source": "FL Constitution Art. VII s.5",
+   "url": "https://www.flsenate.gov/Laws/Constitution",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED"
+  },
+  "origin": {
+   "value": null,
+   "label": "Origin state income tax",
+   "source": "State-by-state rates not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  }
+ },
+ "unsourced": {
+  "ship": {
+   "value": null,
+   "label": "Vehicle shipping (auto transport)",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "mpg": {
+   "value": null,
+   "label": "Vehicle fuel economy for drive cost",
+   "source": "Not yet sourced (EPA/FHWA)",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "milesPerDay": {
+   "value": null,
+   "label": "Driving miles per day (for lodging nights)",
+   "source": "Assumption, not sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "utilDeposit": {
+   "value": null,
+   "label": "Utility & internet setup deposits",
+   "source": "FPL/carrier deposit policies not yet pulled",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "rentDeposit": {
+   "value": null,
+   "label": "Rental security deposit & application fees",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "storage": {
+   "value": null,
+   "label": "Storage unit",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "pets": {
+   "value": null,
+   "label": "Pet relocation",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "hurricane": {
+   "value": null,
+   "label": "Hurricane prep supplies",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "internet": {
+   "value": null,
+   "label": "Home internet monthly",
+   "source": "Not yet sourced",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "transport": {
+   "value": null,
+   "label": "Transportation (non-fuel) ongoing",
+   "source": "BLS CE South transportation lines not yet read",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "buyHousing": {
+   "value": null,
+   "label": "Owner housing cost (buyers)",
+   "source": "Not modeled; buyers see insurance only",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  },
+  "millage": {
+   "value": null,
+   "label": "Property tax millage",
+   "source": "County 2026 millage not yet pulled",
+   "url": null,
+   "asOf": null,
+   "status": "UNSOURCED"
+  }
+ },
+ "hah": {
+  "value": {
+   "rows": [
+    "1-bed apt/small 2-bed",
+    "Large 1-bed/typical 2-bed",
+    "3-bed apt/2-bed house",
+    "3-bed house/large townhome",
+    "4-bed house",
+    "5-bed house"
+   ],
+   "local": {
+    "truck": [
+     402.5,
+     488.4,
+     577.5,
+     589.6,
+     636.0,
+     773.5
+    ],
+    "container": [
+     765.92,
+     916.3,
+     1045.5,
+     1076.35,
+     1176.19,
+     1405.38
+    ],
+    "full": [
+     879,
+     1158,
+     1480,
+     1625,
+     2012.5,
+     2300
+    ]
+   },
+   "ld1200": {
+    "truck": [
+     1397.22,
+     1818.3,
+     2132.48,
+     2279.75,
+     2719.31,
+     3453.53
+    ],
+    "container": [
+     2397.77,
+     3036.09,
+     3250.96,
+     3935.15,
+     4328.99,
+     4962.53
+    ],
+    "full": [
+     5077.86,
+     5666.43,
+     6261.43,
+     6728.57,
+     7392.5,
+     7975
+    ]
+   }
+  },
+  "label": "HireAHelper average move cost tables (local <50 mi; long-distance 1,200 mi)",
+  "source": "HireAHelper Moving Cost Calculator, 2026 tables (Transportation Cost Database + transaction data)",
+  "url": "https://www.hireahelper.com/moving-cost-calculator/",
+  "asOf": "2026",
+  "checked": "2026-10-22",
+  "status": "SOURCED",
+  "caveat": "Long-distance figures are for a 1,200-mile move; used as the benchmark for all long-distance DIY/container moves."
+ },
+ "cmrSeason": {
+  "value": {
+   "jul": 3412,
+   "jan": 2728
+  },
+  "label": "CMR 2BR median, July vs January",
+  "source": "CMR Moving Cost Report 2026",
+  "url": "https://www.consumermovingreviews.com/moving-cost-report-2026/",
+  "asOf": "2025-2026",
+  "checked": "2026-10-22",
+  "status": "SOURCED"
+ },
+ "assumptions": {
+  "tripNights": {
+   "value": 3,
+   "label": "Nights per house-hunting trip",
+   "status": "ASSUMPTION",
+   "source": "Prototype assumption, not data (Guy to confirm)"
+  }
+ }
+}
