@@ -5,24 +5,56 @@
  },
  "origins": [
   {
-   "name": "New York",
-   "elecCents": 29.9
+   "name": "Alabama",
+   "elecCents": 16.40
   },
   {
-   "name": "New Jersey",
-   "elecCents": 25.19
+   "name": "Alaska",
+   "elecCents": 28.83
   },
   {
-   "name": "Pennsylvania",
-   "elecCents": 21.72
+   "name": "Arizona",
+   "elecCents": 15.38
   },
   {
-   "name": "Ohio",
-   "elecCents": 19.45
+   "name": "Arkansas",
+   "elecCents": 14.33
   },
   {
-   "name": "Michigan",
-   "elecCents": 23.05
+   "name": "California",
+   "elecCents": 33.61
+  },
+  {
+   "name": "Colorado",
+   "elecCents": 17.00
+  },
+  {
+   "name": "Connecticut",
+   "elecCents": 24.16
+  },
+  {
+   "name": "Delaware",
+   "elecCents": 18.48
+  },
+  {
+   "name": "District of Columbia",
+   "elecCents": 25.21
+  },
+  {
+   "name": "Florida",
+   "elecCents": 15.03
+  },
+  {
+   "name": "Georgia",
+   "elecCents": 16.27
+  },
+  {
+   "name": "Hawaii",
+   "elecCents": 48.00
+  },
+  {
+   "name": "Idaho",
+   "elecCents": 13.73
   },
   {
    "name": "Illinois",
@@ -33,48 +65,148 @@
    "elecCents": 16.73
   },
   {
-   "name": "Wisconsin",
-   "elecCents": 19.06
+   "name": "Iowa",
+   "elecCents": 15.99
   },
   {
-   "name": "Minnesota",
-   "elecCents": 17.45
+   "name": "Kansas",
+   "elecCents": 15.27
   },
   {
-   "name": "Massachusetts",
-   "elecCents": 30.49
+   "name": "Kentucky",
+   "elecCents": 13.81
   },
   {
-   "name": "Connecticut",
-   "elecCents": 24.16
+   "name": "Louisiana",
+   "elecCents": 12.72
+  },
+  {
+   "name": "Maine",
+   "elecCents": 32.41
   },
   {
    "name": "Maryland",
    "elecCents": 21.41
   },
   {
-   "name": "Virginia",
-   "elecCents": 17.55
+   "name": "Massachusetts",
+   "elecCents": 30.49
+  },
+  {
+   "name": "Michigan",
+   "elecCents": 23.05
+  },
+  {
+   "name": "Minnesota",
+   "elecCents": 17.45
+  },
+  {
+   "name": "Mississippi",
+   "elecCents": 14.54
+  },
+  {
+   "name": "Missouri",
+   "elecCents": 16.09
+  },
+  {
+   "name": "Montana",
+   "elecCents": 14.99
+  },
+  {
+   "name": "Nebraska",
+   "elecCents": 13.78
+  },
+  {
+   "name": "Nevada",
+   "elecCents": 12.77
+  },
+  {
+   "name": "New Hampshire",
+   "elecCents": 26.60
+  },
+  {
+   "name": "New Jersey",
+   "elecCents": 25.19
+  },
+  {
+   "name": "New Mexico",
+   "elecCents": 16.09
+  },
+  {
+   "name": "New York",
+   "elecCents": 29.90
   },
   {
    "name": "North Carolina",
    "elecCents": 15.16
   },
   {
-   "name": "Georgia",
-   "elecCents": 16.27
+   "name": "North Dakota",
+   "elecCents": 13.41
+  },
+  {
+   "name": "Ohio",
+   "elecCents": 19.45
+  },
+  {
+   "name": "Oklahoma",
+   "elecCents": 14.35
+  },
+  {
+   "name": "Oregon",
+   "elecCents": 15.97
+  },
+  {
+   "name": "Pennsylvania",
+   "elecCents": 21.72
+  },
+  {
+   "name": "Rhode Island",
+   "elecCents": 28.29
+  },
+  {
+   "name": "South Carolina",
+   "elecCents": 15.47
+  },
+  {
+   "name": "South Dakota",
+   "elecCents": 15.37
+  },
+  {
+   "name": "Tennessee",
+   "elecCents": 13.71
   },
   {
    "name": "Texas",
    "elecCents": 15.88
   },
   {
-   "name": "California",
-   "elecCents": 33.61
+   "name": "Utah",
+   "elecCents": 13.12
   },
   {
-   "name": "Colorado",
-   "elecCents": 17.0
+   "name": "Vermont",
+   "elecCents": 23.75
+  },
+  {
+   "name": "Virginia",
+   "elecCents": 17.55
+  },
+  {
+   "name": "Washington",
+   "elecCents": 14.71
+  },
+  {
+   "name": "West Virginia",
+   "elecCents": 15.78
+  },
+  {
+   "name": "Wisconsin",
+   "elecCents": 19.06
+  },
+  {
+   "name": "Wyoming",
+   "elecCents": 14.36
   },
   {
    "name": "Other / not listed",
