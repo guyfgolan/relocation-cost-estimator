@@ -15,124 +15,102 @@
 :root{--navy:#001B35;--panel:#052643;--gold:#D4AF37;--light:#E9DCB0;--paper:#F7F4EC;--muted:#E6E1D4;--line:rgba(212,175,55,.4)}
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-html,body{margin:0;min-height:100%;background:var(--paper);color:var(--navy);font-family:Gelasio,Georgia,serif;font-size:16px;line-height:1.5}
-body{min-height:100vh;display:flex;flex-direction:column}
-button,input{font:inherit;color:inherit}
-.skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700;border-radius:2px}
+html,body{margin:0;min-height:100%;background:#001B35;color:#F7F4EC;font-family:Gelasio,Georgia,serif;font-size:16px;line-height:1.5;overflow-x:hidden}
+body{min-height:100vh}
+.fit{width:100%;overflow:hidden;position:relative}
+.stage{width:100%;min-height:100vh;display:flex;flex-direction:column}
+button{font:inherit}
+input{font:inherit;font-size:16px;color:#001B35;background:#F7F4EC}
+.skip{position:absolute;left:12px;top:-48px;background:#D4AF37;color:#001B35;padding:8px 12px;z-index:9;font-weight:700;border-radius:2px}
 .skip:focus{top:8px}
-.siteHeader,.siteFooter,.ctaBand,.headlineBand{background:var(--navy);color:var(--paper);text-align:center}
+.siteHeader,.siteFooter{background:transparent;color:#F7F4EC;text-align:center}
 .siteHeader{padding:28px 16px 22px}
-.logo,.ctaLogo{height:auto;display:block;margin:0 auto;background:none;border:0}
-.logo{width:min(480px,88vw)}
-.ctaLogo{width:min(320px,72vw)}
-.siteTitle{margin:8px 0 0;font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15}
-.titleLine{display:block;font-size:clamp(28px,4vw,44px)}
-.titleGold{color:var(--light)}
-.siteTitle::after{content:"";display:block;width:72px;height:2px;margin:12px auto 0;background:var(--gold)}
+.logo,.ctaLogo,.expLogo{height:auto;display:block;margin:0 auto;background:none;border:0;border-radius:0}
+.logo{width:480px;max-width:100%}
+.ctaLogo{width:320px;max-width:100%}
+.expLogo{width:148px;margin:10px auto 12px}
+.siteTitle{margin:8px 0 0;font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;color:#F7F4EC}
+.titleLine{display:block;font-size:44px}
+.titleGold{color:#E9DCB0}
+.siteTitle::after{content:"";display:block;width:72px;height:2px;margin:12px auto 0;background:#D4AF37}
 main{flex:1 0 auto;padding:20px 16px 36px}
-.sheet{width:min(600px,100%);margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:clamp(18px,3vw,28px)}
-.stepLabel{font-weight:700;margin:0 0 8px}
-.progress{height:4px;background:var(--panel);border-radius:0;overflow:hidden;margin:0 0 22px}
-.progress>div{height:100%;background:var(--gold)}
-h2{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;margin:0 0 18px;font-size:clamp(30px,5vw,46px)}
-h2::after{content:"";display:block;width:64px;height:2px;margin-top:12px;background:var(--gold)}
-.quiet{display:block;margin-top:8px;font-family:Gelasio,Georgia,serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none}
-p{margin:0 0 12px}
-label{font-weight:700;display:block;margin-bottom:6px}
+.sheet{width:min(600px,100%);margin:0 auto;background:transparent;border:0;border-radius:0;padding:28px;color:#F7F4EC}
+.resultsWrap .sheet{width:100%;max-width:none;margin:0;padding:0}
+.stepLabel{font-weight:700;margin:0 0 8px;color:#F7F4EC;font-size:16px}
+.progress{height:4px;background:#052643;border-radius:0;overflow:hidden;margin:0 0 22px}
+.progress>div{height:100%;background:#D4AF37}
+h2{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;margin:0 0 18px;font-size:46px;color:#E9DCB0}
+h2::after{content:"";display:block;width:64px;height:2px;margin-top:12px;background:#D4AF37}
+.quiet{display:block;margin-top:8px;font-family:Gelasio,Georgia,serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none;color:#E6E1D4}
+p{margin:0 0 12px;color:#F7F4EC}
+label{font-weight:700;display:block;margin-bottom:6px;color:#F7F4EC}
 .choices{display:grid;gap:8px}
 .choices.two{grid-template-columns:1fr 1fr}
-.choices.wide{grid-template-columns:1fr 1fr}
+.choices.wide{grid-template-columns:1fr 1fr 1fr}
+.option[data-group="household"][data-id="not-sure"]{grid-column:1/-1}
 .option,.primary,.secondary{border-radius:2px;cursor:pointer;min-height:44px;padding:12px 14px}
-.option{width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);font-weight:600}
-.option[aria-pressed="true"]{background:var(--navy);color:var(--paper);border-color:var(--navy)}
-.primary{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:var(--navy);border:1px solid var(--gold);font-weight:700;text-decoration:none;text-align:center}
-.secondary{background:var(--paper);color:var(--navy);border:1px solid var(--navy);font-weight:700}
-.secondary:disabled{opacity:.45;color:var(--navy);border-color:var(--gold);background:var(--gold);cursor:not-allowed}
-input{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:12px 14px;min-height:44px}
+.option{width:100%;text-align:left;background:#D4AF37;border:1px solid #D4AF37;color:#001B35;font-weight:700}
+.option[aria-pressed="true"]{background:#052643;color:#E9DCB0;border-color:#D4AF37}
+.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;background:#D4AF37;color:#001B35;border:1px solid #D4AF37;font-weight:700;text-decoration:none;text-align:center}
+.primary:disabled,.secondary:disabled{background:#052643;color:#E6E1D4;border:1px solid #D4AF37;cursor:not-allowed;opacity:1}
+input{width:100%;border:1px solid #D4AF37;border-radius:2px;padding:12px 14px;min-height:44px;font-family:Gelasio,Georgia,serif}
 .stepBar{display:flex;gap:12px;margin-top:22px}
 .stepBar>*{flex:1 1 140px}
-.status{min-height:1.4em;margin:8px 0 0;font-weight:600}
+.status{min-height:1.4em;margin:8px 0 0;font-weight:600;color:#F7F4EC;font-size:16px}
 .resultsWrap{width:min(960px,100%);margin:0 auto;display:flex;flex-direction:column;gap:16px}
-.resultsWrap .sheet{width:100%;max-width:none;margin:0}
-.headlineBand{border:1px solid var(--gold);border-radius:2px;padding:22px 18px;margin:0}
-.compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:clamp(36px,5vw,56px);line-height:1.2;color:var(--light);text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
-.estimateLabel{margin:0 0 8px;color:var(--light);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
-.ctaBand .secondary{display:flex;margin:12px auto 0;min-width:min(100%,280px);background:transparent;color:var(--paper);border-color:var(--gold)}
+.headlineBand{background:transparent;border:0;border-radius:0;padding:8px 0 0;margin:0;text-align:center;color:#F7F4EC}
+.compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:56px;line-height:1.15;color:#E9DCB0;text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
 .compareHeadline::after{display:none}
-.tableWrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:2px;background:var(--paper)}
-.compare{width:100%;border-collapse:separate;border-spacing:0;font-size:16px}
-.compare th,.compare td{padding:10px 12px;vertical-align:bottom;background:var(--paper)}
-.compare thead th{font-weight:700;text-align:left}
-.compare tbody th{font-weight:700;text-align:left;position:sticky;left:0;z-index:2;min-width:8.5rem}
+.headlineBand .estimateLabel{margin:0 0 8px;color:#E9DCB0;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.headlineBand p{color:#E6E1D4;margin:12px 0 0;font-size:16px}
+.tableWrap{overflow:visible;max-width:100%;border:0;border-radius:0;background:transparent}
+.compare{width:100%;border-collapse:collapse;font-family:Gelasio,Georgia,serif;font-size:16px;color:#F7F4EC;background:transparent}
+.compare th,.compare td{padding:10px 12px;vertical-align:bottom;background:transparent;color:#F7F4EC;border-bottom:1px solid rgba(212,175,55,.4)}
+.compare thead th{font-weight:700;text-align:left;color:#E6E1D4;font-size:16px}
+.compare tbody th{font-weight:700;text-align:left;color:#F7F4EC;font-size:16px}
 .compare td{text-align:right;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.compare tbody tr:nth-child(even) th,.compare tbody tr:nth-child(even) td{background:var(--paper)}
-.compare .yours{position:sticky;left:8.5rem;z-index:3;background:var(--navy);color:var(--paper)}
-.compare thead .yours{z-index:4}
-.compare tbody tr:nth-child(even) td.yours,.compare tbody tr:nth-child(odd) td.yours,.compare thead th.yours{background:var(--navy);color:var(--paper)}
-.compare th.best,.compare td.best{border-left:1px solid var(--gold);border-right:1px solid var(--gold)}
-.compare thead th.best{border-top:1px solid var(--gold)}
-.compare tbody tr:last-child td.best{border-bottom:1px solid var(--gold)}
-.tag{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:2px;background:var(--gold);color:var(--navy);font-family:Gelasio,Georgia,serif;font-size:12px;font-weight:700;letter-spacing:0;text-transform:none;line-height:1.3}
-.cards{display:grid;gap:12px}
-.areaCard{background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:14px}
-.areaCard.yours{background:var(--navy);color:var(--paper);border-color:var(--navy);position:sticky;top:8px;z-index:3}
-.areaCard.best{border:1px solid var(--gold)}
-.areaCard h3{margin:0 0 8px;font-family:Cinzel,Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.metric{display:flex;justify-content:space-between;gap:12px;padding:8px 0}
-.metric+.metric{border-top:1px solid var(--line)}
-.areaCard.yours .metric+.metric{border-top-color:rgba(212,175,55,.4)}
-.metric b{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.credit{color:var(--panel);font-size:14px;margin:14px 0 0}
-.credit a{color:var(--panel)}
-.help,.note{color:var(--panel);font-size:14px;margin:6px 0 0}
+.compare .yours{background:transparent;color:#F7F4EC;border-left:1px solid #D4AF37;border-right:1px solid #D4AF37}
+.tag{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:2px;background:#D4AF37;color:#001B35;font-family:Cinzel,Georgia,serif;font-size:14px;font-weight:700;letter-spacing:.08em;line-height:1.3}
+.cards{display:none}
+.credit,.help,.note,.sourcesToggle,.sourcesToggle summary,.sourcesToggle p,.credit a{color:#E6E1D4;font-size:16px}
+.credit{margin:14px 0 0}
+.help,.note{margin:6px 0 0}
+.compare .note{font-family:Gelasio,Georgia,serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none;color:#E6E1D4}
+.sourcesToggle{margin-top:14px}
+.sourcesToggle summary{cursor:pointer;font-weight:700}
+.sourcesToggle p{margin:8px 0 0}
 .field{margin:0 0 16px}
-.pair{display:grid;gap:12px}
-.route{font-weight:700;margin:0 0 8px}
-.totalBox{margin-top:16px;border:1px solid var(--gold);border-radius:2px;padding:18px 16px;background:var(--navy);color:var(--paper);text-align:center}
-.totalBox p{margin:0 0 6px;color:var(--paper)}
-.totalBox .totalAmount{font-family:Cinzel,Georgia,"Times New Roman",serif;font-size:clamp(48px,7vw,72px);font-weight:600;line-height:1.05;margin:4px 0 8px;color:var(--light);font-variant-numeric:tabular-nums}
-.sourcesToggle{margin-top:14px;color:var(--panel);font-size:14px}
-.sourcesToggle summary{cursor:pointer;font-weight:700;color:var(--panel)}
-.sourcesToggle p{color:var(--panel);font-size:14px;margin:8px 0 0}
-.check{display:flex;align-items:flex-start;gap:10px;font-weight:600}
+.pair{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.route{font-weight:700;margin:0 0 8px;color:#F7F4EC;font-size:16px}
+.totalBox{margin:16px 0;border:0;border-top:1px solid rgba(212,175,55,.4);border-bottom:1px solid rgba(212,175,55,.4);border-radius:0;padding:18px 0;background:transparent;color:#F7F4EC;text-align:center}
+.totalBox p{margin:0 0 6px;color:#E6E1D4;font-size:16px}
+.totalBox .totalAmount{font-family:Gelasio,Georgia,serif;font-size:72px;font-weight:700;line-height:1.05;margin:4px 0 8px;color:#D4AF37;font-variant-numeric:tabular-nums}
+.check{display:flex;align-items:flex-start;gap:10px;font-weight:600;color:#F7F4EC}
 .check input{width:auto;min-height:0;margin-top:4px}
-.headlineBand p{color:var(--paper);margin:12px 0 0}
-.ctaBand{margin:0;border-radius:2px;padding:28px 16px}
-.ctaBand .primary{margin-top:16px;min-width:min(100%,280px)}
-.siteFooter{padding:22px 16px 28px}
+.ctaBand{background:transparent;border:0;border-radius:0;margin:0;padding:8px 16px 28px;text-align:center;color:#F7F4EC}
+.ctaBand p{color:#F7F4EC;font-size:16px;margin:12px 0 0}
+.ctaBand .primary,.ctaBand .secondary{display:flex;margin:12px auto 0;min-width:280px;max-width:100%;background:#D4AF37;color:#001B35;border-color:#D4AF37}
+.siteFooter{padding:28px 16px 36px}
 .siteFooter p{margin:0 0 6px}
-.siteFooter a{color:var(--paper)}
-.footerMove{margin:18px 0 0;padding-top:18px;border-top:1px solid rgba(212,175,55,.4);width:min(280px,80%)}
-.expLogo{width:min(148px,46vw);height:auto;display:block;margin:10px auto 12px;background:none;border:0}
+.siteFooter a{color:#F7F4EC;text-decoration:underline;text-underline-offset:3px}
+.guyName{font-family:Cinzel,Georgia,serif;font-size:32px;font-weight:700;letter-spacing:.08em;color:#F7F4EC;margin:0 0 8px}
+.footerContact{text-align:center}
+.footerMove{margin:14px 0 0;padding:0;border:0;width:auto;text-align:center}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 :focus:not(:focus-visible){outline:none}
-:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
-@media(min-width:800px){
- .choices.wide{grid-template-columns:1fr 1fr 1fr}
- .pair{grid-template-columns:1fr 1fr}
- .siteFooter{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
- .footerContact{grid-column:2}
- .footerMove{grid-column:3;justify-self:end;width:auto;margin:0;padding:0;border:0;text-align:right}
-}
-@media(max-width:799px){
- .choices.two,.choices.wide{grid-template-columns:1fr}
- .sheet .stepBar{position:sticky;bottom:0;z-index:5;background:var(--paper);padding-top:12px;padding-bottom:4px}
-}
+:focus-visible{outline:1px solid #D4AF37;outline-offset:3px}
+h2:focus-visible{outline-offset:4px}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
-
 button,.primary,.secondary,.option,.skip{font-family:Cinzel,Georgia,serif;font-weight:700;letter-spacing:.15em}
-.option,.primary,.secondary,.skip{background:var(--gold);color:var(--navy);border:1px solid var(--gold);border-radius:2px}
-.option[aria-pressed="true"]{background:var(--panel);color:var(--light);border-color:var(--gold)}
-.ctaBand .secondary{background:var(--gold);color:var(--navy);border-color:var(--gold)}
-.quiet{font-family:Gelasio,Georgia,serif;letter-spacing:0;text-transform:none}
-.tag{font-family:Cinzel,Georgia,serif;letter-spacing:.08em}
-.credit,.help,.note,.sourcesToggle,.sourcesToggle summary,.sourcesToggle p,.credit a{color:var(--panel)}
-.logo,.ctaLogo,.expLogo{border:0;border-radius:0}
+.quiet,.tag{letter-spacing:.08em}
+.quiet{font-family:Gelasio,Georgia,serif;letter-spacing:0;text-transform:none;font-weight:400}
 </style>
 </head>
 <body>
+<div class="fit" id="fit">
+<div class="stage" id="stage">
 <a class="skip" href="#main">Skip to content</a>
 <header class="siteHeader">
 <img class="logo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">
@@ -141,12 +119,14 @@ button,.primary,.secondary,.option,.skip{font-family:Cinzel,Georgia,serif;font-w
 <main id="main"><div id="panel"></div></main>
 <footer class="siteFooter">
 <div class="footerContact">
-<p>Guy Golan</p>
+<p class="guyName">Guy Golan</p>
 <img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty">
 <p><a href="tel:+13019196726">301-919-6726</a></p>
 </div>
 <p class="footerMove"><a href="../">Moving cost estimator</a></p>
 </footer>
+</div>
+</div>
 <script src="lookup.js"></script>
 <script src="estimate.js"></script>
 <script>
@@ -179,8 +159,46 @@ function focusHeading(){
   h.tabIndex=-1;
   h.focus({focusVisible:false});
 }
+
+let fitting=false;
+function fitScale(){
+  if(fitting) return;
+  const design=1280;
+  const fit=document.getElementById('fit');
+  const stage=document.getElementById('stage');
+  if(!fit||!stage) return;
+  fitting=true;
+  const vw=document.documentElement.clientWidth;
+  if(vw>=design-24){
+    stage.style.width='';
+    stage.style.transform='none';
+    stage.style.position='';
+    stage.style.left='';
+    stage.style.top='';
+    fit.style.height='';
+  }else{
+    stage.style.position='absolute';
+    stage.style.left='0';
+    stage.style.top='0';
+    stage.style.width=design+'px';
+    stage.style.transformOrigin='top left';
+    const scale=vw/design;
+    stage.style.transform='scale('+scale+')';
+    fit.style.height=Math.ceil(stage.offsetHeight*scale)+'px';
+  }
+  fitting=false;
+}
+function bindFit(){
+  const stage=document.getElementById('stage');
+  if(!stage||stage.dataset.fit) return;
+  stage.dataset.fit='1';
+  if(window.ResizeObserver) new ResizeObserver(()=>fitScale()).observe(stage);
+  window.addEventListener('resize',fitScale);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitScale);
+  fitScale();
+}
 function bookingLink(label){
-  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">'+esc(label||'Schedule a call with Guy')+'</a>';
+  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">'+esc(label||'Book a Call')+'</a>';
 }
 function noteShown(){const now=Date.now();if(!flowStart)flowStart=now;shownAt=now}
 function noteLeft(){if(!shownAt)return;durations.push(Date.now()-shownAt);shownAt=0}
@@ -201,6 +219,7 @@ function showLowInfo(){
   panel.innerHTML='<div class="resultsWrap"><div class="headlineBand"><p class="estimateLabel">Your Estimate</p><h2 class="compareHeadline">Thank you for filling out the information!</h2><p>It seems as if you are still narrowing down your plans, so a number right now might not tell you much. I encourage you to book a call. I am happy to help in any way I can.</p></div><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">'+bookingLink('Book a Call with Guy')+'<button type="button" class="secondary" id="retakeBtn">Retake</button></section></div>';
   document.getElementById('retakeBtn').onclick=retake;
   focusHeading();
+  fitScale();
 }
 function isSourced(figure){
   return !!figure && typeof figure.value==='number' && !Number.isNaN(figure.value) && figure.evidence==='MEASURED' && /^[\d.]+$/.test(String(figure.display||''));
@@ -382,6 +401,7 @@ function showStep(id){
   });
   focusHeading();
   noteShown();
+  fitScale();
 }
 function paintAdults(){
   const chosen=A.adults||defaultAdults();
@@ -473,6 +493,7 @@ function showResults(){
   const token=++renderGen;
   panel.innerHTML='<article class="sheet"><h2>Your comparison</h2><p>One moment.</p></article>';
   focusHeading();
+  fitScale();
   loadZipShard(A.zip).catch(function(){bundle.crosswalk.zips=[]}).then(function(){
     if(token!==renderGen) return;
     drawResults();
@@ -527,6 +548,7 @@ function drawResults(){
     const message=!keys.state && A.zip?'We couldn\'t match that ZIP, so this page has no comparison yet.':'Answer each question to see your estimate.';
     panel.innerHTML='<article class="sheet"><h2>Your comparison</h2><p>'+esc(message)+'</p><p>'+esc(FRAMING)+'</p><div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section>';
     document.getElementById('backBtn').onclick=()=>go(ready&&!keys.state?'from':'other');
+    fitScale();
     return;
   }
   if(CostEstimate.lowInformation(A,engagementMeta()).show){
@@ -629,17 +651,18 @@ function drawResults(){
   layoutResults();
 }
 function layoutResults(){
-  const mobile=window.matchMedia('(max-width: 799px)').matches;
   const table=document.getElementById('compareTable');
   const cards=document.getElementById('compareCards');
-  if(table) table.hidden=mobile;
-  if(cards) cards.hidden=!mobile;
+  if(table) table.hidden=false;
+  if(cards) cards.hidden=true;
+  fitScale();
 }
 window.addEventListener('resize',layoutResults);
 window.addEventListener('popstate',()=>{
   const step=(location.hash||'#from').replace('#','');
   render(STEPS.includes(step)?step:'from');
 });
+bindFit();
 Promise.all([
   fetch('cost-of-living.json').then(r=>{if(!r.ok) throw new Error('bundle');return r.json()}),
   fetch('factors.json').then(r=>{if(!r.ok) throw new Error('factors');return r.json()})
@@ -651,6 +674,7 @@ Promise.all([
   render(STEPS.includes(step)?step:'from');
 }).catch(()=>{
   panel.innerHTML='<article class="sheet"><h2>The comparison could not load</h2><p>Refresh the page.</p></article>';
+  fitScale();
 });
 </script>
 </body>

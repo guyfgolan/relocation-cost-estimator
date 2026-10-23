@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 const { estimateMove, classifyZip, formatMoney, priceCore, lowInformation, visiblePlace, vehicleCaveat } = require('../estimate.js');
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf8'));
 const Z = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'zips.json'), 'utf8'));
@@ -422,20 +423,95 @@ function paletteProblems(css, label) {
   const problems = [];
   for (const match of css.matchAll(/#([0-9a-fA-F]{3,8})\b/g)) {
     const h = expandHex(match[1]);
-    const solid = h.length === 8 ? h.slice(0, 6) : h;
-    if ((h.length !== 6 && h.length !== 8) || !allowed.has(solid)) problems.push(label + ' ' + match[0]);
+    if (h.length !== 6 || !allowed.has(h)) problems.push(label + ' ' + match[0]);
   }
-  const rgbCalls = css.match(/rgba?\([^)]*\)/gi) || [];
   const rgbRe = /rgba?\(\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)(?:\s*,\s*([0-9.]+%?)\s*)?\)/i;
-  rgbCalls.forEach(call => {
-    const parts = call.match(rgbRe);
-    if (!parts) {
-      problems.push(label + ' ' + call);
-      return;
+  const hairline = /^(border|border-top|border-right|border-bottom|border-left|border-color|outline|outline-color)$/;
+  function channel(part) {
+    return part.endsWith('%') ? Math.round(parseFloat(part) * 2.55) : Math.round(parseFloat(part));
+  }
+  function alphaOf(part) {
+    if (part == null) return 1;
+    return part.endsWith('%') ? parseFloat(part) / 100 : parseFloat(part);
+  }
+  function splitDecls(body) {
+    const decls = [];
+    let cur = '';
+    let depth = 0;
+    for (const ch of body) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth = Math.max(0, depth - 1);
+      if (ch === ';' && depth === 0) {
+        if (cur.trim()) decls.push(cur.trim());
+        cur = '';
+      } else cur += ch;
     }
-    const channels = parts.slice(1, 4).map(part => part.endsWith('%') ? Math.round(parseFloat(part) * 2.55) : Math.round(parseFloat(part)));
-    if (!solids[channels.join(',')]) problems.push(label + ' ' + call);
-  });
+    if (cur.trim()) decls.push(cur.trim());
+    return decls;
+  }
+  function checkDeclaration(selector, prop, value) {
+    if (prop === 'opacity' && parseFloat(value) !== 1) problems.push(label + ' translucent ' + selector + ' ' + prop + ':' + value);
+    const calls = value.match(/rgba?\([^)]*\)/gi) || [];
+    calls.forEach(call => {
+      const parts = call.match(rgbRe);
+      if (!parts) {
+        problems.push(label + ' ' + call);
+        return;
+      }
+      const key = parts.slice(1, 4).map(channel).join(',');
+      const alpha = alphaOf(parts[4]);
+      if (!solids[key]) {
+        problems.push(label + ' ' + call + ' in ' + selector);
+        return;
+      }
+      if (alpha === 1) return;
+      if (prop.startsWith('--') && key === '212,175,55' && Math.abs(alpha - 0.4) <= 0.02) return;
+      if (key === '212,175,55' && Math.abs(alpha - 0.4) <= 0.02 && hairline.test(prop)) return;
+      if (key === '0,27,53' && alpha < 1 && prop === 'background' && /\.bg\b/.test(selector)) return;
+      problems.push(label + ' tint ' + call + ' on ' + prop + ' in ' + selector);
+    });
+  }
+  function walk(block) {
+    const text = block.replace(/\/\*[\s\S]*?\*\//g, '');
+    let i = 0;
+    while (i < text.length) {
+      while (i < text.length && /\s/.test(text[i])) i++;
+      if (i >= text.length) break;
+      if (text[i] === '}') {
+        i++;
+        continue;
+      }
+      const brace = text.indexOf('{', i);
+      if (brace < 0) break;
+      const header = text.slice(i, brace).trim();
+      let depth = 0;
+      let j = brace;
+      for (; j < text.length; j++) {
+        if (text[j] === '{') depth++;
+        else if (text[j] === '}') {
+          depth--;
+          if (depth === 0) {
+            j++;
+            break;
+          }
+        }
+      }
+      const body = text.slice(brace + 1, j - 1);
+      if (/^@font-face\b/i.test(header)) {
+        // font files are not reader-facing color
+      } else if (/^@/i.test(header)) {
+        walk(body);
+      } else {
+        splitDecls(body).forEach(decl => {
+          const colon = decl.indexOf(':');
+          if (colon < 0) return;
+          checkDeclaration(header, decl.slice(0, colon).trim().toLowerCase(), decl.slice(colon + 1).trim());
+        });
+      }
+      i = j;
+    }
+  }
+  walk(css);
   return problems;
 }
 [['moving estimator', moverPage], ['cost of living', colPage]].forEach(([label, html]) => {
@@ -451,6 +527,12 @@ assert(moverPage.indexOf('Arial') === -1 && colPage.indexOf('Arial') === -1 && c
 assert(moverPage.indexOf('family=Cinzel:wght@400;700') > 0 && moverPage.indexOf('Gelasio:ital,wght@0,400;0,700;1,400') > 0, 'moving page loads Cinzel and Gelasio');
 assert(colPage.indexOf('family=Cinzel:wght@400;700') > 0 && colPage.indexOf('Gelasio:ital,wght@0,400;0,700;1,400') > 0, 'cost of living loads Cinzel and Gelasio');
 assert(!/border-radius:\s*(?:8|1[2-9]|[2-9]\d)px/i.test(cssText(moverPage) + cssText(colPage)), 'cards and buttons stay within a 2px radius');
+assert(cssText(moverPage).indexOf('prefers-reduced-motion') > 0, 'moving keeps reduced motion');
+assert(cssText(colPage).indexOf('prefers-reduced-motion') > 0, 'cost of living keeps reduced motion');
+assert(!/@media[^{]*max-width:\s*(?:720|640|520)px/.test(cssText(moverPage)), 'moving phone reflow is gone');
+assert(!/@media[^{]*max-width:\s*799px/.test(cssText(colPage)), 'cost of living phone reflow is gone');
+assert(moverPage.indexOf('class="creditsLink"') > 0 && moverPage.indexOf('>Photo Credits<') > 0 && moverPage.indexOf('class="creditsBtn"') === -1, 'photo credits is a gold text link');
+assert(colPage.indexOf("label||'Book a Call'") > 0 && colPage.indexOf('Schedule a call with Guy') === -1 && colPage.indexOf('Book a Call with Guy') > 0, 'results button says Book a Call');
 
 function show(label, est) {
   const m = est.lines.find(l => l.id === 'moving');
@@ -483,5 +565,13 @@ console.log(`Fees 3 vehicles typical\t${formatMoney(fee3.typ)}\tFees 6 vehicles 
 console.log(`DL 1 person\t${formatMoney(dl.lo)} / ${formatMoney(dl.typ)} / ${formatMoney(dl.hi)}`);
 console.log(`Drive Atlanta lodging\t${formatMoney(lodging.lo)} / ${formatMoney(lodging.typ)} / ${formatMoney(lodging.hi)}`);
 console.log(`Drive Atlanta meals\t${formatMoney(meals.lo)} / ${formatMoney(meals.typ)} / ${formatMoney(meals.hi)}`);
+if (!failed) {
+  try {
+    execFileSync(process.execPath, [path.join(__dirname, 'phone-layout.js')], { stdio: 'inherit' });
+  } catch (err) {
+    failed++;
+    if (!err.status) console.error('FAIL: phone layout', err.message);
+  }
+}
 console.log(failed ? `\n${failed} failed` : '\nAll stress checks passed');
 process.exit(failed ? 1 : 0);
