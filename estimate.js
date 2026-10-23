@@ -270,7 +270,7 @@
   }
 
   function source(obj, caveat) {
-    return {
+    const out = {
       source: obj.source || obj.label || '',
       url: obj.url || null,
       asOf: obj.asOf || null,
@@ -278,6 +278,21 @@
       status: obj.status || '',
       caveat: caveat || obj.caveat || ''
     };
+    if (obj.freshness) out.freshness = obj.freshness;
+    if (obj.fallbackReason) out.fallbackReason = obj.fallbackReason;
+    return out;
+  }
+
+  function fiscalLabel(block) {
+    const match = /FY\s*(20\d\d)/.exec(String(block && block.asOf || ''));
+    return match ? 'FY' + match[1] : 'the cited period';
+  }
+
+  function freshnessClause(block) {
+    if (!block || !block.freshness) return '';
+    if (block.freshness === 'live') return block.checked ? ` Read live on ${block.checked}.` : ' Read live.';
+    if (block.freshness === 'fallback') return ' Stored fallback, not a live read.';
+    return '';
   }
 
   function line(partial) {
@@ -597,7 +612,7 @@
         lo: nLo * rate * rooms.lo,
         typ: nTyp * rate * rooms.typ,
         hi: nHi * rate * rooms.hi,
-        note: `${who} Nights are ${nLo} / ${nTyp} / ${nHi} at ${mpd.lowCost} / ${mpd.typical} / ${mpd.highCost} miles a day (an assumption). Rooms are ${rooms.lo} / ${rooms.typ} / ${rooms.hi}. The $${rate} rate is the FY2027 standard lodging cap.${why}`,
+        note: `${who} Nights are ${nLo} / ${nTyp} / ${nHi} at ${mpd.lowCost} / ${mpd.typical} / ${mpd.highCost} miles a day (an assumption). Rooms are ${rooms.lo} / ${rooms.typ} / ${rooms.hi}. The $${rate} rate is the ${fiscalLabel(D.lodging)} standard lodging cap.${why}${freshnessClause(D.lodging)}`,
         sources: [source(D.lodging), source(mpd), source(D.assumptions.rooms)].concat(adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
       }));
       lines.push(line({
@@ -607,7 +622,7 @@
         lo: mealDays(nLo) * meal * adults.lo,
         typ: mealDays(nTyp) * meal * adults.typ,
         hi: mealDays(nHi) * meal * adults.hi,
-        note: `${who} A drive that fits in one day, at that column's miles-per-day pace, does not add M&IE. A trip with nights uses 75% on the first and last day and 100% on the days between, which is nights + 0.5. The $${meal} rate is the FY2027 standard M&IE.`,
+        note: `${who} A drive that fits in one day, at that column's miles-per-day pace, does not add M&IE. A trip with nights uses 75% on the first and last day and 100% on the days between, which is nights + 0.5. The $${meal} rate is the ${fiscalLabel(D.meals)} standard M&IE.${freshnessClause(D.meals)}`,
         sources: [source(D.meals), source(mpd)].concat(adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
       }));
     } else {
