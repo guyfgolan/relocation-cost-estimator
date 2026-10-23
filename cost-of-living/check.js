@@ -258,10 +258,17 @@ const FACTOR_BLOCKS = [
   ['health'],
   ['usda'],
   ['homestead'],
+  ['electricity'],
+  ['naturalGas'],
+  ['water'],
+  ['originPropertyTax'],
+  ['originMedianPrice'],
   ['florida', 'salesTax'],
   ['florida', 'homeInsurance'],
   ['florida', 'millage'],
-  ['florida', 'medianPrice']
+  ['florida', 'schoolMillage'],
+  ['florida', 'medianPrice'],
+  ['florida', 'flood']
 ];
 
 function checkFactors(config) {
@@ -278,6 +285,10 @@ function checkFactors(config) {
   });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(config.gas.asOf)) fail('gas snapshot date');
   if (config.homestead.value !== 51411) fail('homestead amount');
+  if (config.homestead.schoolValue !== 25000) fail('school homestead');
+  if (typeof config.naturalGas.enabled !== 'boolean') fail('natural gas flag');
+  if (typeof config.florida.flood.enabled !== 'boolean') fail('flood flag');
+  if (config.florida.flood.statistic !== 'median' && config.florida.flood.statistic !== 'average') fail('flood statistic');
   return config;
 }
 

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cost of Living Estimator | Florida Gulf Coast Guide</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
@@ -13,6 +14,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none !important}
 html,body{margin:0;min-height:100%;background:var(--paper);color:var(--navy);font-family:Inter,Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5}
+body{min-height:100vh;display:flex;flex-direction:column}
 button,input{font:inherit;color:inherit}
 .skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700;border-radius:8px}
 .skip:focus{top:8px}
@@ -25,8 +27,8 @@ button,input{font:inherit;color:inherit}
 .titleLine{display:block;font-size:clamp(28px,4vw,44px)}
 .titleGold{color:var(--gold)}
 .siteTitle::after{content:"";display:block;width:72px;height:2px;margin:12px auto 0;background:var(--gold)}
-main{padding:20px 16px 36px}
-.sheet{width:min(760px,100%);margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,3vw,28px)}
+main{flex:1 0 auto;padding:20px 16px 36px}
+.sheet{width:min(600px,100%);margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,3vw,28px)}
 .stepLabel{font-weight:700;margin:0 0 8px}
 .progress{height:4px;background:#E4E8ED;border-radius:8px;overflow:hidden;margin:0 0 22px}
 .progress>div{height:100%;background:var(--gold)}
@@ -43,14 +45,15 @@ label{font-weight:700;display:block;margin-bottom:6px}
 .option[aria-pressed="true"]{background:var(--navy);color:var(--white);border-color:var(--navy)}
 .primary{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:var(--navy);border:1px solid var(--gold);font-weight:700;text-decoration:none;text-align:center}
 .secondary{background:var(--white);color:var(--navy);border:1px solid var(--navy);font-weight:700}
-.secondary:disabled{opacity:.45;cursor:not-allowed}
+.secondary:disabled{opacity:1;color:var(--gray);border-color:var(--gray);background:#E4E8ED;cursor:not-allowed}
 input{width:100%;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:44px}
 .stepBar{display:flex;gap:12px;margin-top:22px}
 .stepBar>*{flex:1 1 140px}
 .status{min-height:1.4em;margin:8px 0 0;font-weight:600}
-.resultsWrap{width:min(1120px,100%);margin:0 auto}
-.headlineBand{border:1px solid var(--gold);border-radius:8px;padding:22px 18px;margin-bottom:16px}
-.compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:clamp(28px,4vw,42px);line-height:1.25;color:var(--gold);text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
+.resultsWrap{width:min(960px,100%);margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.resultsWrap .sheet{width:100%;max-width:none;margin:0}
+.headlineBand{border:1px solid var(--gold);border-radius:8px;padding:22px 18px;margin:0}
+.compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:clamp(36px,5vw,56px);line-height:1.2;color:var(--gold);text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
 .compareHeadline::after{display:none}
 .tableWrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--white)}
 .compare{width:100%;border-collapse:separate;border-spacing:0;font-size:16px}
@@ -75,23 +78,27 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .metric+.metric{border-top:1px solid var(--line)}
 .areaCard.yours .metric+.metric{border-top-color:rgba(255,255,255,.35)}
 .metric b{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.credit,.sources{color:var(--gray);font-size:14px;margin:14px 0 0}
-.credit a,.sources a{color:var(--gray)}
+.credit{color:var(--gray);font-size:14px;margin:14px 0 0}
+.credit a{color:var(--gray)}
 .help,.note{color:var(--gray);font-size:14px;margin:6px 0 0}
 .field{margin:0 0 16px}
 .pair{display:grid;gap:12px}
 .route{font-weight:700;margin:0 0 8px}
-.totalBox{margin-top:16px;border:1px solid var(--gold);border-radius:8px;padding:14px 16px;background:var(--white)}
-.totalBox p{margin:0 0 6px}
-.totalAmount{font-size:clamp(28px,4vw,40px);font-weight:700;margin:0 0 6px;font-variant-numeric:tabular-nums}
+.totalBox{margin-top:16px;border:1px solid var(--gold);border-radius:8px;padding:18px 16px;background:var(--navy);color:var(--white);text-align:center}
+.totalBox p{margin:0 0 6px;color:var(--white)}
+.totalBox .totalAmount{font-family:Cinzel,Georgia,"Times New Roman",serif;font-size:clamp(48px,7vw,72px);font-weight:600;line-height:1.05;margin:4px 0 8px;color:var(--gold);font-variant-numeric:tabular-nums}
+.sourcesToggle{margin-top:14px;color:var(--gray);font-size:14px}
+.sourcesToggle summary{cursor:pointer;font-weight:700;color:var(--gray)}
+.sourcesToggle p{color:var(--gray);font-size:14px;margin:8px 0 0}
 .check{display:flex;align-items:flex-start;gap:10px;font-weight:600}
 .check input{width:auto;min-height:0;margin-top:4px}
 .headlineBand p{color:var(--white);margin:12px 0 0}
-.ctaBand{margin-top:22px;border-radius:8px;padding:28px 16px}
+.ctaBand{margin:0;border-radius:8px;padding:28px 16px}
 .ctaBand .primary{margin-top:16px;min-width:min(100%,280px)}
 .siteFooter{padding:22px 16px 28px}
 .siteFooter p{margin:0 0 6px}
 .siteFooter a{color:var(--white)}
+.footerMove{margin:18px 0 0;padding-top:18px;border-top:1px solid rgba(212,175,55,.7);width:min(280px,80%)}
 .expLogo{width:min(148px,46vw);height:auto;display:block;margin:10px auto 12px;background:none;border:0}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 :focus:not(:focus-visible){outline:none}
@@ -100,6 +107,9 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 @media(min-width:800px){
  .choices.wide{grid-template-columns:1fr 1fr 1fr}
  .pair{grid-template-columns:1fr 1fr}
+ .siteFooter{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+ .footerContact{grid-column:2}
+ .footerMove{grid-column:3;justify-self:end;width:auto;margin:0;padding:0;border:0;text-align:right}
 }
 @media(max-width:799px){
  .choices.two,.choices.wide{grid-template-columns:1fr}
@@ -118,10 +128,12 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 </header>
 <main id="main"><div id="panel"></div></main>
 <footer class="siteFooter">
+<div class="footerContact">
 <p>Guy Golan</p>
 <img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty">
 <p><a href="tel:+13019196726">301-919-6726</a></p>
-<p><a href="../">Moving cost estimator</a></p>
+</div>
+<p class="footerMove"><a href="../">Moving cost estimator</a></p>
 </footer>
 <script src="lookup.js"></script>
 <script src="estimate.js"></script>
@@ -155,7 +167,7 @@ function focusHeading(){
   h.focus({focusVisible:false});
 }
 function bookingLink(){
-  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Book a Call</a>';
+  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Schedule a call with Guy</a>';
 }
 function isSourced(figure){
   return !!figure && typeof figure.value==='number' && !Number.isNaN(figure.value) && figure.evidence==='MEASURED' && /^[\d.]+$/.test(String(figure.display||''));
@@ -211,6 +223,15 @@ function areaList(){
 }
 function selectedArea(){
   return areaList().find(area=>area.id===A.to)||null;
+}
+function configuredFloodPremium(areaId){
+  var flood=factors.florida&&factors.florida.flood;
+  if(!flood||flood.enabled!==true) return null;
+  var table=flood.statistic==='average'?(flood.averages||flood.areas):flood.medians;
+  if(!table) return null;
+  if(table[areaId]!=null) return table[areaId];
+  if((areaId==='venice'||areaId==='north-port')&&table.sarasota!=null) return table.sarasota;
+  return null;
 }
 function defaultAdults(){
   const size=Number(A.household)||0;
@@ -284,7 +305,7 @@ function showStep(id){
   }else{
     const area=selectedArea();
     const factorArea=factors.florida&&factors.florida.areas&&area?factors.florida.areas[area.id]:null;
-    const floodReady=!!(factors.florida&&factors.florida.flood&&factorArea&&factorArea.flood!=null);
+    const floodReady=configuredFloodPremium(area?area.id:'')!=null;
     const floodOn=A.flood==null?A.planFL==='buy':!!A.flood;
     fields='<div class="field"><label for="groceriesNow">Current monthly grocery spending</label><input id="groceriesNow" inputmode="decimal" autocomplete="off" value="'+esc(A.groceriesNow)+'"><p class="help">Leave blank to use the USDA moderate food plan.</p></div>';
     fields+='<div class="pair"><div class="field"><label for="hoaNow">HOA or CDD now, per month</label><input id="hoaNow" inputmode="decimal" autocomplete="off" value="'+esc(A.hoaNow)+'"></div><div class="field"><label for="hoaFL">HOA or CDD in Florida, per month</label><input id="hoaFL" inputmode="decimal" autocomplete="off" value="'+esc(A.hoaFL)+'"><p class="help">The figure varies by community.</p></div></div>';
@@ -451,6 +472,7 @@ function lineNotes(row){
   return bits;
 }
 function cellValue(row, side, indexDisplay){
+  if(row.text==='Not available') return 'Not available';
   if(row.index){
     if(side==='difference') return '\u2014';
     return esc(side==='origin'?indexDisplay.origin:indexDisplay.florida);
@@ -477,10 +499,13 @@ function drawResults(){
   const goodsFlorida=areaIndex(area.id,'goods');
   const utilFlorida=areaIndex(area.id,'utilities');
   const factorArea=factors.florida&&factors.florida.areas?factors.florida.areas[area.id]:null;
-  const floodReady=!!(factors.florida&&factors.florida.flood&&factorArea&&factorArea.flood!=null);
+  const floodChoice=configuredFloodPremium(area.id);
+  const elec=factors.electricity||{};
+  const gasOn=!!(factors.naturalGas&&factors.naturalGas.enabled===true&&factors.naturalGas.states);
   const adults=A.adults?Number(A.adults):Math.min(Number(A.household)||1,2);
   const result=CostEstimate.buildEstimate({
     state:keys.state,
+    countyFips:keys.county,
     toArea:area.id,
     floridaName:area.name,
     originName:originPlace(keys),
@@ -500,7 +525,16 @@ function drawResults(){
     groceriesNow:A.groceriesNow,
     hoaNow:A.hoaNow,
     hoaFL:A.hoaFL,
-    flood:floodReady && (A.flood==null?A.planFL==='buy':!!A.flood),
+    flood:floodChoice!=null && (A.flood==null?A.planFL==='buy':!!A.flood),
+    originMedianValue:factors.originMedianPrice&&factors.originMedianPrice.counties?factors.originMedianPrice.counties[keys.county]:null,
+    originEffRate:factors.originPropertyTax&&factors.originPropertyTax.counties?factors.originPropertyTax.counties[keys.county]:null,
+    kwhOrigin:elec.kwhMonth?elec.kwhMonth[keys.state]:null,
+    elecRateOrigin:elec.states?elec.states[keys.state]:null,
+    kwhFlorida:elec.kwhMonth?elec.kwhMonth.FL:null,
+    elecRateFlorida:elec.states?elec.states.FL:null,
+    gasBillOrigin:gasOn?factors.naturalGas.states[keys.state]:null,
+    gasBillFlorida:gasOn?factors.naturalGas.states.FL:null,
+    nationalWater:factors.water?factors.water.national:null,
     rppOriginGoods:goodsOrigin?goodsOrigin.figure.value:null,
     rppFloridaGoods:goodsFlorida?goodsFlorida.value:null,
     rppOriginAll:allOrigin?allOrigin.figure.value:null,
@@ -543,9 +577,10 @@ function drawResults(){
   const filing=adults>=2?'The state income tax line uses a joint return.':'The state income tax line uses a single return.';
   const evNote=A.drives==='yes' && A.fuel==='ev' && !result.lines.some(row=>row.id==='fuel')?'<p>Car insurance is included. Charging cost is not included in this estimate.</p>':'';
   const headline=result.sentence?'<h2 class="compareHeadline">'+esc(result.sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
-  const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p><p class="note">This total includes only the lines above.</p></div>';
+  const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p></div><p class="note">This total includes only the lines above.</p>';
   const notes=(result.notes||[]).map(note=>'<p>'+esc(note)+'</p>').join('');
-  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+(sourceList?'<p class="sources">Sources: '+sourceList+'.</p>':'')+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
+  const sourceBlock=sourceList?'<details class="sourcesToggle"><summary>Sources</summary><p>'+sourceList+'.</p></details>':'';
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
   document.getElementById('backBtn').onclick=()=>go('other');
   layoutResults();
 }

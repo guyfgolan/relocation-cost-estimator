@@ -72,6 +72,7 @@ assert.ok(Math.abs(estimate.fuelMonthly({ fuel: 'ev', vehicles: 1, miPerKwh: 3.5
 assert.strictEqual(estimate.usdaHousehold(1, factors.usda), 367.4 * 1.2);
 assert.ok(Math.abs(estimate.usdaHousehold(4, factors.usda) - 1389.2) < 0.001);
 assert.ok(Math.abs(estimate.usdaHousehold(6, factors.usda) - 1727.005) < 0.001);
+assert.strictEqual(estimate.usdaHousehold(7, factors.usda), estimate.usdaHousehold(6, factors.usda));
 
 const scaled = estimate.groceryPair({
   hhSize: 1,
@@ -135,11 +136,21 @@ const sales = line(result, 'sales-tax');
 assert.ok(sales && sales.inTotal);
 assert.ok(sales.florida < sales.origin);
 const property = line(result, 'property-tax');
-const sarasotaRate = factors.florida.areas.sarasota.millage;
-const sarasotaHome = estimate.propertySide('own', factors.florida.areas.sarasota.median, 'millage', sarasotaRate, factors.homestead.value);
+const sarasota = factors.florida.areas.sarasota;
+const sarasotaHome = estimate.propertySide(
+  'own',
+  sarasota.median,
+  'millage',
+  sarasota.millage,
+  factors.homestead.value,
+  sarasota.schoolMillage,
+  factors.homestead.schoolValue,
+  factors.homestead.additionalStartsAt
+);
+assert.strictEqual(estimate.round10(sarasotaHome.monthly), 470);
 assert.strictEqual(property.origin, 0);
 assert.strictEqual(property.originNote, 'Included in rent');
-assert.strictEqual(property.florida, estimate.round10(sarasotaHome.monthly));
+assert.strictEqual(property.florida, 470);
 assert.ok(result.notes.indexOf('Moving within Florida? Portability can lower this.') >= 0);
 assert.strictEqual(line(result, 'insurance').label, "Home or renter's insurance");
 assert.strictEqual(line(result, 'insurance').originNote, "Renter's average.");
@@ -154,8 +165,9 @@ assert.strictEqual(result.total.yearly, summed * 12);
 assert.ok(result.total.low <= result.total.monthly && result.total.monthly <= result.total.high);
 
 const noPrimary = estimate.buildEstimate(Object.assign({}, base, { primary: false }), factors);
-const sarasotaNoHome = estimate.propertySide('own', factors.florida.areas.sarasota.median, 'millage', sarasotaRate, 0);
-assert.strictEqual(line(noPrimary, 'property-tax').florida, estimate.round10(sarasotaNoHome.monthly));
+const sarasotaNoHome = estimate.propertySide('own', sarasota.median, 'millage', sarasota.millage, 0);
+assert.strictEqual(estimate.round10(sarasotaNoHome.monthly), 520);
+assert.strictEqual(line(noPrimary, 'property-tax').florida, 520);
 
 const owned = estimate.buildEstimate(Object.assign({}, base, { ownNow: 'own' }), factors);
 assert.strictEqual(line(owned, 'property-tax'), undefined);
@@ -201,9 +213,82 @@ const nameless = JSON.parse(JSON.stringify(factors));
 nameless.health.source = '';
 throws(function () { checkFactors(nameless); }, 'factor missing source health');
 
+assert.strictEqual(factors.health.asOf, '2025');
+assert.strictEqual(factors.health.states.FL.single, 1913);
+assert.strictEqual(factors.health.states.FL.family, 7976);
+assert.strictEqual(factors.health.states.OH.single, 2016);
+assert.strictEqual(factors.health.states.OH.family, 6453);
+assert.strictEqual(factors.naturalGas.enabled, false);
+assert.strictEqual(factors.florida.flood.enabled, false);
+assert.strictEqual(factors.florida.flood.statistic, 'median');
+assert.strictEqual(line(result, 'health').difference, 120);
+assert.strictEqual(line(result, 'utilities').label, 'Electricity and Water');
+assert.strictEqual(line(result, 'utilities').difference, 20);
+assert.strictEqual(line(result, 'fuel').difference, 0);
+assert.strictEqual(line(result, 'auto').difference, 60);
+assert.strictEqual(line(result, 'groceries').difference, 20);
+assert.strictEqual(line(result, 'insurance').difference, 280);
+assert.strictEqual(line(result, 'sales-tax').difference, -10);
+assert.strictEqual(result.total.monthly, 770);
+assert.strictEqual(result.total.low, 650);
+assert.strictEqual(result.total.high, 890);
+assert.strictEqual(result.total.yearly, 9240);
+const noDriveTotal = estimate.buildEstimate(Object.assign({}, base, { drives: false }), factors);
+assert.strictEqual(noDriveTotal.total.monthly, 710);
+
+const bases = estimate.homesteadBases(485000, 51411, 25000, 50000);
+assert.strictEqual(bases.school, 460000);
+assert.strictEqual(bases.other, 433589);
+
+const ownedCounty = estimate.buildEstimate(Object.assign({}, base, { ownNow: 'own', countyFips: '39049' }), factors);
+assert.strictEqual(line(ownedCounty, 'property-tax').origin, 430);
+assert.strictEqual(line(ownedCounty, 'property-tax').florida, 470);
+assert.strictEqual(line(ownedCounty, 'property-tax').difference, 40);
+
+const ev = estimate.buildEstimate(Object.assign({}, base, { fuel: 'ev' }), factors);
+assert.strictEqual(line(ev, 'fuel').label, 'Driving: electricity');
+assert.strictEqual(line(ev, 'fuel').origin, estimate.round10(1000 / 3.5 * 0.1599));
+assert.strictEqual(line(ev, 'fuel').florida, estimate.round10(1000 / 3.5 * 0.1414));
+assert.strictEqual(line(ev, 'fuel').origin, 50);
+assert.strictEqual(line(ev, 'fuel').florida, 40);
+
+const floodHidden = estimate.buildEstimate(Object.assign({}, base, { flood: true }), factors);
+assert.strictEqual(line(floodHidden, 'flood'), undefined);
+const floodOn = JSON.parse(JSON.stringify(factors));
+floodOn.florida.flood.enabled = true;
+const floodMedian = estimate.buildEstimate(Object.assign({}, base, { flood: true }), floodOn);
+assert.strictEqual(line(floodMedian, 'flood').florida, estimate.round10(1088 / 12));
+const floodVenice = estimate.buildEstimate(Object.assign({}, base, { toArea: 'venice', flood: true }), floodOn);
+assert.strictEqual(line(floodVenice, 'flood').florida, estimate.round10(1088 / 12));
+floodOn.florida.flood.statistic = 'average';
+const floodAverage = estimate.buildEstimate(Object.assign({}, base, { flood: true }), floodOn);
+assert.strictEqual(line(floodAverage, 'flood').florida, estimate.round10(1755 / 12));
+
+const gasOn = JSON.parse(JSON.stringify(factors));
+gasOn.naturalGas.enabled = true;
+const withGas = estimate.buildEstimate(base, gasOn);
+assert.ok(line(withGas, 'utilities').label.indexOf('Natural gas') >= 0);
+assert.strictEqual(line(result, 'utilities').label.indexOf('Natural gas'), -1);
+
+['PR', 'GU', 'VI', 'AS', 'MP'].forEach(function (code) {
+  const territory = estimate.buildEstimate(Object.assign({}, base, { state: code }), factors);
+  assert.strictEqual(line(territory, 'income-tax').text, 'Not available', code);
+  assert.strictEqual(line(territory, 'income-tax').inTotal, false, code);
+  assert.strictEqual(line(territory, 'sales-tax').text, 'Not available', code);
+  assert.strictEqual(line(territory, 'sales-tax').inTotal, false, code);
+  assert.ok(territory.lines.every(function (row) { return row.text === 'Not available' || row.inTotal === false || row.difference != null; }));
+});
+
 const page = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 assert.strictEqual(page.indexOf('8GQc'), -1);
 assert.strictEqual(page.indexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'), page.lastIndexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'));
 assert.ok(page.indexOf("const BOOKING_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7'") > 0);
+assert.ok(page.indexOf('Schedule a call with Guy') > 0);
+assert.ok(page.indexOf('class="sourcesToggle"') > 0);
+assert.strictEqual(page.indexOf('sourcesToggle" open'), -1);
+assert.ok(page.indexOf('favicon.ico') > 0);
+assert.ok(page.indexOf('function selectedArea()') > 0);
+assert.ok(page.indexOf('Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.') > 0);
+assert.ok(page.indexOf('This total includes only the lines above.') > 0);
 
 console.log('cost-of-living formula checks passed');

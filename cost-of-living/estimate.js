@@ -158,13 +158,60 @@
     return (other * fullRate + Math.min(food, base) * foodRate) / 12;
   }
 
-  function propertySide(tenure, price, rateKind, rate, homestead) {
+  var TERRITORIES = { PR: true, GU: true, VI: true, AS: true, MP: true };
+
+  function isTerritory(code) {
+    return !!TERRITORIES[String(code || '')];
+  }
+
+  // School taxes get the first $25,000 only. The rest of the exemption applies above $50,000 and only to non-school taxes.
+  function homesteadBases(price, fullExemption, schoolExemption, additionalStartsAt) {
+    var schoolCut = schoolExemption == null ? 25000 : schoolExemption;
+    var starts = additionalStartsAt == null ? 50000 : additionalStartsAt;
+    var school = Math.max(0, price - schoolCut);
+    var extraMax = Math.max(0, (fullExemption || 0) - schoolCut);
+    var extra = price > starts ? Math.min(extraMax, price - starts) : 0;
+    return { school: school, other: Math.max(0, price - schoolCut - extra) };
+  }
+
+  function propertySide(tenure, price, rateKind, rate, homestead, schoolMillage, schoolExemption, additionalStartsAt) {
     if (tenure === 'rent') return { monthly: 0, note: 'Included in rent' };
     if (price == null || rate == null) return null;
     var annual;
-    if (rateKind === 'millage') annual = Math.max(0, price - (homestead || 0)) * rate / 1000;
-    else annual = price * rate;
+    if (rateKind === 'millage' && homestead && schoolMillage != null) {
+      var bases = homesteadBases(price, homestead, schoolExemption, additionalStartsAt);
+      annual = bases.school * schoolMillage / 1000 + bases.other * (rate - schoolMillage) / 1000;
+    } else if (rateKind === 'millage') {
+      annual = Math.max(0, price - (homestead || 0)) * rate / 1000;
+    } else {
+      annual = price * rate;
+    }
     return { monthly: annual / 12, note: '' };
+  }
+
+  function floodPremium(factors, areaId) {
+    var flood = factors && factors.florida && factors.florida.flood;
+    if (!flood || flood.enabled !== true) return null;
+    var table = flood.statistic === 'average' ? (flood.averages || flood.areas) : flood.medians;
+    if (!table) return null;
+    if (table[areaId] != null) return table[areaId];
+    if ((areaId === 'venice' || areaId === 'north-port') && table.sarasota != null) return table.sarasota;
+    return null;
+  }
+
+  function unavailableLine(id, label, sources) {
+    return {
+      id: id,
+      label: label,
+      origin: null,
+      florida: null,
+      difference: null,
+      inTotal: false,
+      text: 'Not available',
+      originNote: '',
+      floridaNote: '',
+      sources: sources || []
+    };
   }
 
   function utilitiesMonthly(parts) {
@@ -240,7 +287,9 @@
       usda: factors.usda
     });
 
-    if (originState && income != null && factors.incomeTax) {
+    if (isTerritory(originState)) {
+      lines.push(unavailableLine('income-tax', 'State income tax', sourceOf(factors.incomeTax)));
+    } else if (originState && income != null && factors.incomeTax) {
       var annualTax = stateIncomeTax(originState, income, filing, factors.incomeTax.states);
       var monthlyTax = annualTax / 12;
       if (!(annualTax > 0) || round10(monthlyTax) === 0) {
@@ -306,19 +355,32 @@
       });
     }
 
+    var elec = factors.electricity || {};
+    var gasOn = !!(factors.naturalGas && factors.naturalGas.enabled === true && factors.naturalGas.states);
+    var kwhOrigin = input.kwhOrigin != null ? input.kwhOrigin : (elec.kwhMonth ? elec.kwhMonth[originState] : null);
+    var rateOrigin = input.elecRateOrigin != null ? input.elecRateOrigin : (elec.states ? elec.states[originState] : null);
+    var kwhFlorida = input.kwhFlorida != null ? input.kwhFlorida : (elec.kwhMonth ? elec.kwhMonth.FL : null);
+    var rateFlorida = input.elecRateFlorida != null ? input.elecRateFlorida : (elec.states ? elec.states.FL : null);
+    var gasOrigin = input.gasBillOrigin != null ? input.gasBillOrigin : (gasOn ? factors.naturalGas.states[originState] : null);
+    var gasFlorida = input.gasBillFlorida != null ? input.gasBillFlorida : (gasOn ? factors.naturalGas.states.FL : null);
+    var nationalWater = input.nationalWater != null ? input.nationalWater : (factors.water ? factors.water.national : null);
     var utilityOrigin = utilitiesMonthly({
-      electricity: electricityBill(input.kwhOrigin, input.elecRateOrigin),
-      gas: input.gasBillOrigin,
-      water: waterBill(input.waterOrigin, input.nationalWater, input.rppOriginUtilities)
+      electricity: electricityBill(kwhOrigin, rateOrigin),
+      gas: gasOrigin,
+      water: waterBill(input.waterOrigin, nationalWater, input.rppOriginUtilities)
     });
     var utilityFlorida = utilitiesMonthly({
-      electricity: electricityBill(input.kwhFlorida, input.elecRateFlorida),
-      gas: input.gasBillFlorida,
-      water: waterBill(input.waterFlorida, input.nationalWater, input.rppFloridaUtilities)
+      electricity: electricityBill(kwhFlorida, rateFlorida),
+      gas: gasFlorida,
+      water: waterBill(input.waterFlorida, nationalWater, input.rppFloridaUtilities)
     });
     if (utilityOrigin && utilityFlorida && utilityOrigin.label === utilityFlorida.label) {
+      var utilitySources = [];
+      if (utilityOrigin.label.indexOf('Electricity') >= 0) utilitySources = utilitySources.concat(sourceOf(factors.electricity));
+      if (utilityOrigin.label.indexOf('Natural gas') >= 0) utilitySources = utilitySources.concat(sourceOf(factors.naturalGas));
+      if (utilityOrigin.label.indexOf('Water') >= 0) utilitySources = utilitySources.concat(sourceOf(factors.water));
       var utility = moneyLine('utilities', utilityOrigin.label, utilityOrigin.monthly, utilityFlorida.monthly, {
-        sources: sourceOf(factors.electricity).concat(sourceOf(factors.naturalGas), sourceOf(factors.water))
+        sources: utilitySources
       });
       if (utility) lines.push(utility);
     }
@@ -350,8 +412,9 @@
       if (cover) lines.push(cover);
     }
 
-    if (input.flood && area && area.flood != null) {
-      var flood = moneyLine('flood', 'Flood insurance', 0, area.flood / 12, {
+    var premium = input.flood ? (area && area.flood != null ? area.flood : floodPremium(factors, input.toArea)) : null;
+    if (premium != null) {
+      var flood = moneyLine('flood', 'Flood insurance', 0, premium / 12, {
         originNote: '',
         floridaNote: 'Flood coverage may be required by your lender depending on the property\'s flood zone.',
         sources: sourceOf(factors.florida.flood)
@@ -359,7 +422,9 @@
       if (flood) lines.push(flood);
     }
 
-    if (income != null && groceries && factors.salesTax && area) {
+    if (isTerritory(originState)) {
+      lines.push(unavailableLine('sales-tax', 'Sales tax', sourceOf(factors.salesTax).concat(sourceOf(factors.florida && factors.florida.salesTax))));
+    } else if (income != null && groceries && factors.salesTax && area) {
       var originSales = factors.salesTax.states[originState];
       var floridaRate = area.salesTax;
       if (originSales && floridaRate != null) {
@@ -378,11 +443,18 @@
       var budget = num(input.homeBudget);
       var floridaPrice = budget != null ? budget : area.median;
       var homestead = input.planFL === 'buy' && input.primary ? (factors.homestead && factors.homestead.value) || 0 : 0;
+      var originValue = input.originMedianValue;
+      var originRate = input.originEffRate;
+      var county = input.countyFips || '';
+      if (input.ownNow === 'own') {
+        if (originValue == null && factors.originMedianPrice && factors.originMedianPrice.counties) originValue = factors.originMedianPrice.counties[county];
+        if (originRate == null && factors.originPropertyTax && factors.originPropertyTax.counties) originRate = factors.originPropertyTax.counties[county];
+      }
       var originProperty = propertySide(
         input.ownNow === 'own' ? 'own' : 'rent',
-        input.originMedianValue,
+        originValue,
         'effective',
-        input.originEffRate,
+        originRate,
         0
       );
       var floridaProperty = propertySide(
@@ -390,13 +462,18 @@
         floridaPrice,
         'millage',
         area.millage,
-        homestead
+        homestead,
+        homestead && area.schoolMillage != null ? area.schoolMillage : null,
+        factors.homestead && factors.homestead.schoolValue,
+        factors.homestead && factors.homestead.additionalStartsAt
       );
       if (originProperty && floridaProperty) {
+        var propertySources = sourceOf(factors.florida.millage).concat(sourceOf(factors.florida.schoolMillage), sourceOf(factors.homestead), sourceOf(factors.florida.medianPrice));
+        if (input.ownNow === 'own') propertySources = propertySources.concat(sourceOf(factors.originPropertyTax), sourceOf(factors.originMedianPrice));
         var property = moneyLine('property-tax', 'Property tax', originProperty.monthly, floridaProperty.monthly, {
           originNote: originProperty.note,
           floridaNote: floridaProperty.note,
-          sources: sourceOf(factors.florida.millage).concat(sourceOf(factors.homestead), sourceOf(factors.florida.medianPrice))
+          sources: propertySources
         });
         if (property) {
           lines.push(property);
@@ -473,6 +550,9 @@
     groceryPair: groceryPair,
     salesTaxMonthly: salesTaxMonthly,
     salesTaxMonthlyReduced: salesTaxMonthlyReduced,
+    isTerritory: isTerritory,
+    floodPremium: floodPremium,
+    homesteadBases: homesteadBases,
     propertySide: propertySide,
     utilitiesMonthly: utilitiesMonthly,
     electricityBill: electricityBill,
