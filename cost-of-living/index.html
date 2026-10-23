@@ -81,6 +81,8 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .credit{color:var(--gray);font-size:14px;margin:14px 0 0}
 .credit a{color:var(--gray)}
 .help,.note{color:var(--gray);font-size:14px;margin:6px 0 0}
+.taxNote{margin:0 0 16px;padding:12px 14px;border:1px solid var(--gold);background:var(--paper);color:var(--navy);font-size:16px;line-height:1.45}
+.taxNote .meta{display:block;margin-top:6px;color:var(--gray);font-size:14px}
 .field{margin:0 0 16px}
 .pair{display:grid;gap:12px}
 .route{font-weight:700;margin:0 0 8px}
@@ -139,12 +141,11 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 <script src="estimate.js"></script>
 <script>
 const BOOKING_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7';
-const STEPS=['from','to','household','income','now','plan','drive','other','results'];
+const STEPS=['from','to','household','now','plan','drive','other','results'];
 const QUESTIONS=[
   {id:'from',title:'Where are you moving from?'},
   {id:'to',title:'Which Gulf Coast area?'},
   {id:'household',title:'How many people are in your household?'},
-  {id:'income',title:"What's your household income range?"},
   {id:'now',title:'Do you own or rent now?'},
   {id:'plan',title:'Will you buy or rent in Florida?'},
   {id:'drive',title:'Will you be driving?'},
@@ -152,7 +153,7 @@ const QUESTIONS=[
 ];
 const FRAMING='General estimate for planning a conversation. Not a quote. Your actual costs depend on your home, coverage and habits.';
 const REPORT='This is a general estimate built from published averages. It is not a quote or tax advice. Let\'s talk through your actual numbers.';
-const A={zip:'',to:'',household:'',adults:'',adultsTouched:false,income:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null};
+const A={zip:'',to:'',household:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null};
 let bundle=null;
 let factors=null;
 let renderGen=0;
@@ -200,10 +201,11 @@ function render(step){
   else showStep(QUESTIONS.some(q=>q.id===step)?step:'from');
 }
 function progress(n){
-  return '<p class="stepLabel" id="stepLabel">Step '+n+' of 8</p><div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="8" aria-valuenow="'+n+'" aria-labelledby="stepLabel"><div style="width:'+(n/8*100)+'%"></div></div>';
+  const total=QUESTIONS.length;
+  return '<p class="stepLabel" id="stepLabel">Step '+n+' of '+total+'</p><div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="'+total+'" aria-valuenow="'+n+'" aria-labelledby="stepLabel"><div style="width:'+(n/total*100)+'%"></div></div>';
 }
 function stepBar(n){
-  const nextLabel=n===8?'See your estimate':'Next';
+  const nextLabel=n===QUESTIONS.length?'See your estimate':'Next';
   return '<div class="stepBar"><button type="button" class="secondary" id="backBtn"'+(n===1?' disabled':'')+'>Back</button><button type="button" class="primary" id="nextBtn">'+nextLabel+'</button></div>';
 }
 function choices(group, items, current){
@@ -232,20 +234,6 @@ function configuredFloodPremium(areaId){
   if(table[areaId]!=null) return table[areaId];
   if((areaId==='venice'||areaId==='north-port')&&table.sarasota!=null) return table.sarasota;
   return null;
-}
-function defaultAdults(){
-  const size=Number(A.household)||0;
-  return size?String(Math.min(size,2)):'';
-}
-function bandRecord(){
-  return (factors.incomeBands||[]).find(band=>band.id===A.income)||null;
-}
-function midpointCopy(band){
-  if(!band) return '';
-  const dollars=Number(band.midpoint).toLocaleString('en-US');
-  let text='This estimate uses $'+dollars+', the middle of this range.';
-  if(band.id==='250plus') text+=' That midpoint is halfway from $250,000 to $500,000.';
-  return text;
 }
 function householdLabel(){
   if(A.household==='1') return '1 person';
@@ -288,12 +276,7 @@ function showStep(id){
   }else if(id==='to'){
     fields=choices('to',areaList().map(area=>({id:area.id,label:area.name})),A.to);
   }else if(id==='household'){
-    const adults=A.adults||defaultAdults();
     fields='<div class="field">'+choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5',label:'5 people'},{id:'6',label:'6 or more'}],A.household)+'</div>';
-    fields+='<div class="field"><label id="adultsLabel">How many adults?</label>'+choices('adults',[{id:'1',label:'1 adult'},{id:'2',label:'2 or more adults'}],adults)+'<p class="help">Used for the state income tax line. The default is one adult, or two when the household has two or more people.</p></div>';
-  }else if(id==='income'){
-    fields=choices('income',(factors.incomeBands||[]).map(band=>({id:band.id,label:band.label})),A.income);
-    fields+='<p id="midpoint" class="help">'+esc(midpointCopy(bandRecord()))+'</p><p>It stays in this browser and is not saved.</p>';
   }else if(id==='now'){
     fields=choices('ownNow',[{id:'own',label:'Own'},{id:'rent',label:'Rent'}],A.ownNow);
   }else if(id==='plan'){
@@ -321,12 +304,6 @@ function showStep(id){
       const picked=btn.getAttribute('data-id');
       panel.querySelectorAll('[data-group="'+group+'"]').forEach(other=>other.setAttribute('aria-pressed',other===btn?'true':'false'));
       A[group]=picked;
-      if(group==='adults') A.adultsTouched=true;
-      if(group==='household' && !A.adultsTouched) paintAdults();
-      if(group==='income'){
-        const note=document.getElementById('midpoint');
-        if(note) note.textContent=midpointCopy(bandRecord());
-      }
       if(group==='planFL'){
         const buy=document.getElementById('buyDetails');
         if(buy) buy.hidden=picked!=='buy';
@@ -348,18 +325,10 @@ function showStep(id){
   });
   focusHeading();
 }
-function paintAdults(){
-  const chosen=A.adults||defaultAdults();
-  panel.querySelectorAll('[data-group="adults"]').forEach(btn=>btn.setAttribute('aria-pressed',btn.getAttribute('data-id')===chosen?'true':'false'));
-}
 function saveStep(id){
   if(id==='from') A.zip=fieldValue('zip');
   if(id==='to') A.to=readChoice('to');
-  if(id==='household'){
-    A.household=readChoice('household');
-    A.adults=A.adultsTouched?readChoice('adults'):'';
-  }
-  if(id==='income') A.income=readChoice('income');
+  if(id==='household') A.household=readChoice('household');
   if(id==='now') A.ownNow=readChoice('ownNow');
   if(id==='plan'){
     A.planFL=readChoice('planFL');
@@ -405,7 +374,6 @@ function advance(id,n){
   }
   if(id==='to' && !A.to){setStatus('formStatus','Choose one to continue.');return}
   if(id==='household' && !A.household){setStatus('formStatus','Choose one to continue.');return}
-  if(id==='income' && !A.income){setStatus('formStatus','Choose one to continue.');return}
   if(id==='now' && !A.ownNow){setStatus('formStatus','Choose one to continue.');return}
   if(id==='plan'){
     if(!A.planFL){setStatus('formStatus','Choose one to continue.');return}
@@ -428,7 +396,7 @@ function advance(id,n){
     const hoaFL=numberOrBlank(A.hoaFL);
     if(grocery||hoaNow||hoaFL){setStatus('formStatus',grocery||hoaNow||hoaFL);return}
   }
-  if(n<8) go(QUESTIONS[n].id);
+  if(n<QUESTIONS.length) go(QUESTIONS[n].id);
   else go('results');
 }
 function showResults(){
@@ -483,7 +451,7 @@ function cellValue(row, side, indexDisplay){
   return esc(money(value, side==='difference'));
 }
 function drawResults(){
-  const ready=A.zip && A.to && A.household && A.income && A.ownNow && A.planFL && A.drives && (A.planFL!=='buy' || A.primary);
+  const ready=A.zip && A.to && A.household && A.ownNow && A.planFL && A.drives && (A.planFL!=='buy' || A.primary);
   const keys=ready?CostLookup.resolveKeys(bundle.crosswalk,A.zip):{state:''};
   const area=selectedArea();
   if(!ready || !keys.state || !area){
@@ -502,7 +470,6 @@ function drawResults(){
   const floodChoice=configuredFloodPremium(area.id);
   const elec=factors.electricity||{};
   const gasOn=!!(factors.naturalGas&&factors.naturalGas.enabled===true&&factors.naturalGas.states);
-  const adults=A.adults?Number(A.adults):Math.min(Number(A.household)||1,2);
   const result=CostEstimate.buildEstimate({
     state:keys.state,
     countyFips:keys.county,
@@ -510,8 +477,6 @@ function drawResults(){
     floridaName:area.name,
     originName:originPlace(keys),
     hhSize:Number(A.household),
-    adults:adults,
-    incomeBand:A.income,
     ownNow:A.ownNow,
     planFL:A.planFL,
     primary:A.primary==='yes',
@@ -568,19 +533,22 @@ function drawResults(){
       sources.push(source);
     });
   });
+  if(result.incomeTaxNote && result.incomeTaxNote.source){
+    sources.push({name:result.incomeTaxNote.source, asOf:result.incomeTaxNote.asOf});
+  }
   const sourceList=sources.map(function(source){
     const dated=asOfText(source.asOf);
     const name=source.name||'';
     return esc(dated && name.indexOf(dated)<0 ? name+', as of '+dated : name);
   }).join('. ');
-  const band=bandRecord();
-  const filing=adults>=2?'The state income tax line uses a joint return.':'The state income tax line uses a single return.';
   const evNote=A.drives==='yes' && A.fuel==='ev' && !result.lines.some(row=>row.id==='fuel')?'<p>Car insurance is included. Charging cost is not included in this estimate.</p>':'';
+  const tax=result.incomeTaxNote;
+  const taxNote=tax?'<p class="taxNote" id="incomeTaxNote">'+esc(tax.text)+(tax.asOfLabel||tax.source?'<span class="meta">'+esc(tax.asOfLabel?('As of '+tax.asOfLabel+'.'):'')+(tax.source?(' Source: '+tax.source+'.'):'')+'</span>':'')+'</p>':'';
   const headline=result.sentence?'<h2 class="compareHeadline">'+esc(result.sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
   const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p></div><p class="note">This total includes only the lines above.</p>';
   const notes=(result.notes||[]).map(note=>'<p>'+esc(note)+'</p>').join('');
   const sourceBlock=sourceList?'<details class="sourcesToggle"><summary>Sources</summary><p>'+sourceList+'.</p></details>':'';
-  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p>'+evNote+taxNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
   document.getElementById('backBtn').onclick=()=>go('other');
   layoutResults();
 }
