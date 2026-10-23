@@ -85,15 +85,30 @@ assert.ok(doc.crosswalk.zips.every(function (row) { return row.label === 'SAMPLE
 
 // B3. DESIGN_PREVIEW keeps its rules. SOURCED accepts a complete measured figure.
 check(doc);
-check(doc, 'DESIGN_PREVIEW');
+check(doc, 'SOURCED');
+throws(function () { check(doc, 'DESIGN_PREVIEW'); }, /numeric value in design preview/);
 const numbered = clone(doc);
-numbered.figures[0].value = 100.89;
-numbered.figures[0].source = 'Example agency';
-throws(function () { check(numbered); }, /numeric value in design preview/);
+numbered.status = 'DESIGN_PREVIEW';
+numbered.figures.forEach(function (figure) {
+  if (figure.categoryId !== 'price-index') return;
+  figure.value = null;
+  figure.display = 'PLACEHOLDER';
+  figure.status = 'placeholder';
+  figure.evidence = null;
+  figure.url = '';
+  figure.source = 'SOURCE NOT CHOSEN';
+  figure.asOf = null;
+  figure.retrieved = null;
+});
+numbered.nationalTables.rows = [];
+const groceryPreview = numbered.figures.find(function (figure) { return figure.areaId === 'manatee' && figure.categoryId === 'groceries'; });
+groceryPreview.value = 12;
+groceryPreview.source = 'Example agency';
 throws(function () { check(numbered, 'DESIGN_PREVIEW'); }, /numeric value in design preview/);
 const priced = clone(doc);
-const grocery = priced.figures.find(function (figure) { return figure.areaId === 'manatee' && figure.categoryId === 'groceries'; });
-Object.assign(grocery, sourcedFigure(grocery));
+priced.figures.forEach(function (figure) {
+  if (figure.categoryId === 'groceries' && (figure.componentId || null) === null) Object.assign(figure, sourcedFigure(figure));
+});
 check(priced, 'SOURCED');
 const unnamed = clone(priced);
 unnamed.figures.find(function (figure) { return figure.areaId === 'manatee' && figure.categoryId === 'groceries'; }).source = 'SOURCE NOT CHOSEN';
@@ -145,14 +160,17 @@ assert.strictEqual(lookup.linkText({ url: 'https://example.com/a', linkLabel: 'B
 assert.strictEqual(lookup.linkText({ url: 'https://example.com/b', source: 'HUD fair market rents' }), 'HUD fair market rents');
 assert.strictEqual(lookup.linkText({ url: '', linkLabel: 'FEMA flood map', source: 'FEMA' }), '');
 
-// L1. Venice and North Port place codes stay flagged unverified.
+// Place codes Dexter verified against the Census 2020 Florida place file.
 ['venice', 'north-port'].forEach(function (id) {
-  const rows = doc.figures.filter(function (figure) { return figure.areaId === id; });
-  assert.ok(rows.length > 0);
-  rows.forEach(function (figure) {
-    assert.match(figure.caveat, /UNVERIFIED/);
+  const area = doc.areas.find(function (item) { return item.id === id; });
+  assert.match(area.note, /verified/i);
+  assert.doesNotMatch(area.note, /unverified/i);
+  doc.figures.filter(function (figure) { return figure.areaId === id; }).forEach(function (figure) {
+    assert.doesNotMatch(figure.caveat || '', /UNVERIFIED/);
   });
 });
+assert.strictEqual(doc.areas.find(function (area) { return area.id === 'venice'; }).placeFips, '1273900');
+assert.strictEqual(doc.areas.find(function (area) { return area.id === 'north-port'; }).placeFips, '1249675');
 
 // L2 and L3. Area and category entries, including unit and period.
 const missingFips = clone(doc);
@@ -181,5 +199,108 @@ doc.categories.forEach(function (category) {
   if (category.unit === 'USD/year') assert.strictEqual(category.period, 'year');
   if (category.unit === 'index') assert.strictEqual(category.period, 'year');
 });
+
+// BEA Regional Price Parities 2024. Values are the shipped figures, unchanged.
+assert.strictEqual(doc.status, 'SOURCED');
+const metroRows = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'cbsa'; });
+const stateRows = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'state'; });
+assert.strictEqual(metroRows.length, 1935);
+assert.strictEqual(stateRows.length, 255);
+assert.strictEqual(doc.nationalTables.rows.length, 2190);
+metroRows.concat(stateRows).forEach(function (row) {
+  assert.strictEqual(row.categoryId, 'price-index');
+  assert.strictEqual(row.evidence, 'MEASURED');
+  assert.strictEqual(row.status, 'sourced');
+  assert.strictEqual(row.asOf, '2024');
+  assert.strictEqual(row.source, 'U.S. Bureau of Economic Analysis, Regional Price Parities');
+});
+const measured = doc.figures.filter(function (figure) { return figure.evidence === 'MEASURED'; });
+assert.strictEqual(measured.length, 30);
+measured.forEach(function (figure) {
+  assert.strictEqual(figure.categoryId, 'price-index');
+  assert.strictEqual(figure.status, 'sourced');
+});
+function gulf(areaId, componentId) {
+  return doc.figures.find(function (figure) {
+    return figure.areaId === areaId && figure.categoryId === 'price-index' && figure.componentId === componentId;
+  });
+}
+['manatee', 'sarasota', 'venice', 'north-port'].forEach(function (areaId) {
+  assert.strictEqual(gulf(areaId, null).value, 102.417);
+  assert.strictEqual(gulf(areaId, null).display, '102.4');
+  assert.strictEqual(gulf(areaId, 'goods').value, 96.24);
+  assert.strictEqual(gulf(areaId, 'goods').display, '96.2');
+  assert.strictEqual(gulf(areaId, 'housing').value, 127.95);
+  assert.strictEqual(gulf(areaId, 'housing').display, '128.0');
+  assert.strictEqual(gulf(areaId, 'utilities').value, 88.171);
+  assert.strictEqual(gulf(areaId, 'utilities').display, '88.2');
+  assert.strictEqual(gulf(areaId, 'other-services').value, 98.864);
+  assert.strictEqual(gulf(areaId, 'other-services').display, '98.9');
+});
+['hillsborough', 'pinellas'].forEach(function (areaId) {
+  assert.strictEqual(gulf(areaId, null).value, 100.89);
+  assert.strictEqual(gulf(areaId, null).display, '100.9');
+  assert.strictEqual(gulf(areaId, 'goods').value, 95.47);
+  assert.strictEqual(gulf(areaId, 'goods').display, '95.5');
+  assert.strictEqual(gulf(areaId, 'housing').value, 125.839);
+  assert.strictEqual(gulf(areaId, 'housing').display, '125.8');
+  assert.strictEqual(gulf(areaId, 'utilities').value, 88.525);
+  assert.strictEqual(gulf(areaId, 'utilities').display, '88.5');
+  assert.strictEqual(gulf(areaId, 'other-services').value, 97.565);
+  assert.strictEqual(gulf(areaId, 'other-services').display, '97.6');
+});
+function national(level, geoId, componentId) {
+  return doc.nationalTables.rows.find(function (row) {
+    return row.geoLevel === level && row.geoId === geoId && row.componentId === componentId;
+  });
+}
+assert.strictEqual(national('cbsa', '35840', null).value, 102.417);
+assert.strictEqual(national('cbsa', '45300', null).value, 100.89);
+assert.strictEqual(national('cbsa', '18140', null).value, 95.469);
+assert.strictEqual(national('cbsa', '18140', 'housing').value, 87.945);
+assert.strictEqual(national('cbsa', '11260', null).value, 105.42);
+assert.strictEqual(national('state', 'MT', null).value, 94.645);
+const indexCategory = doc.categories.find(function (category) { return category.id === 'price-index'; });
+assert.deepStrictEqual(indexCategory.components.map(function (component) { return component.id; }), ['goods', 'housing', 'utilities', 'other-services']);
+doc.figures.filter(function (figure) { return figure.categoryId !== 'price-index'; }).forEach(function (figure) {
+  assert.strictEqual(figure.value, null);
+  assert.notStrictEqual(figure.status, 'sourced');
+});
+assert.strictEqual(doc.crosswalk.zips.length, 1);
+assert.strictEqual(doc.crosswalk.zips[0].zip, '00000');
+assert.strictEqual(doc.crosswalk.zips[0].label, 'SAMPLE');
+assert.strictEqual(lookup.lookup(doc, '00000', 'price-index', null).level, 'Not available');
+const withZips = {
+  crosswalk: {
+    zips: [
+      { zip: '43215', countyFips: '39049', cbsa: '18140', state: 'OH', label: 'TEST' },
+      { zip: '99501', countyFips: '02020', cbsa: '11260', state: 'AK', label: 'TEST' },
+      { zip: '59001', countyFips: '30003', cbsa: '', state: 'MT', label: 'TEST' }
+    ]
+  },
+  nationalTables: doc.nationalTables
+};
+assert.strictEqual(lookup.lookup(withZips, '43215', 'price-index', null).level, 'metro value');
+assert.strictEqual(lookup.lookup(withZips, '43215', 'price-index', null).figure.value, 95.469);
+assert.strictEqual(lookup.lookup(withZips, '43215', 'price-index', 'housing').figure.value, 87.945);
+assert.strictEqual(lookup.lookup(withZips, '99501', 'price-index', null).figure.value, 105.42);
+assert.strictEqual(lookup.lookup(withZips, '59001', 'price-index', null).level, 'state value');
+assert.strictEqual(lookup.lookup(withZips, '59001', 'price-index', null).figure.value, 94.645);
+assert.strictEqual(lookup.lookup(withZips, '12345', 'price-index', null).level, 'Not available');
+
+const emptySourced = clone(doc);
+const emptyFigure = emptySourced.figures.find(function (figure) { return figure.areaId === 'manatee' && figure.categoryId === 'groceries'; });
+emptyFigure.status = 'sourced';
+emptyFigure.value = null;
+throws(function () { check(emptySourced, 'SOURCED'); }, /sourced record has no value/);
+const emptyRow = clone(doc);
+emptyRow.nationalTables.rows[0].value = null;
+throws(function () { check(emptyRow, 'SOURCED'); }, /sourced record has no value/);
+const mixed = clone(doc);
+mixed.figures.find(function (figure) { return figure.areaId === 'venice' && figure.categoryId === 'price-index' && figure.componentId === null; }).asOf = '2023';
+throws(function () { check(mixed, 'SOURCED'); }, /mixed source or vintage/);
+const bareLookup = clone(doc);
+bareLookup.nationalTables.rows[0].url = 'http://example.com/not-https';
+throws(function () { check(bareLookup, 'SOURCED'); }, /sourced url/);
 
 console.log('cost-of-living checks passed');

@@ -71,15 +71,68 @@ function checkCrosswalk(doc) {
   });
 }
 
-function sourcedFigure(figure) {
-  if (typeof figure.value !== 'number' || Number.isNaN(figure.value)) fail('sourced value ' + figure.areaId + ' ' + figure.categoryId);
-  if (!figure.url || !/^https:\/\//.test(figure.url)) fail('sourced url ' + figure.areaId + ' ' + figure.categoryId);
-  if (!figure.license || figure.license === 'LICENSE NOT CHOSEN') fail('sourced license ' + figure.areaId + ' ' + figure.categoryId);
-  if (figure.asOf == null || !ASOF.test(figure.asOf)) fail('sourced asOf ' + figure.areaId + ' ' + figure.categoryId);
-  if (figure.retrieved == null || !RETRIEVED.test(figure.retrieved)) fail('sourced retrieved ' + figure.areaId + ' ' + figure.categoryId);
-  if (!figure.source || figure.source === 'SOURCE NOT CHOSEN') fail('sourced source ' + figure.areaId + ' ' + figure.categoryId);
-  if (figure.evidence !== 'MEASURED') fail('sourced evidence ' + figure.areaId + ' ' + figure.categoryId);
-  if (!figure.geoLevel) fail('sourced geography ' + figure.areaId + ' ' + figure.categoryId);
+function recordLabel(record) {
+  if (record.areaId) return record.areaId + ' ' + record.categoryId + ' ' + (record.componentId || '');
+  return (record.geoLevel || '?') + ' ' + (record.geoId || '?') + ' ' + (record.categoryId || '?') + ' ' + (record.componentId || '');
+}
+
+function sourcedRecord(record) {
+  const label = recordLabel(record);
+  if (typeof record.value !== 'number' || Number.isNaN(record.value)) fail('sourced value ' + label);
+  if (!record.url || !/^https:\/\//.test(record.url)) fail('sourced url ' + label);
+  if (!record.license || record.license === 'LICENSE NOT CHOSEN') fail('sourced license ' + label);
+  if (record.asOf == null || !ASOF.test(record.asOf)) fail('sourced asOf ' + label);
+  if (record.retrieved == null || !RETRIEVED.test(record.retrieved)) fail('sourced retrieved ' + label);
+  if (!record.source || record.source === 'SOURCE NOT CHOSEN') fail('sourced source ' + label);
+  if (record.evidence !== 'MEASURED') fail('sourced evidence ' + label);
+  if (!record.geoLevel || record.geoId == null || record.geoId === '') fail('sourced geography ' + label);
+}
+
+function componentAllowed(doc, categoryId, componentId) {
+  if (!componentId) return true;
+  const category = doc.categories.find(function (item) { return item.id === categoryId; });
+  const ids = ((category && category.components) || []).map(function (item) { return item.id; });
+  return ids.indexOf(componentId) >= 0;
+}
+
+function checkLookupRows(doc, use) {
+  const rows = doc.nationalTables.rows;
+  const categoryIds = new Set(doc.categories.map(function (category) { return category.id; }));
+  const levels = new Set(['zip', 'county', 'cbsa', 'state', 'place', 'us']);
+  rows.forEach(function (row) {
+    const label = recordLabel(row);
+    if (!categoryIds.has(row.categoryId)) fail('lookup category ' + label);
+    if (!periodMatchesUnit(row.unit, row.period)) fail('lookup unit/period ' + label);
+    if (row.asOf != null && !ASOF.test(row.asOf)) fail('lookup asOf ' + row.asOf);
+    if (row.retrieved != null && !RETRIEVED.test(row.retrieved)) fail('lookup retrieved ' + row.retrieved);
+    if (row.url && !row.linkLabel) fail('lookup link without its own label');
+    if (row.value != null && row.source === 'SOURCE NOT CHOSEN') fail('SOURCE NOT CHOSEN with a value');
+    if (row.status === 'sourced' && (typeof row.value !== 'number' || Number.isNaN(row.value))) fail('sourced record has no value');
+    if (!row.geoLevel || row.geoId == null || row.geoId === '') fail('lookup geography ' + label);
+    if (!levels.has(row.geoLevel)) fail('lookup geoLevel ' + row.geoLevel);
+    if (row.geoLevel === 'us' && !/U\.S\. average/i.test((row.display || '') + ' ' + (row.geoName || ''))) fail('national row must be labelled U.S. average');
+    if (!componentAllowed(doc, row.categoryId, row.componentId)) fail('lookup component ' + label);
+    if (use === 'SOURCED' && (row.value != null || row.status === 'sourced')) sourcedRecord(row);
+  });
+}
+
+function checkVintage(doc) {
+  const groups = new Map();
+  function add(record) {
+    const key = record.categoryId + '\0' + (record.componentId || '');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(record);
+  }
+  doc.figures.forEach(add);
+  doc.nationalTables.rows.forEach(add);
+  groups.forEach(function (records, key) {
+    const source = records[0].source;
+    const asOf = records[0].asOf == null ? null : records[0].asOf;
+    records.forEach(function (record) {
+      const recordAsOf = record.asOf == null ? null : record.asOf;
+      if (record.source !== source || recordAsOf !== asOf) fail('mixed source or vintage ' + key.split('\0')[0]);
+    });
+  });
 }
 
 function check(doc, mode) {
@@ -111,12 +164,9 @@ function check(doc, mode) {
     const area = doc.areas.find(function (item) { return item.id === figure.areaId; });
     if (figure.areaCodes.cbsa !== area.cbsa) fail('figure CBSA ' + figure.areaId + ' ' + figure.categoryId);
     if (figure.value != null && figure.source === 'SOURCE NOT CHOSEN') fail('SOURCE NOT CHOSEN with a value');
+    if (figure.status === 'sourced' && (typeof figure.value !== 'number' || Number.isNaN(figure.value))) fail('sourced record has no value');
     if (figure.url && !figure.linkLabel) fail('link without its own label');
-  });
-  ['venice', 'north-port'].forEach(function (id) {
-    doc.figures.filter(function (figure) { return figure.areaId === id; }).forEach(function (figure) {
-      if (!/UNVERIFIED/.test(figure.caveat || '')) fail('place code caveat ' + id);
-    });
+    if (!componentAllowed(doc, figure.categoryId, figure.componentId)) fail('figure component ' + figure.areaId + ' ' + figure.componentId);
   });
   const gulf = ['manatee', 'hillsborough', 'pinellas', 'sarasota', 'venice', 'north-port'];
   gulf.forEach(function (id) {
@@ -134,8 +184,12 @@ function check(doc, mode) {
   }
   if (use === 'SOURCED') {
     doc.figures.forEach(function (figure) {
-      if (figure.value != null) sourcedFigure(figure);
+      if (figure.value != null || figure.status === 'sourced') sourcedRecord(figure);
     });
+    checkLookupRows(doc, use);
+    checkVintage(doc);
+  } else {
+    checkLookupRows(doc, use);
   }
   return doc;
 }
@@ -147,7 +201,10 @@ function load(file) {
 if (require.main === module) {
   const doc = load(path.join(__dirname, 'cost-of-living.json'));
   check(doc);
-  console.log('Preview bundle ok:', doc.figures.length, 'placeholder figures,', doc.areas.length, 'Gulf columns');
+  const measured = doc.figures.filter(function (figure) { return figure.evidence === 'MEASURED'; }).length;
+  const metro = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'cbsa'; }).length;
+  const state = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'state'; }).length;
+  console.log('Bundle ok:', measured, 'measured Gulf figures,', metro, 'metro rows,', state, 'state rows,', doc.areas.length, 'Gulf columns');
 }
 
 module.exports = { check: check, load: load, CBSA_FOR: CBSA_FOR };
