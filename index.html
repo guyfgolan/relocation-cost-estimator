@@ -52,6 +52,8 @@ html,body,.app{background:#0d2235}
 .heroStart{margin-left:auto;margin-right:auto}
 h1,h2,h3,.eyebrow,.figures small,.questionNo{font-family:Cinzel,Georgia,"Times New Roman",serif;text-transform:uppercase;letter-spacing:.06em}
 h1{font-weight:600;line-height:1.12}
+h1:focus:not(:focus-visible),h2:focus:not(:focus-visible){outline:none}
+h1:focus-visible,h2:focus-visible{outline:2px solid #c7a25a;outline-offset:4px}
 h2{font-weight:600;line-height:1.16;text-wrap:balance;font-size:clamp(24px,3.2vw,42px)}
 h3{font-weight:600;letter-spacing:.08em}
 .figures{max-width:780px;margin-left:auto;margin-right:auto}
@@ -84,7 +86,7 @@ function track(n,p={}){if(typeof window.gtag==='function')window.gtag('event',n,
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function setBg(k){bg.style.backgroundImage=`url("${IMG[k]||IMG.intro}")`}
 function toggleCredits(){const panel=document.getElementById('creditsPanel'),btn=document.getElementById('creditsBtn');panel.hidden=!panel.hidden;btn.setAttribute('aria-expanded',panel.hidden?'false':'true')}
-function focusStep(){const h=panel.querySelector('h1,h2');const live=document.getElementById('live');if(!h)return;h.tabIndex=-1;h.focus();if(live)live.textContent=pendingAnnounce||h.textContent;pendingAnnounce=''}
+function focusStep(){const h=panel.querySelector('h1,h2');const live=document.getElementById('live');if(!h)return;h.tabIndex=-1;h.focus({focusVisible:false});if(live)live.textContent=pendingAnnounce||h.textContent;pendingAnnounce=''}
 function show(){if(!stack.length){intro();focusStep();return}const step=stack[stack.length-1];if(step==='result')result();else renderStep(step);focusStep()}
 function go(step){stack.push(step);show()}
 function back(){stack.pop();show()}
