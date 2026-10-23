@@ -338,12 +338,13 @@
       var floridaCover = input.planFL === 'buy'
         ? (area ? area.homeowners : null)
         : (factors.rentersInsurance && factors.rentersInsurance.states ? factors.rentersInsurance.states.FL : null);
-      var coverLabel = (input.ownNow === 'own' ? 'Home' : "Renter's") + ' insurance';
-      if (input.ownNow !== input.planFL) coverLabel = input.planFL === 'buy' ? "Homeowner's insurance" : "Renter's insurance";
+      var coverLabel = "Home or renter's insurance";
       var coverSources = input.planFL === 'buy' ? sourceOf(factors.florida.homeInsurance) : sourceOf(factors.rentersInsurance);
       if (input.ownNow === 'own') coverSources = sourceOf(factors.homeInsurance).concat(coverSources);
       else coverSources = sourceOf(factors.rentersInsurance).concat(coverSources);
       var cover = moneyLine('insurance', coverLabel, originCover == null ? null : originCover / 12, floridaCover == null ? null : floridaCover / 12, {
+        originNote: input.ownNow === 'own' ? "Homeowner's average." : "Renter's average.",
+        floridaNote: input.planFL === 'buy' ? "Homeowner's average." : "Renter's average.",
         sources: coverSources
       });
       if (cover) lines.push(cover);

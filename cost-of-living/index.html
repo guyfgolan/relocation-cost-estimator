@@ -534,7 +534,11 @@ function drawResults(){
       sources.push(source);
     });
   });
-  const sourceList=sources.map(source=>esc(source.name)+(source.asOf?', as of '+esc(asOfText(source.asOf)):'' )).join('. ');
+  const sourceList=sources.map(function(source){
+    const dated=asOfText(source.asOf);
+    const name=source.name||'';
+    return esc(dated && name.indexOf(dated)<0 ? name+', as of '+dated : name);
+  }).join('. ');
   const band=bandRecord();
   const filing=adults>=2?'The state income tax line uses a joint return.':'The state income tax line uses a single return.';
   const evNote=A.drives==='yes' && A.fuel==='ev' && !result.lines.some(row=>row.id==='fuel')?'<p>Car insurance is included. Charging cost is not included in this estimate.</p>':'';
