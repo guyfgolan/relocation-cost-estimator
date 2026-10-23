@@ -371,6 +371,11 @@ const moverPage = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf
 assert(moverPage.indexOf('https://commons.wikimedia.org') === -1, 'photo credits are not outside links');
 assert(moverPage.indexOf('https://www.census.gov') === -1, 'census credit is not an outside link');
 assert(moverPage.indexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7') === moverPage.lastIndexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'), 'booking url once');
+assert(moverPage.indexOf('8GQc') === -1, 'no 8GQc booking link');
+assert(moverPage.indexOf('mailto:${encodeURIComponent(email)}') === -1, 'mailto recipient keeps the @ sign');
+assert(moverPage.indexOf('function mailtoAddress(email){const at=email.lastIndexOf(\'@\');const enc=part=>encodeURIComponent(part).replace(/%2B/gi,\'+\');return enc(email.slice(0,at))+\'@\'+enc(email.slice(at+1))}') > 0, 'mailto address helper');
+assert(moverPage.indexOf("bcc=${encodeURIComponent('guy@floridagulfcoastguide.com')}") > 0, 'results copy goes to Guy');
+assert(moverPage.indexOf('href="#creditsPanel"') > 0 && moverPage.indexOf('id="creditsPanel"') > 0, 'photo credits target exists');
 assert(moverPage.indexOf('href="${BOOK_URL}"') > 0, 'Book a Call is a link');
 assert(moverPage.indexOf('window.open(BOOK_URL') === -1, 'Book a Call is not a scripted popup');
 const booking = 'https://calendar.app.google/5xtMmGSY9kCY5NRk7';
@@ -387,6 +392,11 @@ function customerAddresses(html) {
   return Array.from(new Set(found)).sort();
 }
 const colPage = fs.readFileSync(path.join(__dirname, '..', 'cost-of-living', 'index.html'), 'utf8');
+assert(colPage.indexOf('8GQc') === -1, 'cost-of-living has no 8GQc link');
+assert(colPage.indexOf('href="#main"') > 0 && colPage.indexOf('id="main"') > 0, 'skip link target exists');
+assert(colPage.indexOf('href="tel:+13019196726">301-919-6726<') > 0, 'phone label matches the tel link');
+assert(colPage.indexOf('href="../">Moving cost estimator<') > 0, 'link back to the moving estimator');
+assert(fs.existsSync(path.join(__dirname, '..', 'index.html')), 'moving estimator resolves from the cost-of-living link');
 const lowInfo = moverPage.slice(moverPage.indexOf('function lowInfoCopy'), moverPage.indexOf('function result'));
 const results = moverPage.slice(moverPage.indexOf('function result'), moverPage.indexOf('function sendEmail'));
 function sameAddresses(found, expected, msg) {
