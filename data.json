@@ -3,6 +3,9 @@
   "built": "2026-10-22",
   "note": "Moving costs only. Destinations are Hillsborough, Pinellas, Manatee, and Sarasota counties. Every dollar figure is cited, or marked not included and kept out of the total. Road miles are an estimate: great-circle times 1.2."
  },
+ "engagement": {
+  "samePosition": false
+ },
  "areas": [
   {
    "id": "tarponsprings",

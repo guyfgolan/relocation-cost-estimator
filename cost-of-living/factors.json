@@ -1,4 +1,7 @@
 {
+  "engagement": {
+    "samePosition": false
+  },
   "incomeBands": [
     {
       "id": "under75",

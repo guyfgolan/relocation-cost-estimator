@@ -289,6 +289,7 @@ function checkFactors(config) {
   if (typeof config.naturalGas.enabled !== 'boolean') fail('natural gas flag');
   if (typeof config.florida.flood.enabled !== 'boolean') fail('flood flag');
   if (config.florida.flood.statistic !== 'median' && config.florida.flood.statistic !== 'average') fail('flood statistic');
+  if (config.engagement != null && typeof config.engagement.samePosition !== 'boolean') fail('same position flag');
   return config;
 }
 

@@ -2,125 +2,118 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=1280">
 <title>Cost of Living Estimator | Florida Gulf Coast Guide</title>
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Gelasio:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:Cinzel;src:url("../assets/fonts/Cinzel-VF.ttf") format("truetype");font-weight:100 900;font-style:normal;font-display:swap}
-:root{--navy:#001F3F;--gold:#D4AF37;--paper:#F5F7FA;--slate:#5A7A9A;--line:#808A98;--white:#fff;--gray:#4E5964}
+@font-face{font-family:Gelasio;src:url("../assets/fonts/gelasio-latin.woff2") format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:Gelasio;src:url("../assets/fonts/gelasio-latin-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+:root{--navy:#001B35;--panel:#052643;--gold:#D4AF37;--light:#E9DCB0;--paper:#F7F4EC;--muted:#E6E1D4;--line:rgba(212,175,55,.4)}
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-html,body{margin:0;min-height:100%;background:var(--paper);color:var(--navy);font-family:Inter,Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5}
-body{min-height:100vh;display:flex;flex-direction:column}
-button,input{font:inherit;color:inherit}
-.skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700;border-radius:8px}
+html,body{margin:0;min-height:100%;background:#001B35;color:#F7F4EC;font-family:Gelasio,Georgia,serif;font-size:16px;line-height:1.5;overflow-x:hidden}
+body{min-height:100vh}
+.fit{width:100%;overflow:hidden;position:relative}
+.stage{width:100%;min-height:100vh;display:flex;flex-direction:column}
+button{font:inherit}
+input{font:inherit;font-size:16px;color:#001B35;background:#F7F4EC}
+.skip{position:absolute;left:12px;top:-48px;background:#D4AF37;color:#001B35;padding:8px 12px;z-index:9;font-weight:700;border-radius:2px}
 .skip:focus{top:8px}
-.siteHeader,.siteFooter,.ctaBand,.headlineBand{background:var(--navy);color:var(--white);text-align:center}
+.siteHeader,.siteFooter{background:transparent;color:#F7F4EC;text-align:center}
 .siteHeader{padding:28px 16px 22px}
-.logo,.ctaLogo{height:auto;display:block;margin:0 auto;background:none;border:0}
-.logo{width:min(480px,88vw)}
-.ctaLogo{width:min(320px,72vw)}
-.siteTitle{margin:8px 0 0;font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15}
-.titleLine{display:block;font-size:clamp(28px,4vw,44px)}
-.titleGold{color:var(--gold)}
-.siteTitle::after{content:"";display:block;width:72px;height:2px;margin:12px auto 0;background:var(--gold)}
+.logo,.ctaLogo,.expLogo{height:auto;display:block;margin:0 auto;background:none;border:0;border-radius:0}
+.logo{width:480px;max-width:100%}
+.ctaLogo{width:320px;max-width:100%}
+.expLogo{width:148px;margin:10px auto 12px}
+.siteTitle{margin:8px 0 0;font-family:Cinzel,Georgia,serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;color:#F7F4EC}
+.titleLine{display:block;font-size:44px}
+.titleGold{color:#E9DCB0}
+.siteTitle::after{content:"";display:block;width:72px;height:2px;margin:12px auto 0;background:#D4AF37}
 main{flex:1 0 auto;padding:20px 16px 36px}
-.sheet{width:min(600px,100%);margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,3vw,28px)}
-.stepLabel{font-weight:700;margin:0 0 8px}
-.progress{height:4px;background:#E4E8ED;border-radius:8px;overflow:hidden;margin:0 0 22px}
-.progress>div{height:100%;background:var(--gold)}
-h2{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;margin:0 0 18px;font-size:clamp(30px,5vw,46px)}
-h2::after{content:"";display:block;width:64px;height:2px;margin-top:12px;background:var(--gold)}
-.quiet{display:block;margin-top:8px;font-family:Inter,Arial,Helvetica,sans-serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none}
-p{margin:0 0 12px}
-label{font-weight:700;display:block;margin-bottom:6px}
+.sheet{width:min(600px,100%);margin:0 auto;background:#001B35;border:0;border-radius:0;padding:28px;color:#F7F4EC}
+.resultsWrap .sheet{width:100%;max-width:none;margin:0;padding:0}
+.stepLabel{font-weight:700;margin:0 0 8px;color:#F7F4EC;font-size:16px}
+.progress{height:4px;background:#052643;border-radius:0;overflow:hidden;margin:0 0 22px}
+.progress>div{height:100%;background:#D4AF37}
+h2,h3{font-family:Cinzel,Georgia,serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;margin:0 0 18px;font-size:46px;color:#E9DCB0}
+h2::after{content:"";display:block;width:64px;height:2px;margin-top:12px;background:#D4AF37}
+.quiet{display:block;margin-top:8px;font-family:Gelasio,Georgia,serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none;color:#E6E1D4}
+p{margin:0 0 12px;color:#F7F4EC}
+label{font-weight:700;display:block;margin-bottom:6px;color:#F7F4EC}
 .choices{display:grid;gap:8px}
 .choices.two{grid-template-columns:1fr 1fr}
-.choices.wide{grid-template-columns:1fr 1fr}
-.option,.primary,.secondary{border-radius:8px;cursor:pointer;min-height:44px;padding:12px 14px}
-.option{width:100%;text-align:left;background:var(--white);border:1px solid var(--line);font-weight:600}
-.option[aria-pressed="true"]{background:var(--navy);color:var(--white);border-color:var(--navy)}
-.primary{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:var(--navy);border:1px solid var(--gold);font-weight:700;text-decoration:none;text-align:center}
-.secondary{background:var(--white);color:var(--navy);border:1px solid var(--navy);font-weight:700}
-.secondary:disabled{opacity:1;color:var(--gray);border-color:var(--gray);background:#E4E8ED;cursor:not-allowed}
-input{width:100%;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:44px}
+.choices.wide{grid-template-columns:1fr 1fr 1fr}
+.option[data-group="household"][data-id="not-sure"]{grid-column:1/-1}
+.option,.primary,.secondary{border-radius:2px;cursor:pointer;min-height:44px;padding:12px 14px}
+.option{width:100%;text-align:left;background:#D4AF37;border:1px solid #D4AF37;color:#001B35;font-weight:700}
+.option[aria-pressed="true"]{background:#052643;color:#E9DCB0;border-color:#D4AF37}
+.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;background:#D4AF37;color:#001B35;border:1px solid #D4AF37;font-weight:700;text-decoration:none;text-align:center}
+.primary:disabled,.secondary:disabled{background:#052643;color:#E6E1D4;border:1px solid #D4AF37;cursor:not-allowed;opacity:1}
+input{width:100%;border:1px solid #D4AF37;border-radius:0;padding:12px 14px;min-height:44px;font-family:Gelasio,Georgia,serif}
 .stepBar{display:flex;gap:12px;margin-top:22px}
 .stepBar>*{flex:1 1 140px}
-.status{min-height:1.4em;margin:8px 0 0;font-weight:600}
+.status{min-height:1.4em;margin:8px 0 0;font-weight:600;color:#F7F4EC;font-size:16px}
 .resultsWrap{width:min(960px,100%);margin:0 auto;display:flex;flex-direction:column;gap:16px}
-.resultsWrap .sheet{width:100%;max-width:none;margin:0}
-.headlineBand{border:1px solid var(--gold);border-radius:8px;padding:22px 18px;margin:0}
-.compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:clamp(36px,5vw,56px);line-height:1.2;color:var(--gold);text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
+.headlineBand{background:transparent;border:0;border-radius:0;padding:8px 0 0;margin:0;text-align:center;color:#F7F4EC}
+.compareHeadline{font-family:Cinzel,Georgia,serif;font-weight:600;font-size:56px;line-height:1.15;color:#E9DCB0;text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
 .compareHeadline::after{display:none}
-.tableWrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--white)}
-.compare{width:100%;border-collapse:separate;border-spacing:0;font-size:16px}
-.compare th,.compare td{padding:10px 12px;vertical-align:bottom;background:var(--white)}
-.compare thead th{font-weight:700;text-align:left}
-.compare tbody th{font-weight:700;text-align:left;position:sticky;left:0;z-index:2;min-width:8.5rem}
+.headlineBand .estimateLabel{margin:0 0 8px;color:#E9DCB0;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.headlineBand p{color:#E6E1D4;margin:12px 0 0;font-size:16px}
+.tableWrap{overflow:visible;max-width:100%;border:0;border-radius:0;background:#001B35}
+.compare{width:100%;border-collapse:collapse;font-family:Gelasio,Georgia,serif;font-size:16px;color:#F7F4EC;background:transparent}
+.compare th,.compare td{padding:10px 12px;vertical-align:bottom;background:transparent;color:#F7F4EC;border-bottom:1px solid rgba(212,175,55,.4)}
+.compare thead th{font-weight:700;text-align:left;color:#E6E1D4;font-size:16px}
+.compare tbody th{font-weight:700;text-align:left;color:#F7F4EC;font-size:16px}
 .compare td{text-align:right;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.compare tbody tr:nth-child(even) th,.compare tbody tr:nth-child(even) td{background:var(--paper)}
-.compare .yours{position:sticky;left:8.5rem;z-index:3;background:var(--navy);color:var(--white)}
-.compare thead .yours{z-index:4}
-.compare tbody tr:nth-child(even) td.yours,.compare tbody tr:nth-child(odd) td.yours,.compare thead th.yours{background:var(--navy);color:var(--white)}
-.compare th.best,.compare td.best{border-left:1px solid var(--gold);border-right:1px solid var(--gold)}
-.compare thead th.best{border-top:1px solid var(--gold)}
-.compare tbody tr:last-child td.best{border-bottom:1px solid var(--gold)}
-.tag{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:8px;background:var(--gold);color:var(--navy);font-family:Inter,Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:0;text-transform:none;line-height:1.3}
-.cards{display:grid;gap:12px}
-.areaCard{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:14px}
-.areaCard.yours{background:var(--navy);color:var(--white);border-color:var(--navy);position:sticky;top:8px;z-index:3}
-.areaCard.best{border:1px solid var(--gold)}
-.areaCard h3{margin:0 0 8px;font-family:Cinzel,Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.metric{display:flex;justify-content:space-between;gap:12px;padding:8px 0}
-.metric+.metric{border-top:1px solid var(--line)}
-.areaCard.yours .metric+.metric{border-top-color:rgba(255,255,255,.35)}
-.metric b{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.credit{color:var(--gray);font-size:14px;margin:14px 0 0}
-.credit a{color:var(--gray)}
-.help,.note{color:var(--gray);font-size:14px;margin:6px 0 0}
+.compare .yours{background:transparent;color:#F7F4EC;border-left:1px solid #D4AF37;border-right:1px solid #D4AF37}
+.tag{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:2px;background:#D4AF37;color:#001B35;font-family:Cinzel,Georgia,serif;font-size:14px;font-weight:700;letter-spacing:.08em;line-height:1.3}
+.cards{display:none}
+.areaCard{border-radius:0;background:#001B35;color:#F7F4EC}
+.credit,.help,.note,.sourcesToggle,.sourcesToggle summary,.sourcesToggle p,.credit a{color:#E6E1D4;font-size:16px}
+.credit{margin:14px 0 0}
+.help,.note{margin:6px 0 0}
+.compare .note{font-family:Gelasio,Georgia,serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none;color:#E6E1D4}
+.sourcesToggle{margin-top:14px}
+.sourcesToggle summary{cursor:pointer;font-weight:700}
+.sourcesToggle p{margin:8px 0 0}
 .field{margin:0 0 16px}
-.pair{display:grid;gap:12px}
-.route{font-weight:700;margin:0 0 8px}
-.totalBox{margin-top:16px;border:1px solid var(--gold);border-radius:8px;padding:18px 16px;background:var(--navy);color:var(--white);text-align:center}
-.totalBox p{margin:0 0 6px;color:var(--white)}
-.totalBox .totalAmount{font-family:Cinzel,Georgia,"Times New Roman",serif;font-size:clamp(48px,7vw,72px);font-weight:600;line-height:1.05;margin:4px 0 8px;color:var(--gold);font-variant-numeric:tabular-nums}
-.sourcesToggle{margin-top:14px;color:var(--gray);font-size:14px}
-.sourcesToggle summary{cursor:pointer;font-weight:700;color:var(--gray)}
-.sourcesToggle p{color:var(--gray);font-size:14px;margin:8px 0 0}
-.check{display:flex;align-items:flex-start;gap:10px;font-weight:600}
+.pair{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.route{font-weight:700;margin:0 0 8px;color:#F7F4EC;font-size:16px}
+.totalBox{margin:16px 0;border:0;border-top:1px solid rgba(212,175,55,.4);border-bottom:1px solid rgba(212,175,55,.4);border-radius:0;padding:18px 0;background:transparent;color:#F7F4EC;text-align:center}
+.totalBox p{margin:0 0 6px;color:#E6E1D4;font-size:16px}
+.totalBox .totalAmount{font-family:Gelasio,Georgia,serif;font-size:72px;font-weight:700;line-height:1.05;margin:4px 0 8px;color:#D4AF37;font-variant-numeric:tabular-nums}
+.check{display:flex;align-items:flex-start;gap:10px;font-weight:600;color:#F7F4EC}
 .check input{width:auto;min-height:0;margin-top:4px}
-.headlineBand p{color:var(--white);margin:12px 0 0}
-.ctaBand{margin:0;border-radius:8px;padding:28px 16px}
-.ctaBand .primary{margin-top:16px;min-width:min(100%,280px)}
-.siteFooter{padding:22px 16px 28px}
+.ctaBand{background:transparent;border:0;border-radius:0;margin:0;padding:8px 16px 28px;text-align:center;color:#F7F4EC}
+.ctaBand p{color:#F7F4EC;font-size:16px;margin:12px 0 0}
+.ctaBand .primary,.ctaBand .secondary{display:flex;margin:12px auto 0;min-width:280px;max-width:100%;background:#D4AF37;color:#001B35;border-color:#D4AF37}
+.siteFooter{padding:28px 16px 36px}
 .siteFooter p{margin:0 0 6px}
-.siteFooter a{color:var(--white)}
-.footerMove{margin:18px 0 0;padding-top:18px;border-top:1px solid rgba(212,175,55,.7);width:min(280px,80%)}
-.expLogo{width:min(148px,46vw);height:auto;display:block;margin:10px auto 12px;background:none;border:0}
+.siteFooter a{color:#F7F4EC;text-decoration:underline;text-underline-offset:3px}
+.guyName{font-family:Cinzel,Georgia,serif;font-size:32px;font-weight:700;letter-spacing:.08em;color:#F7F4EC;margin:0 0 8px}
+.footerContact{text-align:center}
+.footerMove{margin:14px 0 0;padding:0;border:0;width:auto;text-align:center}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 :focus:not(:focus-visible){outline:none}
-:focus-visible{outline:2px solid var(--navy);outline-offset:2px;box-shadow:0 0 0 2px var(--gold)}
-.headlineBand :focus-visible,.ctaBand :focus-visible,.siteHeader :focus-visible,.siteFooter :focus-visible,.areaCard.yours :focus-visible,.compare .yours :focus-visible{outline:2px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 2px var(--navy)}
-@media(min-width:800px){
- .choices.wide{grid-template-columns:1fr 1fr 1fr}
- .pair{grid-template-columns:1fr 1fr}
- .siteFooter{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
- .footerContact{grid-column:2}
- .footerMove{grid-column:3;justify-self:end;width:auto;margin:0;padding:0;border:0;text-align:right}
-}
-@media(max-width:799px){
- .choices.two,.choices.wide{grid-template-columns:1fr}
- .sheet .stepBar{position:sticky;bottom:0;z-index:5;background:var(--white);padding-top:12px;padding-bottom:4px}
-}
+:focus-visible{outline:1px solid #D4AF37;outline-offset:3px}
+h2:focus-visible{outline-offset:4px}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
+button,.primary,.secondary,.option,.skip{font-family:Cinzel,Georgia,serif;font-weight:700;letter-spacing:.15em}
+.quiet,.tag{letter-spacing:.08em}
+.quiet{font-family:Gelasio,Georgia,serif;letter-spacing:0;text-transform:none;font-weight:400}
+h3{font-size:18px;margin:0 0 8px}
+.sheet,input,.tableWrap,.areaCard{border-radius:0}
 </style>
 </head>
 <body>
+<div class="fit" id="fit">
+<div class="stage" id="stage">
 <a class="skip" href="#main">Skip to content</a>
 <header class="siteHeader">
 <img class="logo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">
@@ -129,12 +122,14 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 <main id="main"><div id="panel"></div></main>
 <footer class="siteFooter">
 <div class="footerContact">
-<p>Guy Golan</p>
+<p class="guyName">Guy Golan</p>
 <img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty">
 <p><a href="tel:+13019196726">301-919-6726</a></p>
 </div>
 <p class="footerMove"><a href="../">Moving cost estimator</a></p>
 </footer>
+</div>
+</div>
 <script src="lookup.js"></script>
 <script src="estimate.js"></script>
 <script>
@@ -152,7 +147,8 @@ const QUESTIONS=[
 ];
 const FRAMING='General estimate for planning a conversation. Not a quote. Your actual costs depend on your home, coverage and habits.';
 const REPORT='This is a general estimate built from published averages. It is not a quote or tax advice. Let\'s talk through your actual numbers.';
-const A={zip:'',to:'',household:'',adults:'',adultsTouched:false,income:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null};
+const A={zip:'',to:'',household:'',adults:'',adultsTouched:false,income:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null,picks:{}};
+let durations=[],flowStart=0,shownAt=0;
 let bundle=null;
 let factors=null;
 let renderGen=0;
@@ -166,8 +162,75 @@ function focusHeading(){
   h.tabIndex=-1;
   h.focus({focusVisible:false});
 }
-function bookingLink(){
-  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Schedule a call with Guy</a>';
+
+let fitting=false;
+function fitScale(){
+  if(fitting) return;
+  const meta=document.querySelector('meta[name="viewport"]');
+  if(meta && /width\s*=\s*1280/.test(meta.getAttribute('content')||'')){
+    const fixed=document.getElementById('stage');
+    const frame=document.getElementById('fit');
+    if(fixed){fixed.style.width='';fixed.style.transform='none';fixed.style.position='';fixed.style.left='';fixed.style.top='';}
+    if(frame) frame.style.height='';
+    return;
+  }
+  const design=1280;
+  const fit=document.getElementById('fit');
+  const stage=document.getElementById('stage');
+  if(!fit||!stage) return;
+  fitting=true;
+  const vw=document.documentElement.clientWidth;
+  if(vw>=design-24){
+    stage.style.width='';
+    stage.style.transform='none';
+    stage.style.position='';
+    stage.style.left='';
+    stage.style.top='';
+    fit.style.height='';
+  }else{
+    stage.style.position='absolute';
+    stage.style.left='0';
+    stage.style.top='0';
+    stage.style.width=design+'px';
+    stage.style.transformOrigin='top left';
+    const scale=vw/design;
+    stage.style.transform='scale('+scale+')';
+    fit.style.height=Math.ceil(stage.offsetHeight*scale)+'px';
+  }
+  fitting=false;
+}
+function bindFit(){
+  const stage=document.getElementById('stage');
+  if(!stage||stage.dataset.fit) return;
+  stage.dataset.fit='1';
+  if(window.ResizeObserver) new ResizeObserver(()=>fitScale()).observe(stage);
+  window.addEventListener('resize',fitScale);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitScale);
+  fitScale();
+}
+function bookingLink(label){
+  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">'+esc(label||'Book a Call')+'</a>';
+}
+function noteShown(){const now=Date.now();if(!flowStart)flowStart=now;shownAt=now}
+function noteLeft(){if(!shownAt)return;durations.push(Date.now()-shownAt);shownAt=0}
+function recordPicks(){
+  A.picks=A.picks||{};
+  ['to','household','adults','income','ownNow','planFL','primary','drives','fuel'].forEach(group=>{
+    const buttons=[...panel.querySelectorAll('[data-group="'+group+'"]')];
+    if(!buttons.length)return;
+    const index=buttons.findIndex(btn=>btn.getAttribute('aria-pressed')==='true');
+    if(index>=0)A.picks[group]=index;
+  });
+}
+function engagementMeta(){
+  return {timing:{durationsMs:durations.slice(),elapsedMs:flowStart?Date.now()-flowStart:null},choiceIndexes:Object.keys(A.picks||{}).map(key=>A.picks[key]),samePosition:!!(factors&&factors.engagement&&factors.engagement.samePosition===true)};
+}
+function retake(){durations=[];flowStart=0;shownAt=0;go('from')}
+function showLowInfo(){
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand"><p class="estimateLabel">Your Estimate</p><h2 class="compareHeadline">Thank you for filling out the information!</h2><p>It seems as if you are still narrowing down your plans, so a number right now might not tell you much. I encourage you to book a call. I am happy to help in any way I can.</p></div><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">'+bookingLink('Book a Call with Guy')+'<button type="button" class="secondary" id="retakeBtn">Retake</button></section></div>';
+  document.getElementById('retakeBtn').onclick=retake;
+  focusHeading();
+  fitScale();
 }
 function isSourced(figure){
   return !!figure && typeof figure.value==='number' && !Number.isNaN(figure.value) && figure.evidence==='MEASURED' && /^[\d.]+$/.test(String(figure.display||''));
@@ -248,6 +311,7 @@ function midpointCopy(band){
   return text;
 }
 function householdLabel(){
+  if(A.household==='not-sure') return 'not sure';
   if(A.household==='1') return '1 person';
   if(A.household==='6') return '6 or more people';
   return A.household?A.household+' people':'';
@@ -289,18 +353,18 @@ function showStep(id){
     fields=choices('to',areaList().map(area=>({id:area.id,label:area.name})),A.to);
   }else if(id==='household'){
     const adults=A.adults||defaultAdults();
-    fields='<div class="field">'+choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5',label:'5 people'},{id:'6',label:'6 or more'}],A.household)+'</div>';
+    fields='<div class="field">'+choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5',label:'5 people'},{id:'6',label:'6 or more'},{id:'not-sure',label:'Not sure'}],A.household)+'</div>';
     fields+='<div class="field"><label id="adultsLabel">How many adults?</label>'+choices('adults',[{id:'1',label:'1 adult'},{id:'2',label:'2 or more adults'}],adults)+'<p class="help">Used for the state income tax line. The default is one adult, or two when the household has two or more people.</p></div>';
   }else if(id==='income'){
-    fields=choices('income',(factors.incomeBands||[]).map(band=>({id:band.id,label:band.label})),A.income);
+    fields=choices('income',(factors.incomeBands||[]).map(band=>({id:band.id,label:band.label})).concat([{id:'not-sure',label:'Not sure'}]),A.income);
     fields+='<p id="midpoint" class="help">'+esc(midpointCopy(bandRecord()))+'</p><p>It stays in this browser and is not saved.</p>';
   }else if(id==='now'){
-    fields=choices('ownNow',[{id:'own',label:'Own'},{id:'rent',label:'Rent'}],A.ownNow);
+    fields=choices('ownNow',[{id:'own',label:'Own'},{id:'rent',label:'Rent'},{id:'not-sure',label:'Not sure'}],A.ownNow);
   }else if(id==='plan'){
-    fields=choices('planFL',[{id:'buy',label:'Buy'},{id:'rent',label:'Rent'}],A.planFL);
+    fields=choices('planFL',[{id:'buy',label:'Buy'},{id:'rent',label:'Rent'},{id:'not-sure',label:'Not sure'}],A.planFL);
     fields+='<div id="buyDetails"'+(A.planFL==='buy'?'':' hidden')+'><div class="field"><label id="primaryLabel">Is this your primary residence?</label>'+choices('primary',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],A.primary)+'</div><div class="field"><label for="homeBudget">Home budget</label><input id="homeBudget" inputmode="decimal" autocomplete="off" value="'+esc(A.homeBudget)+'"><p class="help">Leave blank to use the area\'s median sale price.</p></div></div>';
   }else if(id==='drive'){
-    fields=choices('drives',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],A.drives);
+    fields=choices('drives',[{id:'yes',label:'Yes'},{id:'no',label:'No'},{id:'not-sure',label:'Not sure'}],A.drives);
     fields+='<div id="driveDetails"'+(A.drives==='yes'?'':' hidden')+'><div class="pair"><div class="field"><label for="vehicles">How many vehicles?</label><input id="vehicles" inputmode="numeric" autocomplete="off" value="'+esc(A.vehicles)+'"><p class="help">Default is 1.</p></div><div class="field"><label for="miles">Miles per month</label><input id="miles" inputmode="decimal" autocomplete="off" value="'+esc(A.miles)+'"><p class="help">Default is 1,000.</p></div></div><div class="field"><label id="fuelLabel">Gas or electric?</label>'+choices('fuel',[{id:'gas',label:'Gas'},{id:'ev',label:'Electric vehicle'}],A.fuel||'gas')+'</div><div class="field" id="mpgField"'+(A.fuel==='ev'?' hidden':'')+'><label for="mpg">Miles per gallon</label><input id="mpg" inputmode="decimal" autocomplete="off" value="'+esc(A.mpg)+'"><p class="help">Default is 25.</p></div><div class="field" id="kwhField"'+(A.fuel==='ev'?'':' hidden')+'><label for="miPerKwh">Miles per kilowatt-hour</label><input id="miPerKwh" inputmode="decimal" autocomplete="off" value="'+esc(A.miPerKwh)+'"><p class="help">Default is 3.5.</p></div></div>';
   }else{
     const area=selectedArea();
@@ -347,6 +411,8 @@ function showStep(id){
     input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();advance(id,n)}});
   });
   focusHeading();
+  noteShown();
+  fitScale();
 }
 function paintAdults(){
   const chosen=A.adults||defaultAdults();
@@ -388,6 +454,7 @@ function setStatus(id, message){
 }
 function advance(id,n){
   if(busy) return;
+  recordPicks();
   saveStep(id);
   if(id==='from'){
     if(!A.zip){setStatus('zipStatus','Enter a 5-digit ZIP code.');return}
@@ -397,6 +464,7 @@ function advance(id,n){
     loadZipShard(A.zip).then(function(){
       const keys=CostLookup.resolveKeys(bundle.crosswalk,A.zip);
       if(!keys.state){setStatus('zipStatus','We couldn\'t match that ZIP, so this page has no comparison yet.');return}
+      noteLeft();
       go('to');
     }).catch(function(){
       setStatus('zipStatus','We couldn\'t match that ZIP, so this page has no comparison yet.');
@@ -410,14 +478,14 @@ function advance(id,n){
   if(id==='plan'){
     if(!A.planFL){setStatus('formStatus','Choose one to continue.');return}
     if(A.planFL==='buy' && !A.primary){setStatus('formStatus','Say whether this will be your primary residence.');return}
-    const budget=numberOrBlank(A.homeBudget);
+    const budget=CostEstimate.boundMessage('budget',A.homeBudget);
     if(budget){setStatus('formStatus',budget);return}
   }
   if(id==='drive'){
     if(!A.drives){setStatus('formStatus','Choose one to continue.');return}
     if(A.drives==='yes'){
-      const vehicles=countOrBlank(A.vehicles);
-      const miles=countOrBlank(A.miles);
+      const vehicles=CostEstimate.boundMessage('vehicles',A.vehicles);
+      const miles=CostEstimate.boundMessage('miles',A.miles);
       const rate=A.fuel==='ev'?countOrBlank(A.miPerKwh):countOrBlank(A.mpg);
       if(vehicles||miles||rate){setStatus('formStatus',vehicles||miles||rate);return}
     }
@@ -428,6 +496,7 @@ function advance(id,n){
     const hoaFL=numberOrBlank(A.hoaFL);
     if(grocery||hoaNow||hoaFL){setStatus('formStatus',grocery||hoaNow||hoaFL);return}
   }
+  noteLeft();
   if(n<8) go(QUESTIONS[n].id);
   else go('results');
 }
@@ -435,6 +504,7 @@ function showResults(){
   const token=++renderGen;
   panel.innerHTML='<article class="sheet"><h2>Your comparison</h2><p>One moment.</p></article>';
   focusHeading();
+  fitScale();
   loadZipShard(A.zip).catch(function(){bundle.crosswalk.zips=[]}).then(function(){
     if(token!==renderGen) return;
     drawResults();
@@ -461,9 +531,8 @@ function floridaPlace(area){
 }
 function censusCredit(){
   const source=((bundle.crosswalk&&bundle.crosswalk.sources)||[])[0];
-  if(!source) return '';
-  const label=source.url?'<a href="'+esc(source.url)+'">'+esc(source.name)+'</a>':esc(source.name);
-  return '<p class="credit">ZIP lookup: '+label+'.</p>';
+  if(!source||!source.name) return '';
+  return '<p class="credit">ZIP lookup: '+esc(source.name)+'.</p>';
 }
 function lineNotes(row){
   const bits=[];
@@ -490,6 +559,11 @@ function drawResults(){
     const message=!keys.state && A.zip?'We couldn\'t match that ZIP, so this page has no comparison yet.':'Answer each question to see your estimate.';
     panel.innerHTML='<article class="sheet"><h2>Your comparison</h2><p>'+esc(message)+'</p><p>'+esc(FRAMING)+'</p><div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section>';
     document.getElementById('backBtn').onclick=()=>go(ready&&!keys.state?'from':'other');
+    fitScale();
+    return;
+  }
+  if(CostEstimate.lowInformation(A,engagementMeta()).show){
+    showLowInfo();
     return;
   }
   const allOrigin=originIndex(null);
@@ -509,11 +583,13 @@ function drawResults(){
     toArea:area.id,
     floridaName:area.name,
     originName:originPlace(keys),
-    hhSize:Number(A.household),
+    hhSize:A.household==='not-sure'?null:Number(A.household),
     adults:adults,
-    incomeBand:A.income,
-    ownNow:A.ownNow,
-    planFL:A.planFL,
+    incomeBand:A.income==='not-sure'?'':A.income,
+    householdNotSure:A.household==='not-sure',
+    incomeNotSure:A.income==='not-sure',
+    ownNow:A.ownNow==='not-sure'?'':A.ownNow,
+    planFL:A.planFL==='not-sure'?'':A.planFL,
     primary:A.primary==='yes',
     homeBudget:A.homeBudget,
     drives:A.drives==='yes',
@@ -576,26 +652,28 @@ function drawResults(){
   const band=bandRecord();
   const filing=adults>=2?'The state income tax line uses a joint return.':'The state income tax line uses a single return.';
   const evNote=A.drives==='yes' && A.fuel==='ev' && !result.lines.some(row=>row.id==='fuel')?'<p>Car insurance is included. Charging cost is not included in this estimate.</p>':'';
-  const headline=result.sentence?'<h2 class="compareHeadline">'+esc(result.sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
+  const sentence=CostEstimate.alignedSentence(result.sentence,result.total.monthly,area.name,originPlace(keys));
+  const headline=sentence?'<h2 class="compareHeadline">'+esc(sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
   const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p></div><p class="note">This total includes only the lines above.</p>';
   const notes=(result.notes||[]).map(note=>'<p>'+esc(note)+'</p>').join('');
   const sourceBlock=sourceList?'<details class="sourcesToggle"><summary>Sources</summary><p>'+sourceList+'.</p></details>':'';
-  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>'+esc(A.income==='not-sure'?'Income: not sure.':'Income: '+(band?band.label:'')+'. '+midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
   document.getElementById('backBtn').onclick=()=>go('other');
   layoutResults();
 }
 function layoutResults(){
-  const mobile=window.matchMedia('(max-width: 799px)').matches;
   const table=document.getElementById('compareTable');
   const cards=document.getElementById('compareCards');
-  if(table) table.hidden=mobile;
-  if(cards) cards.hidden=!mobile;
+  if(table) table.hidden=false;
+  if(cards) cards.hidden=true;
+  fitScale();
 }
 window.addEventListener('resize',layoutResults);
 window.addEventListener('popstate',()=>{
   const step=(location.hash||'#from').replace('#','');
   render(STEPS.includes(step)?step:'from');
 });
+bindFit();
 Promise.all([
   fetch('cost-of-living.json').then(r=>{if(!r.ok) throw new Error('bundle');return r.json()}),
   fetch('factors.json').then(r=>{if(!r.ok) throw new Error('factors');return r.json()})
@@ -607,6 +685,7 @@ Promise.all([
   render(STEPS.includes(step)?step:'from');
 }).catch(()=>{
   panel.innerHTML='<article class="sheet"><h2>The comparison could not load</h2><p>Refresh the page.</p></article>';
+  fitScale();
 });
 </script>
 </body>

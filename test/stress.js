@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { estimateMove, classifyZip, formatMoney, priceCore } = require('../estimate.js');
+const { execFileSync } = require('child_process');
+const { estimateMove, classifyZip, formatMoney, priceCore, lowInformation, visiblePlace, vehicleCaveat } = require('../estimate.js');
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf8'));
 const Z = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'zips.json'), 'utf8'));
 
@@ -239,7 +240,7 @@ const fee7 = feesFor(7), fee8 = feesFor(8), fee12 = feesFor(12);
 near(fee7.typ, fee1.typ * 7, 1e-6, 'seven vehicles are priced as seven');
 near(fee8.typ, fee7.typ, 1e-6, 'eight vehicles are priced as seven');
 near(fee12.typ, fee7.typ, 1e-6, 'twelve vehicles are priced as seven');
-const CAVEAT = 'It seems you have selected to transport seven or more vehicles. Please contact a relocation company directly for a better estimate.';
+const CAVEAT = vehicleCaveat;
 function moved(veh) {
   return estimateMove(Object.assign({}, base, {
     origin: originZip('30303'), dest: area('tampa'), help: 'Full-service movers', veh: String(veh), licenses: '0', travel: 'Flying', vehHow: 'Ship them'
@@ -339,6 +340,217 @@ assert(/not applied/.test(summer.line.note), 'July note');
 const oldCell = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '4 bedrooms', when: 'March 2027' }, 1600);
 assert(oldCell.line.sources.some(s => s.asOf === 'Dec 2022-Sep 2026'), '1500-1999 / 4+BR period');
 
+const slow = { timing: { durationsMs: [4000, 4000, 4000, 4000, 4000], elapsedMs: 30000 }, choiceIndexes: [0, 1, 2, 3, 0] };
+const thoughtful = Object.assign({}, base, { origin: originZip('30303'), dest: area('venice') });
+assert(!lowInformation(thoughtful, slow).show, 'a complete move with a slow, varied path is priced');
+assert(lowInformation(Object.assign({}, thoughtful, { origin: null }), slow).show, 'origin Not sure is low information');
+assert(lowInformation(Object.assign({}, thoughtful, { dest: null, area: 'Not sure' }), slow).show, 'destination Not sure is low information');
+const manyUnsure = Object.assign({}, thoughtful, {
+  when: 'Not sure', type: 'Not sure', size: 'Not sure', help: 'Not sure', packing: 'Not sure', veh: 'Not sure'
+});
+assert(lowInformation(manyUnsure, slow).reasons.indexOf('unsure') >= 0, 'six Not sure answers are low information');
+assert(lowInformation(thoughtful, { timing: { durationsMs: [800, 900, 700, 1000], elapsedMs: 20000 }, choiceIndexes: [0, 1, 2, 0, 1] }).show, 'median under 1.5 seconds is low information');
+assert(lowInformation(thoughtful, { timing: { durationsMs: [3000, 3000], elapsedMs: 9000 }, choiceIndexes: [0, 1, 2, 3, 4] }).show, 'a flow under 10 seconds is low information');
+assert(!lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, 'every first option is priced when the same-position flag is off');
+assert(!lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [2, 2, 2, 2, 2] }).show, 'the same button position is priced when the flag is off');
+assert(lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0], samePosition: true }).show, 'the same-position flag can still send a repeated path to the call page');
+assert(!lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0], samePosition: false }).show, 'an explicit off flag stays off');
+assert(D.engagement.samePosition === false, 'the shipped same-position flag is off');
+assert(lowInformation(Object.assign({}, thoughtful, { veh: '0', vehHow: 'Drive them' }), slow).show, 'zero vehicles plus drive is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { travel: 'Flying', help: 'DIY rental truck' }), slow).show, 'flying plus a DIY truck is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { size: '1 bedroom', adults: '4' }), slow).show, 'one bedroom and four adults is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { storage: 'Yes', origin: null, dest: null }), slow).show, 'storage without a move is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { type: 'Studio apartment', size: '3 bedrooms' }), slow).show, 'studio and three bedrooms is a contradiction');
+assert(vehicleCaveat === "Moving seven or more vehicles takes a custom plan. Book a call and I'll help you work through it.", 'seven-vehicle note');
+assert(visiblePlace('Wellen Park is not a Census place and has no USGS GNIS populated-place point (Domestic Names, Florida, checked 2026-10-22). The Census 2024 internal point for North Port city is used.') === '', 'internal place notes stay off the page');
+assert(visiblePlace('Census 2024 Gazetteer internal point for Venice city, Florida.') === 'Census 2024 Gazetteer internal point for Venice city, Florida.', 'ordinary place text stays');
+const moverPage = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+['UNSOURCED', 'Not yet sourced', 'ASSUMPTION', 'checked '].forEach(word => {
+  assert(moverPage.indexOf(word) === -1, 'customer page hides ' + word);
+});
+assert(moverPage.indexOf('https://commons.wikimedia.org') === -1, 'photo credits are not outside links');
+assert(moverPage.indexOf('https://www.census.gov') === -1, 'census credit is not an outside link');
+assert(moverPage.indexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7') === moverPage.lastIndexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'), 'booking url once');
+assert(moverPage.indexOf('8GQc') === -1, 'no 8GQc booking link');
+assert(moverPage.indexOf('mailto:${encodeURIComponent(email)}') === -1, 'mailto recipient keeps the @ sign');
+assert(moverPage.indexOf('function mailtoAddress(email){const at=email.lastIndexOf(\'@\');const enc=part=>encodeURIComponent(part).replace(/%2B/gi,\'+\');return enc(email.slice(0,at))+\'@\'+enc(email.slice(at+1))}') > 0, 'mailto address helper');
+assert(moverPage.indexOf("bcc=${encodeURIComponent('guy@floridagulfcoastguide.com')}") > 0, 'results copy goes to Guy');
+assert(moverPage.indexOf('href="#creditsPanel"') > 0 && moverPage.indexOf('id="creditsPanel"') > 0, 'photo credits target exists');
+assert(moverPage.indexOf('href="${BOOK_URL}"') > 0, 'Book a Call is a link');
+assert(moverPage.indexOf('window.open(BOOK_URL') === -1, 'Book a Call is not a scripted popup');
+const booking = 'https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+const phone = 'tel:+13019196726';
+function customerAddresses(html) {
+  const found = [];
+  const re = /<a\b[^>]*?\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const href = match[1] || match[2] || match[3] || '';
+    const address = href.indexOf('BOOK_URL') >= 0 || href.indexOf('BOOKING_URL') >= 0 ? booking : href;
+    if (/^https?:|^tel:/i.test(address)) found.push(address);
+  }
+  return Array.from(new Set(found)).sort();
+}
+const colPage = fs.readFileSync(path.join(__dirname, '..', 'cost-of-living', 'index.html'), 'utf8');
+assert(colPage.indexOf('8GQc') === -1, 'cost-of-living has no 8GQc link');
+assert(colPage.indexOf('href="#main"') > 0 && colPage.indexOf('id="main"') > 0, 'skip link target exists');
+assert(colPage.indexOf('href="tel:+13019196726">301-919-6726<') > 0, 'phone label matches the tel link');
+assert(colPage.indexOf('href="../">Moving cost estimator<') > 0, 'link back to the moving estimator');
+assert(fs.existsSync(path.join(__dirname, '..', 'index.html')), 'moving estimator resolves from the cost-of-living link');
+const lowInfo = moverPage.slice(moverPage.indexOf('function lowInfoCopy'), moverPage.indexOf('function result'));
+const results = moverPage.slice(moverPage.indexOf('function result'), moverPage.indexOf('function sendEmail'));
+function sameAddresses(found, expected, msg) {
+  assert(JSON.stringify(found) === JSON.stringify(expected), msg + ': ' + JSON.stringify(found));
+}
+sameAddresses(customerAddresses(lowInfo), [booking], 'moving low-info links');
+sameAddresses(customerAddresses(results), [booking], 'moving results links');
+sameAddresses(customerAddresses(moverPage), [booking], 'moving page outside links');
+sameAddresses(customerAddresses(colPage), [booking, phone].sort(), 'cost-of-living results and low-info links');
+const censusFn = colPage.slice(colPage.indexOf('function censusCredit'), colPage.indexOf('function lineNotes'));
+assert(censusFn.indexOf('<a') === -1 && censusFn.indexOf('ZIP lookup:') > 0, 'census credit is plain text');
+assert(moverPage.indexOf('Your Estimate') > 0 && moverPage.indexOf('Thank you for filling out the information!') > 0, 'low-info copy');
+assert(moverPage.indexOf('Book a Call with Guy') > 0 && moverPage.indexOf('onclick="retake()"') > 0, 'low-info buttons');
+assert(moverPage.indexOf('function retake(){durations=[];flowStart=0;stepShownAt=0;stack=[\'fromMethod\'];show()}') > 0, 'retake keeps the answers');
+
+function cssText(html) {
+  return [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(match => match[1]).join('\n');
+}
+function expandHex(hex) {
+  let h = hex.toLowerCase();
+  if (h.length === 3 || h.length === 4) h = h.split('').map(ch => ch + ch).join('');
+  return h;
+}
+function paletteProblems(css, label) {
+  const allowed = new Set(['001b35', '052643', 'd4af37', 'e9dcb0', 'f7f4ec', 'e6e1d4']);
+  const solids = {
+    '0,27,53': '001b35',
+    '5,38,67': '052643',
+    '212,175,55': 'd4af37',
+    '233,220,176': 'e9dcb0',
+    '247,244,236': 'f7f4ec',
+    '230,225,212': 'e6e1d4'
+  };
+  const problems = [];
+  for (const match of css.matchAll(/#([0-9a-fA-F]{3,8})\b/g)) {
+    const h = expandHex(match[1]);
+    if (h.length !== 6 || !allowed.has(h)) problems.push(label + ' ' + match[0]);
+  }
+  const rgbRe = /rgba?\(\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)(?:\s*,\s*([0-9.]+%?)\s*)?\)/i;
+  const hairline = /^(border|border-top|border-right|border-bottom|border-left|border-color|outline|outline-color)$/;
+  function channel(part) {
+    return part.endsWith('%') ? Math.round(parseFloat(part) * 2.55) : Math.round(parseFloat(part));
+  }
+  function alphaOf(part) {
+    if (part == null) return 1;
+    return part.endsWith('%') ? parseFloat(part) / 100 : parseFloat(part);
+  }
+  function splitDecls(body) {
+    const decls = [];
+    let cur = '';
+    let depth = 0;
+    for (const ch of body) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth = Math.max(0, depth - 1);
+      if (ch === ';' && depth === 0) {
+        if (cur.trim()) decls.push(cur.trim());
+        cur = '';
+      } else cur += ch;
+    }
+    if (cur.trim()) decls.push(cur.trim());
+    return decls;
+  }
+  function checkDeclaration(selector, prop, value) {
+    if (prop === 'opacity' && parseFloat(value) !== 1) problems.push(label + ' translucent ' + selector + ' ' + prop + ':' + value);
+    const calls = value.match(/rgba?\([^)]*\)/gi) || [];
+    calls.forEach(call => {
+      const parts = call.match(rgbRe);
+      if (!parts) {
+        problems.push(label + ' ' + call);
+        return;
+      }
+      const key = parts.slice(1, 4).map(channel).join(',');
+      const alpha = alphaOf(parts[4]);
+      if (!solids[key]) {
+        problems.push(label + ' ' + call + ' in ' + selector);
+        return;
+      }
+      if (alpha === 1) return;
+      if (prop.startsWith('--') && key === '212,175,55' && Math.abs(alpha - 0.4) <= 0.02) return;
+      if (key === '212,175,55' && Math.abs(alpha - 0.4) <= 0.02 && hairline.test(prop)) return;
+      if (key === '0,27,53' && alpha < 1 && prop === 'background' && /\.bg\b/.test(selector)) return;
+      problems.push(label + ' tint ' + call + ' on ' + prop + ' in ' + selector);
+    });
+  }
+  function walk(block) {
+    const text = block.replace(/\/\*[\s\S]*?\*\//g, '');
+    let i = 0;
+    while (i < text.length) {
+      while (i < text.length && /\s/.test(text[i])) i++;
+      if (i >= text.length) break;
+      if (text[i] === '}') {
+        i++;
+        continue;
+      }
+      const brace = text.indexOf('{', i);
+      if (brace < 0) break;
+      const header = text.slice(i, brace).trim();
+      let depth = 0;
+      let j = brace;
+      for (; j < text.length; j++) {
+        if (text[j] === '{') depth++;
+        else if (text[j] === '}') {
+          depth--;
+          if (depth === 0) {
+            j++;
+            break;
+          }
+        }
+      }
+      const body = text.slice(brace + 1, j - 1);
+      if (/^@font-face\b/i.test(header)) {
+        // font files are not reader-facing color
+      } else if (/^@/i.test(header)) {
+        walk(body);
+      } else {
+        splitDecls(body).forEach(decl => {
+          const colon = decl.indexOf(':');
+          if (colon < 0) return;
+          checkDeclaration(header, decl.slice(0, colon).trim().toLowerCase(), decl.slice(colon + 1).trim());
+        });
+      }
+      i = j;
+    }
+  }
+  walk(css);
+  return problems;
+}
+[['moving estimator', moverPage], ['cost of living', colPage]].forEach(([label, html]) => {
+  const problems = paletteProblems(cssText(html), label);
+  assert(problems.length === 0, 'palette ' + label + ': ' + problems.join(', '));
+});
+assert(moverPage.indexOf('.flag{') === -1 && moverPage.indexOf('#7a5c12') === -1 && moverPage.indexOf('#7A5C12') === -1, 'old flag styles are gone');
+assert(moverPage.indexOf('class="flagNote"') > 0, 'the vehicle warning uses the navy and gold note');
+assert(/\.flagNote\{[^}]*background:#052643;[^}]*color:#E9DCB0;[^}]*border:1px solid #D4AF37;[^}]*border-radius:0/.test(moverPage), 'flag note is panel navy, gold, and light gold with square corners');
+assert(moverPage.indexOf('fgcg-logo-white.svg') === -1 && moverPage.indexOf('logo_h_white.png') > 0, 'moving page uses the shared wordmark');
+assert(moverPage.indexOf('expknowledgebase.exprealty.com') === -1 && moverPage.indexOf('assets/exp-realty-white.svg') > 0, 'eXp logo is hosted locally');
+assert(moverPage.indexOf('Arial') === -1 && colPage.indexOf('Arial') === -1 && colPage.indexOf('Inter') === -1, 'Inter and Arial are gone');
+assert(moverPage.indexOf('family=Cinzel:wght@400;700') > 0 && moverPage.indexOf('Gelasio:ital,wght@0,400;0,700;1,400') > 0, 'moving page loads Cinzel and Gelasio');
+assert(colPage.indexOf('family=Cinzel:wght@400;700') > 0 && colPage.indexOf('Gelasio:ital,wght@0,400;0,700;1,400') > 0, 'cost of living loads Cinzel and Gelasio');
+assert(!/border-radius:\s*(?:8|1[2-9]|[2-9]\d)px/i.test(cssText(moverPage) + cssText(colPage)), 'cards and buttons stay within a 2px radius');
+assert(cssText(moverPage).indexOf('prefers-reduced-motion') > 0, 'moving keeps reduced motion');
+assert(cssText(colPage).indexOf('prefers-reduced-motion') > 0, 'cost of living keeps reduced motion');
+assert(!/@media[^{]*max-width:\s*(?:720|640|520)px/.test(cssText(moverPage)), 'moving phone reflow is gone');
+assert(!/@media[^{]*max-width:\s*799px/.test(cssText(colPage)), 'cost of living phone reflow is gone');
+assert(moverPage.indexOf('class="creditsLink"') > 0 && moverPage.indexOf('>Photo Credits<') > 0 && moverPage.indexOf('class="creditsBtn"') === -1, 'photo credits is a gold text link');
+assert(colPage.indexOf("label||'Book a Call'") > 0 && colPage.indexOf('Schedule a call with Guy') === -1 && colPage.indexOf('Book a Call with Guy') > 0, 'results button says Book a Call');
+assert(colPage.indexOf('content="width=1280"') > 0 && colPage.indexOf('width=device-width') === -1, 'cost of living viewport is width 1280');
+assert(colPage.indexOf('--navy:#001B35') > 0 && colPage.indexOf('#001F3F') === -1 && colPage.indexOf('#001f3f') === -1, 'navy token is #001B35');
+assert(!/#808A98|#4E5964|#5A7A9A|#F5F7FA/i.test(colPage), 'cost of living has no grey leftovers');
+assert(colPage.indexOf('Inter') === -1 && /font-family:\s*Gelasio,\s*Georgia,\s*serif/.test(colPage) && /font-family:\s*Cinzel,\s*Georgia,\s*serif/.test(colPage), 'cost of living uses Cinzel and Gelasio');
+assert(/\.sheet,input,\.tableWrap,\.areaCard\{border-radius:0\}/.test(colPage), 'sheet, inputs, table, and cards are square');
+assert(!/\.sheet\{[^}]*background:\s*(?:#fff\b|#ffffff\b|white\b|var\(--paper\))/i.test(cssText(colPage)), 'the sheet is not white');
+assert(colPage.indexOf("matchMedia('(max-width: 799px)')") === -1 && !/@media[^{]*max-width:\s*799px/.test(cssText(colPage)), 'cost of living has no mobile card layout');
+
 function show(label, est) {
   const m = est.lines.find(l => l.id === 'moving');
   const tot = est.total;
@@ -370,5 +582,13 @@ console.log(`Fees 3 vehicles typical\t${formatMoney(fee3.typ)}\tFees 6 vehicles 
 console.log(`DL 1 person\t${formatMoney(dl.lo)} / ${formatMoney(dl.typ)} / ${formatMoney(dl.hi)}`);
 console.log(`Drive Atlanta lodging\t${formatMoney(lodging.lo)} / ${formatMoney(lodging.typ)} / ${formatMoney(lodging.hi)}`);
 console.log(`Drive Atlanta meals\t${formatMoney(meals.lo)} / ${formatMoney(meals.typ)} / ${formatMoney(meals.hi)}`);
+if (!failed) {
+  try {
+    execFileSync(process.execPath, [path.join(__dirname, 'phone-layout.js')], { stdio: 'inherit' });
+  } catch (err) {
+    failed++;
+    if (!err.status) console.error('FAIL: phone layout', err.message);
+  }
+}
 console.log(failed ? `\n${failed} failed` : '\nAll stress checks passed');
 process.exit(failed ? 1 : 0);
