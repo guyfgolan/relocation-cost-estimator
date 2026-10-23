@@ -379,7 +379,7 @@
   "asOf": "2026",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "The local table is published for moves under 50 miles. The long-distance table is a 1,200-mile benchmark. This estimator scales between those two published prices; the scaled amount is an assumption, not another published table."
+  "caveat": "The local table is published for moves under 50 miles. The long-distance table is a 1,200-mile benchmark. This estimator scales between those two published prices up to 1,200 miles and holds the 1,200-mile price after that. At every distance the DIY price is capped so it does not exceed full-service for the same home. A 1-bedroom house uses the 1-bedroom apartment row, matching the full-service Studio/1BR cell. That scale, hold, and cap are assumptions, not another published table."
  },
  "cmrSeason": {
   "value": {
@@ -506,7 +506,7 @@
   "asOf": "FY2027 (Oct 1, 2026-Sep 30, 2027)",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "Standard M&IE is $68. Published tiers run higher in some places; this estimator uses the standard rate. First and last travel day are counted at 75%."
+  "caveat": "Standard M&IE is $68. Published tiers run higher in some places; this estimator uses the standard rate. A drive that fits in one day does not add M&IE. When the trip includes a night, the first and last travel day are counted at 75%."
  },
  "assumptions": {
   "diyScale": {
@@ -518,7 +518,7 @@
    "url": "https://www.hireahelper.com/moving-cost-calculator/",
    "asOf": "2026-10-22",
    "status": "ASSUMPTION",
-   "caveat": "Typical price moves in a straight line from the local price at 0 miles to the 1,200-mile price, then in proportion to distance after 1,200 miles. Low is 0.8 times typical and high is 1.25 times typical."
+   "caveat": "Typical price moves in a straight line from the local price at 0 miles to the 1,200-mile price. Past 1,200 miles that 1,200-mile price is held flat. At every distance the result is capped so it does not exceed full-service for the same home and distance. Low is 0.8 times typical and high is 1.25 times typical, and those ends are also kept at or under the full-service low and high."
   },
   "fullLocal": {
    "lowFactor": 0.75,
@@ -568,7 +568,7 @@
    "url": null,
    "asOf": "2026-10-22",
    "status": "ASSUMPTION",
-   "caveat": "Nights are zero or more, from ceil(miles divided by miles per day) minus 1. Fewer miles per day means more nights and a higher cost."
+   "caveat": "Nights are zero or more, from ceil(miles divided by miles per day) minus 1. Fewer miles per day means more nights and a higher cost. Meal days are zero when that pace fits the drive into one day."
   },
   "rooms": {
    "label": "Hotel rooms",

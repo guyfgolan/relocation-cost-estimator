@@ -67,8 +67,8 @@
     if (house) {
       if (type === 'Single-story house' || type === 'Multi-story house') notes.push('Number of stories is not priced separately in the cited table.');
       if (beds <= 1) {
-        notes.push('A 1-bedroom house is not its own row; the 2-bedroom house row is used.');
-        return { idx: 2, notes };
+        notes.push('A 1-bedroom house is not its own HireAHelper row. The 1-bedroom apartment row is used, the same size class as the full-service Studio/1BR cell.');
+        return { idx: 0, notes };
       }
       if (beds === 2) return { idx: 2, notes };
       if (beds === 3) return { idx: 3, notes };
@@ -142,19 +142,34 @@
     };
   }
 
+  const VEHICLE_CAVEAT = 'It seems you have selected to transport seven or more vehicles. Please contact a relocation company directly for a better estimate.';
+
   function diyTypical(local, ld, road) {
     const capped = Math.min(Math.max(road, 0), 1200);
-    let typ = local + (ld - local) * (capped / 1200);
-    if (road > 1200) typ = ld * (road / 1200);
-    return typ;
+    return local + (ld - local) * (capped / 1200);
   }
 
-  function priceDiySpec(D, key, idx, road) {
+  function capDiyToFull(diy, full) {
+    let typ = Math.min(diy.typ, full.typ);
+    let lo = Math.min(diy.lo, full.lo);
+    let hi = Math.min(diy.hi, full.hi);
+    if (lo > typ) lo = typ;
+    if (hi < typ) hi = typ;
+    const capped = diy.typ - typ > 1e-6 || diy.hi - hi > 1e-6 || diy.lo - lo > 1e-6;
+    return { lo, typ, hi, capped };
+  }
+
+  function priceDiySpec(D, key, spec, road) {
+    const idx = spec.hah.idx;
     const local = D.hah.value.local[key][idx];
     const ld = D.hah.value.ld1200[key][idx];
     const typ = diyTypical(local, ld, road);
     const a = D.assumptions.diyScale;
-    return { lo: typ * a.lowFactor, typ, hi: typ * a.highFactor, row: D.hah.value.rows[idx] };
+    const priced = capDiyToFull(
+      { lo: typ * a.lowFactor, typ, hi: typ * a.highFactor, capped: false },
+      priceFullSpec(D, spec, road)
+    );
+    return { lo: priced.lo, typ: priced.typ, hi: priced.hi, capped: priced.capped, row: D.hah.value.rows[idx] };
   }
 
   function priceFullSpec(D, spec, road) {
@@ -238,7 +253,7 @@
   function coreForMode(D, mode, built, road) {
     const parts = built.specs.map(spec => {
       if (mode === 'full') return Object.assign(priceFullSpec(D, spec, road), { spec });
-      return Object.assign(priceDiySpec(D, mode, spec.hah.idx, road), { spec });
+      return Object.assign(priceDiySpec(D, mode, spec, road), { spec });
     });
     const refPart = built.ref ? parts.find(p => p.spec === built.ref) : null;
     const combined = combineParts(parts, refPart ? refPart.typ : null);
@@ -281,15 +296,19 @@
     function methodNote(mode, parts) {
       const methods = new Set(parts.map(p => p.method));
       if (mode !== 'full') {
-        return `Scaled from HireAHelper's local price and its 1,200-mile price across ${milesLabel(road)}. The scale, and the 0.8 / 1.25 range, are assumptions.`;
+        const hit = parts.some(p => p.capped) ? ' The cap applies on this move.' : '';
+        if (road > 1200) {
+          return `Past 1,200 miles, the HireAHelper 1,200-mile price is held flat instead of rising with distance. At every distance, including this one, a DIY truck or container is capped so it does not exceed full-service for the same home. The flat stretch, the cap, and the 0.8 / 1.25 range are assumptions.${hit}`;
+        }
+        return `Scaled from HireAHelper's local price and its 1,200-mile price across ${milesLabel(road)}. At every distance, a DIY truck or container is capped so it does not exceed full-service for the same home. The scale, the cap, and the 0.8 / 1.25 range are assumptions.${hit}`;
       }
-      if (methods.has('local') && parts.length === 1 && parts[0].method === 'local') {
-        return `Under 50 miles, priced from HireAHelper's local table. Typical is the published figure. Low and high use a 0.75 / 1.25 range, which is an assumption.`;
-      }
+      const localNote = `Under 50 miles, priced from HireAHelper's local table. Typical is the published figure. Low and high use a 0.75 / 1.25 range, which is an assumption.`;
+      if ([...methods].every(m => m === 'local')) return localNote;
       if (methods.has('bridge')) {
         return `This distance is between 50 and 100 miles. It is not priced from the under-50-mile table. The price is blended from that table at 50 miles to the CMR 100-499 mile band at 100 miles, so it does not jump at 100 miles. The blend is an assumption.`;
       }
-      const cell = parts[0].cell;
+      const cell = (parts.find(p => p.cell && p.cell.band) || {}).cell;
+      if (!cell) return localNote;
       let text = `CMR ${cell.band.replace('-', '–')} miles, ${cell.size}. Estimated road distance ${Math.round(road).toLocaleString('en-US')} miles.`;
       if (cell.sample) text += ` CMR marked this cell: ${cell.sample}.`;
       if (cell.period && cell.period !== D.movers.asOf) text += ` This cell covers ${cell.period}.`;
@@ -314,7 +333,7 @@
         typ: median(priced.map(p => p.typ)),
         hi: Math.max(...priced.map(p => p.hi))
       };
-      notes.unshift('Help level was not chosen. This range covers a DIY truck (including truck fuel), a container, and full-service movers. Typical is the middle of those three typical prices. It is not the full-service price alone.');
+      notes.unshift('Help level was not chosen. This range covers a DIY truck (including truck fuel), a container, and full-service movers. Typical is the middle of those three typical prices. It is not the full-service price alone. The truck and container prices are capped so they do not exceed full-service for the same home.' + (road > 1200 ? ' Past 1,200 miles they are held at the 1,200-mile HireAHelper price before that cap.' : ''));
       if (season) notes.push(season);
       return {
         ok: true,
@@ -331,6 +350,14 @@
 
     const mode = help === 'DIY rental truck' ? 'truck' : help === 'Moving container' ? 'container' : 'full';
     const result = coreForMode(D, mode, built, road);
+    if (mode !== 'full') {
+      const full = coreForMode(D, 'full', built, road);
+      const capped = capDiyToFull(result.combined, full.combined);
+      if (capped.capped) result.parts.forEach(p => { p.capped = true; });
+      result.combined.lo = capped.lo;
+      result.combined.typ = capped.typ;
+      result.combined.hi = capped.hi;
+    }
     notes.push(methodNote(mode, result.parts));
     if (mode === 'full' && season) notes.push(season);
     const names = { truck: 'DIY rental truck', container: 'Moving container', full: 'Full-service movers' };
@@ -369,6 +396,14 @@
     return n;
   }
 
+  function vehicleCount(value) {
+    if (value == null || value === 'Not sure') return null;
+    const raw = String(value).trim();
+    const n = raw === '7+' ? 7 : Number(raw);
+    if (!Number.isInteger(n) || n < 0) return null;
+    return { priced: n >= 7 ? 7 : n, many: n >= 7 };
+  }
+
   function chosen(label, note) {
     return line({
       label, display: 'not-selected', group: 'other', note,
@@ -398,7 +433,7 @@
   }
 
   function mealDays(nights) {
-    if (nights <= 0) return 0.75;
+    if (nights <= 0) return 0;
     return nights + 0.5;
   }
 
@@ -415,6 +450,9 @@
     const A = answers || {};
     const origin = A.origin || null;
     const dest = A.dest || null;
+    const vehiclesInfo = vehicleCount(A.veh);
+    const vehicles = vehiclesInfo ? vehiclesInfo.priced : null;
+    const vehicleCaveat = vehiclesInfo && vehiclesInfo.many ? VEHICLE_CAVEAT : '';
     if (origin && isOverseasState(origin.state)) {
       return {
         mode: 'quote',
@@ -426,7 +464,8 @@
         subtotals: { moving: null, fees: null },
         total: null,
         inFL: false,
-        headline: 'Get a quote'
+        headline: 'Get a quote',
+        vehicleCaveat
       };
     }
     const dist = roadBetween(origin, dest, D.distance.factor);
@@ -457,7 +496,6 @@
       }
     }
 
-    const vehicles = countOf(A.veh, 6);
     const drivingCars = A.vehHow === 'Drive them' && vehicles > 0 && dist && A.travel && A.travel !== 'Not sure';
     if (drivingCars) {
       const mpg = D.assumptions.carMpg;
@@ -515,7 +553,7 @@
         lo: mealDays(nLo) * meal * adults.lo,
         typ: mealDays(nTyp) * meal * adults.typ,
         hi: mealDays(nHi) * meal * adults.hi,
-        note: `${who} A same-day trip uses 75% of M&IE. A trip with nights uses 75% on the first and last day and 100% on the days between, which is nights + 0.5. The $${meal} rate is the FY2027 standard M&IE.`,
+        note: `${who} A drive that fits in one day, at that column's miles-per-day pace, does not add M&IE. A trip with nights uses 75% on the first and last day and 100% on the days between, which is nights + 0.5. The $${meal} rate is the FY2027 standard M&IE.`,
         sources: [source(D.meals), source(mpd)].concat(adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
       }));
     } else {
@@ -605,7 +643,8 @@
       subtotals: { moving: mode === 'estimate' ? movingSub : null, fees: feeSub },
       total,
       inFL,
-      headline: mode === 'estimate' ? 'Your moving cost estimate' : 'Not enough info to estimate'
+      headline: mode === 'estimate' ? 'Your moving cost estimate' : 'Not enough info to estimate',
+      vehicleCaveat
     };
   }
 
