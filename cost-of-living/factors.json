@@ -1,2046 +1,235 @@
 {
-  "incomeBands": [
-    {
-      "id": "under75",
-      "label": "Under $75,000",
-      "min": 0,
-      "max": 75000,
-      "midpoint": 37500
-    },
-    {
-      "id": "75to150",
-      "label": "$75,000 to $150,000",
-      "min": 75000,
-      "max": 150000,
-      "midpoint": 112500
-    },
-    {
-      "id": "150to250",
-      "label": "$150,000 to $250,000",
-      "min": 150000,
-      "max": 250000,
-      "midpoint": 200000
-    },
-    {
-      "id": "250plus",
-      "label": "$250,000 or more",
-      "min": 250000,
-      "max": null,
-      "midpoint": 375000
-    }
-  ],
-  "incomeTax": {
-    "source": "Tax Foundation, State Individual Income Tax Rates and Brackets, 2026",
-    "url": "https://taxfoundation.org/data/all/state/state-income-tax-rates-2026/",
-    "asOf": "2026-01-01",
-    "retrieved": "2026-10-23",
-    "states": {
-      "AL": {
-        "standardDeduction": {
-          "single": 3000.0,
-          "married": 8500.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 1500.0,
-          "married": 3000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 500.0,
-              "rate": 0.04
-            },
-            {
-              "over": 3000.0,
-              "rate": 0.05
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 1000.0,
-              "rate": 0.04
-            },
-            {
-              "over": 6000.0,
-              "rate": 0.05
-            }
-          ]
-        }
-      },
-      "AK": {
-        "none": true
-      },
-      "AZ": {
-        "standardDeduction": {
-          "single": 8350.0,
-          "married": 16700.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.025
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.025
-            }
-          ]
-        }
-      },
-      "AR": {
-        "standardDeduction": {
-          "single": 2470.0,
-          "married": 4940.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 29.0,
-          "married": 58.0
-        },
-        "personalExemptionIsCredit": true,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 4600.0,
-              "rate": 0.039
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 4600.0,
-              "rate": 0.039
-            }
-          ]
-        }
-      },
-      "CA": {
-        "standardDeduction": {
-          "single": 5540.0,
-          "married": 11080.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 153.0,
-          "married": 306.0
-        },
-        "personalExemptionIsCredit": true,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.01
-            },
-            {
-              "over": 11079.0,
-              "rate": 0.02
-            },
-            {
-              "over": 26264.0,
-              "rate": 0.04
-            },
-            {
-              "over": 41452.0,
-              "rate": 0.06
-            },
-            {
-              "over": 57542.0,
-              "rate": 0.08
-            },
-            {
-              "over": 72724.0,
-              "rate": 0.09300000000000001
-            },
-            {
-              "over": 371479.0,
-              "rate": 0.10300000000000001
-            },
-            {
-              "over": 445771.0,
-              "rate": 0.113
-            },
-            {
-              "over": 742953.0,
-              "rate": 0.12300000000000001
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.133
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.01
-            },
-            {
-              "over": 22158.0,
-              "rate": 0.02
-            },
-            {
-              "over": 52528.0,
-              "rate": 0.04
-            },
-            {
-              "over": 82904.0,
-              "rate": 0.06
-            },
-            {
-              "over": 115084.0,
-              "rate": 0.08
-            },
-            {
-              "over": 145448.0,
-              "rate": 0.09300000000000001
-            },
-            {
-              "over": 742958.0,
-              "rate": 0.10300000000000001
-            },
-            {
-              "over": 891542.0,
-              "rate": 0.113
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.12300000000000001
-            },
-            {
-              "over": 1485906.0,
-              "rate": 0.133
-            }
-          ]
-        }
-      },
-      "CO": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.044000000000000004
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.044000000000000004
-            }
-          ]
-        }
-      },
-      "CT": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 15000.0,
-          "married": 24000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.045
-            },
-            {
-              "over": 50000.0,
-              "rate": 0.055
-            },
-            {
-              "over": 100000.0,
-              "rate": 0.06
-            },
-            {
-              "over": 200000.0,
-              "rate": 0.065
-            },
-            {
-              "over": 250000.0,
-              "rate": 0.069
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.0699
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 20000.0,
-              "rate": 0.045
-            },
-            {
-              "over": 100000.0,
-              "rate": 0.055
-            },
-            {
-              "over": 200000.0,
-              "rate": 0.06
-            },
-            {
-              "over": 400000.0,
-              "rate": 0.065
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.069
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.0699
-            }
-          ]
-        }
-      },
-      "DE": {
-        "standardDeduction": {
-          "single": 3250.0,
-          "married": 6500.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 110.0,
-          "married": 220.0
-        },
-        "personalExemptionIsCredit": true,
-        "brackets": {
-          "single": [
-            {
-              "over": 2000.0,
-              "rate": 0.022000000000000002
-            },
-            {
-              "over": 5000.0,
-              "rate": 0.039
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.048
-            },
-            {
-              "over": 20000.0,
-              "rate": 0.052000000000000005
-            },
-            {
-              "over": 25000.0,
-              "rate": 0.0555
-            },
-            {
-              "over": 60000.0,
-              "rate": 0.066
-            }
-          ],
-          "married": [
-            {
-              "over": 2000.0,
-              "rate": 0.022000000000000002
-            },
-            {
-              "over": 5000.0,
-              "rate": 0.039
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.048
-            },
-            {
-              "over": 20000.0,
-              "rate": 0.052000000000000005
-            },
-            {
-              "over": 25000.0,
-              "rate": 0.0555
-            },
-            {
-              "over": 60000.0,
-              "rate": 0.066
-            }
-          ]
-        }
-      },
-      "FL": {
-        "none": true
-      },
-      "GA": {
-        "standardDeduction": {
-          "single": 12000.0,
-          "married": 24000.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0519
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0519
-            }
-          ]
-        }
-      },
-      "HI": {
-        "standardDeduction": {
-          "single": 4400.0,
-          "married": 8800.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 1144.0,
-          "married": 2288.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.013999999999999999
-            },
-            {
-              "over": 9600.0,
-              "rate": 0.032
-            },
-            {
-              "over": 14400.0,
-              "rate": 0.055
-            },
-            {
-              "over": 19200.0,
-              "rate": 0.064
-            },
-            {
-              "over": 24000.0,
-              "rate": 0.068
-            },
-            {
-              "over": 36000.0,
-              "rate": 0.07200000000000001
-            },
-            {
-              "over": 48000.0,
-              "rate": 0.076
-            },
-            {
-              "over": 125000.0,
-              "rate": 0.079
-            },
-            {
-              "over": 175000.0,
-              "rate": 0.0825
-            },
-            {
-              "over": 225000.0,
-              "rate": 0.09
-            },
-            {
-              "over": 275000.0,
-              "rate": 0.1
-            },
-            {
-              "over": 325000.0,
-              "rate": 0.11
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.013999999999999999
-            },
-            {
-              "over": 19200.0,
-              "rate": 0.032
-            },
-            {
-              "over": 28800.0,
-              "rate": 0.055
-            },
-            {
-              "over": 38400.0,
-              "rate": 0.064
-            },
-            {
-              "over": 48000.0,
-              "rate": 0.068
-            },
-            {
-              "over": 72000.0,
-              "rate": 0.07200000000000001
-            },
-            {
-              "over": 96000.0,
-              "rate": 0.076
-            },
-            {
-              "over": 250000.0,
-              "rate": 0.079
-            },
-            {
-              "over": 350000.0,
-              "rate": 0.0825
-            },
-            {
-              "over": 450000.0,
-              "rate": 0.09
-            },
-            {
-              "over": 550000.0,
-              "rate": 0.1
-            },
-            {
-              "over": 650000.0,
-              "rate": 0.11
-            }
-          ]
-        }
-      },
-      "ID": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 4811.0,
-              "rate": 0.053
-            }
-          ],
-          "married": [
-            {
-              "over": 9622.0,
-              "rate": 0.053
-            }
-          ]
-        }
-      },
-      "IL": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 2925.0,
-          "married": 5850.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0495
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0495
-            }
-          ]
-        },
-        "exemptionPhaseout": {
-          "single": 250000,
-          "married": 500000
-        }
-      },
-      "IN": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 1000.0,
-          "married": 2000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.029500000000000002
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.029500000000000002
-            }
-          ]
-        }
-      },
-      "IA": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 40.0,
-          "married": 80.0
-        },
-        "personalExemptionIsCredit": true,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.038
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.038
-            }
-          ]
-        }
-      },
-      "KS": {
-        "standardDeduction": {
-          "single": 3605.0,
-          "married": 8240.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 9160.0,
-          "married": 18320.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.052000000000000005
-            },
-            {
-              "over": 23000.0,
-              "rate": 0.0558
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.052000000000000005
-            },
-            {
-              "over": 46000.0,
-              "rate": 0.0558
-            }
-          ]
-        }
-      },
-      "KY": {
-        "standardDeduction": {
-          "single": 3360.0,
-          "married": 3360.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.035
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.035
-            }
-          ]
-        }
-      },
-      "LA": {
-        "standardDeduction": {
-          "single": 12875.0,
-          "married": 25750.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.03
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.03
-            }
-          ]
-        }
-      },
-      "ME": {
-        "standardDeduction": {
-          "single": 8350.0,
-          "married": 16700.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 5300.0,
-          "married": 10600.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.057999999999999996
-            },
-            {
-              "over": 27399.0,
-              "rate": 0.0675
-            },
-            {
-              "over": 64849.0,
-              "rate": 0.07150000000000001
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.057999999999999996
-            },
-            {
-              "over": 54849.0,
-              "rate": 0.0675
-            },
-            {
-              "over": 129749.0,
-              "rate": 0.07150000000000001
-            }
-          ]
-        }
-      },
-      "MD": {
-        "standardDeduction": {
-          "single": 3350.0,
-          "married": 6700.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 3200.0,
-          "married": 6400.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 1000.0,
-              "rate": 0.03
-            },
-            {
-              "over": 2000.0,
-              "rate": 0.04
-            },
-            {
-              "over": 3000.0,
-              "rate": 0.0475
-            },
-            {
-              "over": 100000.0,
-              "rate": 0.05
-            },
-            {
-              "over": 125000.0,
-              "rate": 0.0525
-            },
-            {
-              "over": 150000.0,
-              "rate": 0.055
-            },
-            {
-              "over": 250000.0,
-              "rate": 0.0575
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.0625
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.065
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 1000.0,
-              "rate": 0.03
-            },
-            {
-              "over": 2000.0,
-              "rate": 0.04
-            },
-            {
-              "over": 3000.0,
-              "rate": 0.0475
-            },
-            {
-              "over": 150000.0,
-              "rate": 0.05
-            },
-            {
-              "over": 175000.0,
-              "rate": 0.0525
-            },
-            {
-              "over": 225000.0,
-              "rate": 0.055
-            },
-            {
-              "over": 300000.0,
-              "rate": 0.0575
-            },
-            {
-              "over": 600000.0,
-              "rate": 0.0625
-            },
-            {
-              "over": 1200000.0,
-              "rate": 0.065
-            }
-          ]
-        }
-      },
-      "MA": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 4400.0,
-          "married": 8800.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.05
-            },
-            {
-              "over": 1083150.0,
-              "rate": 0.09
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.05
-            },
-            {
-              "over": 1083150.0,
-              "rate": 0.09
-            }
-          ]
-        }
-      },
-      "MI": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 5900.0,
-          "married": 11800.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0425
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0425
-            }
-          ]
-        }
-      },
-      "MN": {
-        "standardDeduction": {
-          "single": 15300.0,
-          "married": 30600.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0535
-            },
-            {
-              "over": 33310.0,
-              "rate": 0.068
-            },
-            {
-              "over": 109430.0,
-              "rate": 0.0785
-            },
-            {
-              "over": 203150.0,
-              "rate": 0.09849999999999999
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0535
-            },
-            {
-              "over": 48700.0,
-              "rate": 0.068
-            },
-            {
-              "over": 193480.0,
-              "rate": 0.0785
-            },
-            {
-              "over": 337930.0,
-              "rate": 0.09849999999999999
-            }
-          ]
-        }
-      },
-      "MS": {
-        "standardDeduction": {
-          "single": 2300.0,
-          "married": 4600.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 6000.0,
-          "married": 12000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 10000.0,
-              "rate": 0.04
-            }
-          ],
-          "married": [
-            {
-              "over": 10000.0,
-              "rate": 0.04
-            }
-          ]
-        }
-      },
-      "MO": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 1348.0,
-              "rate": 0.02
-            },
-            {
-              "over": 2696.0,
-              "rate": 0.025
-            },
-            {
-              "over": 4044.0,
-              "rate": 0.03
-            },
-            {
-              "over": 5392.0,
-              "rate": 0.035
-            },
-            {
-              "over": 6740.0,
-              "rate": 0.04
-            },
-            {
-              "over": 8088.0,
-              "rate": 0.045
-            },
-            {
-              "over": 9436.0,
-              "rate": 0.047
-            }
-          ],
-          "married": [
-            {
-              "over": 1348.0,
-              "rate": 0.02
-            },
-            {
-              "over": 2696.0,
-              "rate": 0.025
-            },
-            {
-              "over": 4044.0,
-              "rate": 0.03
-            },
-            {
-              "over": 5392.0,
-              "rate": 0.035
-            },
-            {
-              "over": 6740.0,
-              "rate": 0.04
-            },
-            {
-              "over": 8088.0,
-              "rate": 0.045
-            },
-            {
-              "over": 9436.0,
-              "rate": 0.047
-            }
-          ]
-        }
-      },
-      "MT": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.047
-            },
-            {
-              "over": 47500.0,
-              "rate": 0.0565
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.047
-            },
-            {
-              "over": 95000.0,
-              "rate": 0.0565
-            }
-          ]
-        }
-      },
-      "NE": {
-        "standardDeduction": {
-          "single": 8850.0,
-          "married": 17700.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 176.0,
-          "married": 352.0
-        },
-        "personalExemptionIsCredit": true,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0246
-            },
-            {
-              "over": 4130.0,
-              "rate": 0.0351
-            },
-            {
-              "over": 24760.0,
-              "rate": 0.0455
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0246
-            },
-            {
-              "over": 8250.0,
-              "rate": 0.0351
-            },
-            {
-              "over": 49530.0,
-              "rate": 0.0455
-            }
-          ]
-        }
-      },
-      "NV": {
-        "none": true
-      },
-      "NH": {
-        "none": true
-      },
-      "NJ": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 1000.0,
-          "married": 2000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.013999999999999999
-            },
-            {
-              "over": 20000.0,
-              "rate": 0.0175
-            },
-            {
-              "over": 35000.0,
-              "rate": 0.035
-            },
-            {
-              "over": 40000.0,
-              "rate": 0.0553
-            },
-            {
-              "over": 75000.0,
-              "rate": 0.0637
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.0897
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.1075
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.013999999999999999
-            },
-            {
-              "over": 20000.0,
-              "rate": 0.0175
-            },
-            {
-              "over": 50000.0,
-              "rate": 0.0245
-            },
-            {
-              "over": 70000.0,
-              "rate": 0.035
-            },
-            {
-              "over": 80000.0,
-              "rate": 0.0553
-            },
-            {
-              "over": 150000.0,
-              "rate": 0.0637
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.0897
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.1075
-            }
-          ]
-        }
-      },
-      "NM": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.015
-            },
-            {
-              "over": 5500.0,
-              "rate": 0.032
-            },
-            {
-              "over": 16500.0,
-              "rate": 0.043
-            },
-            {
-              "over": 33500.0,
-              "rate": 0.047
-            },
-            {
-              "over": 66500.0,
-              "rate": 0.049
-            },
-            {
-              "over": 210000.0,
-              "rate": 0.059000000000000004
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.015
-            },
-            {
-              "over": 8000.0,
-              "rate": 0.032
-            },
-            {
-              "over": 25000.0,
-              "rate": 0.043
-            },
-            {
-              "over": 50000.0,
-              "rate": 0.047
-            },
-            {
-              "over": 100000.0,
-              "rate": 0.049
-            },
-            {
-              "over": 315000.0,
-              "rate": 0.059000000000000004
-            }
-          ]
-        }
-      },
-      "NY": {
-        "standardDeduction": {
-          "single": 8000.0,
-          "married": 16050.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.039
-            },
-            {
-              "over": 8500.0,
-              "rate": 0.044000000000000004
-            },
-            {
-              "over": 11700.0,
-              "rate": 0.051500000000000004
-            },
-            {
-              "over": 13900.0,
-              "rate": 0.054000000000000006
-            },
-            {
-              "over": 80650.0,
-              "rate": 0.059000000000000004
-            },
-            {
-              "over": 215400.0,
-              "rate": 0.06849999999999999
-            },
-            {
-              "over": 1077550.0,
-              "rate": 0.0965
-            },
-            {
-              "over": 5000000.0,
-              "rate": 0.10300000000000001
-            },
-            {
-              "over": 25000000.0,
-              "rate": 0.109
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.039
-            },
-            {
-              "over": 17150.0,
-              "rate": 0.044000000000000004
-            },
-            {
-              "over": 23600.0,
-              "rate": 0.051500000000000004
-            },
-            {
-              "over": 27900.0,
-              "rate": 0.054000000000000006
-            },
-            {
-              "over": 161550.0,
-              "rate": 0.059000000000000004
-            },
-            {
-              "over": 323200.0,
-              "rate": 0.06849999999999999
-            },
-            {
-              "over": 2155350.0,
-              "rate": 0.0965
-            },
-            {
-              "over": 5000000.0,
-              "rate": 0.10300000000000001
-            },
-            {
-              "over": 25000000.0,
-              "rate": 0.109
-            }
-          ]
-        }
-      },
-      "NC": {
-        "standardDeduction": {
-          "single": 12750.0,
-          "married": 25500.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.039900000000000005
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.039900000000000005
-            }
-          ]
-        }
-      },
-      "ND": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 48475.0,
-              "rate": 0.0195
-            },
-            {
-              "over": 244825.0,
-              "rate": 0.025
-            }
-          ],
-          "married": [
-            {
-              "over": 80975.0,
-              "rate": 0.0195
-            },
-            {
-              "over": 298075.0,
-              "rate": 0.025
-            }
-          ]
-        }
-      },
-      "OH": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 2400.0,
-          "married": 4800.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 26050.0,
-              "rate": 0.0275
-            }
-          ],
-          "married": [
-            {
-              "over": 26050.0,
-              "rate": 0.0275
-            }
-          ]
-        },
-        "exemptionSchedule": [
-          {
-            "maxInclusive": 40000,
-            "single": 2400,
-            "married": 4800
-          },
-          {
-            "maxInclusive": 80000,
-            "single": 2150,
-            "married": 4300
-          },
-          {
-            "maxExclusive": 500000,
-            "single": 1900,
-            "married": 3800
-          },
-          {
-            "single": 0,
-            "married": 0
-          }
-        ]
-      },
-      "OK": {
-        "standardDeduction": {
-          "single": 6350.0,
-          "married": 12700.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 1000.0,
-          "married": 2000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 3750.0,
-              "rate": 0.025
-            },
-            {
-              "over": 4900.0,
-              "rate": 0.035
-            },
-            {
-              "over": 7200.0,
-              "rate": 0.045
-            }
-          ],
-          "married": [
-            {
-              "over": 7500.0,
-              "rate": 0.025
-            },
-            {
-              "over": 9800.0,
-              "rate": 0.035
-            },
-            {
-              "over": 14400.0,
-              "rate": 0.045
-            }
-          ]
-        }
-      },
-      "OR": {
-        "standardDeduction": {
-          "single": 2910.0,
-          "married": 5820.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 256.0,
-          "married": 512.0
-        },
-        "personalExemptionIsCredit": true,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0475
-            },
-            {
-              "over": 4550.0,
-              "rate": 0.0675
-            },
-            {
-              "over": 11400.0,
-              "rate": 0.0875
-            },
-            {
-              "over": 125000.0,
-              "rate": 0.099
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0475
-            },
-            {
-              "over": 9100.0,
-              "rate": 0.0675
-            },
-            {
-              "over": 22800.0,
-              "rate": 0.0875
-            },
-            {
-              "over": 250000.0,
-              "rate": 0.099
-            }
-          ]
-        }
-      },
-      "PA": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.030699999999999998
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.030699999999999998
-            }
-          ]
-        }
-      },
-      "RI": {
-        "standardDeduction": {
-          "single": 11200.0,
-          "married": 22400.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 5250.0,
-          "married": 10500.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0375
-            },
-            {
-              "over": 82050.0,
-              "rate": 0.0475
-            },
-            {
-              "over": 186450.0,
-              "rate": 0.0599
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0375
-            },
-            {
-              "over": 82050.0,
-              "rate": 0.0475
-            },
-            {
-              "over": 186450.0,
-              "rate": 0.0599
-            }
-          ]
-        }
-      },
-      "SC": {
-        "standardDeduction": {
-          "single": 8350.0,
-          "married": 16700.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0
-            },
-            {
-              "over": 3640.0,
-              "rate": 0.03
-            },
-            {
-              "over": 18230.0,
-              "rate": 0.06
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0
-            },
-            {
-              "over": 3640.0,
-              "rate": 0.03
-            },
-            {
-              "over": 18230.0,
-              "rate": 0.06
-            }
-          ]
-        }
-      },
-      "SD": {
-        "none": true
-      },
-      "TN": {
-        "none": true
-      },
-      "TX": {
-        "none": true
-      },
-      "UT": {
-        "standardDeduction": {
-          "single": 966.0,
-          "married": 1932.0
-        },
-        "standardDeductionIsCredit": true,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.045
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.045
-            }
-          ]
-        }
-      },
-      "VT": {
-        "standardDeduction": {
-          "single": 7650.0,
-          "married": 15300.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 5300.0,
-          "married": 10600.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0335
-            },
-            {
-              "over": 49400.0,
-              "rate": 0.066
-            },
-            {
-              "over": 119700.0,
-              "rate": 0.076
-            },
-            {
-              "over": 249700.0,
-              "rate": 0.0875
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0335
-            },
-            {
-              "over": 82500.0,
-              "rate": 0.066
-            },
-            {
-              "over": 199450.0,
-              "rate": 0.076
-            },
-            {
-              "over": 304000.0,
-              "rate": 0.0875
-            }
-          ]
-        }
-      },
-      "VA": {
-        "standardDeduction": {
-          "single": 8750.0,
-          "married": 17500.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 930.0,
-          "married": 1860.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 3000.0,
-              "rate": 0.03
-            },
-            {
-              "over": 5000.0,
-              "rate": 0.05
-            },
-            {
-              "over": 17000.0,
-              "rate": 0.0575
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.02
-            },
-            {
-              "over": 3000.0,
-              "rate": 0.03
-            },
-            {
-              "over": 5000.0,
-              "rate": 0.05
-            },
-            {
-              "over": 17000.0,
-              "rate": 0.0575
-            }
-          ]
-        }
-      },
-      "WA": {
-        "none": true
-      },
-      "WV": {
-        "standardDeduction": {
-          "single": 0,
-          "married": 0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 2000.0,
-          "married": 4000.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.0222
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.0296
-            },
-            {
-              "over": 25000.0,
-              "rate": 0.0333
-            },
-            {
-              "over": 40000.0,
-              "rate": 0.0444
-            },
-            {
-              "over": 60000.0,
-              "rate": 0.0482
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.0222
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.0296
-            },
-            {
-              "over": 25000.0,
-              "rate": 0.0333
-            },
-            {
-              "over": 40000.0,
-              "rate": 0.0444
-            },
-            {
-              "over": 60000.0,
-              "rate": 0.0482
-            }
-          ]
-        }
-      },
-      "WI": {
-        "standardDeduction": {
-          "single": 13960.0,
-          "married": 25840.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 700.0,
-          "married": 1400.0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.035
-            },
-            {
-              "over": 15110.0,
-              "rate": 0.044000000000000004
-            },
-            {
-              "over": 51950.0,
-              "rate": 0.053
-            },
-            {
-              "over": 332720.0,
-              "rate": 0.0765
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.035
-            },
-            {
-              "over": 20150.0,
-              "rate": 0.044000000000000004
-            },
-            {
-              "over": 69260.0,
-              "rate": 0.053
-            },
-            {
-              "over": 443630.0,
-              "rate": 0.0765
-            }
-          ]
-        }
-      },
-      "WY": {
-        "none": true
-      },
-      "DC": {
-        "standardDeduction": {
-          "single": 16100.0,
-          "married": 32200.0
-        },
-        "standardDeductionIsCredit": false,
-        "personalExemption": {
-          "single": 0,
-          "married": 0
-        },
-        "personalExemptionIsCredit": false,
-        "brackets": {
-          "single": [
-            {
-              "over": 0.0,
-              "rate": 0.04
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.06
-            },
-            {
-              "over": 40000.0,
-              "rate": 0.065
-            },
-            {
-              "over": 60000.0,
-              "rate": 0.085
-            },
-            {
-              "over": 250000.0,
-              "rate": 0.0925
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.0975
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.1075
-            }
-          ],
-          "married": [
-            {
-              "over": 0.0,
-              "rate": 0.04
-            },
-            {
-              "over": 10000.0,
-              "rate": 0.06
-            },
-            {
-              "over": 40000.0,
-              "rate": 0.065
-            },
-            {
-              "over": 60000.0,
-              "rate": 0.085
-            },
-            {
-              "over": 250000.0,
-              "rate": 0.0925
-            },
-            {
-              "over": 500000.0,
-              "rate": 0.0975
-            },
-            {
-              "over": 1000000.0,
-              "rate": 0.1075
-            }
-          ]
+    "incomeTax": {
+      "source": "Tax Foundation, State Individual Income Tax Rates and Brackets, 2026",
+      "url": "https://taxfoundation.org/data/all/state/state-income-tax-rates-2026/",
+      "asOf": "2026-01-01",
+      "retrieved": "2026-10-23",
+      "note": "Displayed rates are the Tax Foundation statutory rates on wage income. Flat states have one rate. Graduated states show the lowest and highest single-filer bracket rates, not counting a 0% bottom bracket. kind none means no state tax on wages. Washington taxes some capital gains and is none for wages. Local wage taxes are not included.",
+      "states": {
+        "AL": {
+          "kind": "graduated",
+          "min": 0.02,
+          "max": 0.05
+        },
+        "AK": {
+          "kind": "none"
+        },
+        "AZ": {
+          "kind": "flat",
+          "rate": 0.025
+        },
+        "AR": {
+          "kind": "graduated",
+          "min": 0.02,
+          "max": 0.039
+        },
+        "CA": {
+          "kind": "graduated",
+          "min": 0.01,
+          "max": 0.133
+        },
+        "CO": {
+          "kind": "flat",
+          "rate": 0.044
+        },
+        "CT": {
+          "kind": "graduated",
+          "min": 0.02,
+          "max": 0.0699
+        },
+        "DE": {
+          "kind": "graduated",
+          "min": 0.022,
+          "max": 0.066
+        },
+        "DC": {
+          "kind": "graduated",
+          "min": 0.04,
+          "max": 0.1075
+        },
+        "FL": {
+          "kind": "none"
+        },
+        "GA": {
+          "kind": "flat",
+          "rate": 0.0519
+        },
+        "HI": {
+          "kind": "graduated",
+          "min": 0.014,
+          "max": 0.11
+        },
+        "ID": {
+          "kind": "flat",
+          "rate": 0.053
+        },
+        "IL": {
+          "kind": "flat",
+          "rate": 0.0495
+        },
+        "IN": {
+          "kind": "flat",
+          "rate": 0.0295
+        },
+        "IA": {
+          "kind": "flat",
+          "rate": 0.038
+        },
+        "KS": {
+          "kind": "graduated",
+          "min": 0.052,
+          "max": 0.0558
+        },
+        "KY": {
+          "kind": "flat",
+          "rate": 0.035
+        },
+        "LA": {
+          "kind": "flat",
+          "rate": 0.03
+        },
+        "ME": {
+          "kind": "graduated",
+          "min": 0.058,
+          "max": 0.0715
+        },
+        "MD": {
+          "kind": "graduated",
+          "min": 0.02,
+          "max": 0.065
+        },
+        "MA": {
+          "kind": "graduated",
+          "min": 0.05,
+          "max": 0.09
+        },
+        "MI": {
+          "kind": "flat",
+          "rate": 0.0425
+        },
+        "MN": {
+          "kind": "graduated",
+          "min": 0.0535,
+          "max": 0.0985
+        },
+        "MS": {
+          "kind": "flat",
+          "rate": 0.04
+        },
+        "MO": {
+          "kind": "graduated",
+          "min": 0.02,
+          "max": 0.047
+        },
+        "MT": {
+          "kind": "graduated",
+          "min": 0.047,
+          "max": 0.0565
+        },
+        "NE": {
+          "kind": "graduated",
+          "min": 0.0246,
+          "max": 0.0455
+        },
+        "NV": {
+          "kind": "none"
+        },
+        "NH": {
+          "kind": "none"
+        },
+        "NJ": {
+          "kind": "graduated",
+          "min": 0.014,
+          "max": 0.1075
+        },
+        "NM": {
+          "kind": "graduated",
+          "min": 0.015,
+          "max": 0.059
+        },
+        "NY": {
+          "kind": "graduated",
+          "min": 0.039,
+          "max": 0.109
+        },
+        "NC": {
+          "kind": "flat",
+          "rate": 0.0399
+        },
+        "ND": {
+          "kind": "graduated",
+          "min": 0.0195,
+          "max": 0.025
+        },
+        "OH": {
+          "kind": "flat",
+          "rate": 0.0275
+        },
+        "OK": {
+          "kind": "graduated",
+          "min": 0.025,
+          "max": 0.045
+        },
+        "OR": {
+          "kind": "graduated",
+          "min": 0.0475,
+          "max": 0.099
+        },
+        "PA": {
+          "kind": "flat",
+          "rate": 0.0307
+        },
+        "RI": {
+          "kind": "graduated",
+          "min": 0.0375,
+          "max": 0.0599
+        },
+        "SC": {
+          "kind": "graduated",
+          "min": 0.03,
+          "max": 0.06
+        },
+        "SD": {
+          "kind": "none"
+        },
+        "TN": {
+          "kind": "none"
+        },
+        "TX": {
+          "kind": "none"
+        },
+        "UT": {
+          "kind": "flat",
+          "rate": 0.045
+        },
+        "VT": {
+          "kind": "graduated",
+          "min": 0.0335,
+          "max": 0.0875
+        },
+        "VA": {
+          "kind": "graduated",
+          "min": 0.02,
+          "max": 0.0575
+        },
+        "WA": {
+          "kind": "none"
+        },
+        "WV": {
+          "kind": "graduated",
+          "min": 0.0222,
+          "max": 0.0482
+        },
+        "WI": {
+          "kind": "graduated",
+          "min": 0.035,
+          "max": 0.0765
+        },
+        "WY": {
+          "kind": "none"
         }
       }
-    }
-  },
+    },
   "salesTax": {
     "source": "Tax Foundation, State and Local Sales Tax Rates, as of July 1, 2026",
     "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",

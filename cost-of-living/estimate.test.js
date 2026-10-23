@@ -23,25 +23,24 @@ assert.strictEqual(estimate.round10(-185), -190);
 assert.strictEqual(estimate.round10(-184), -180);
 assert.strictEqual(estimate.round10(0), 0);
 
-// Income-band edges. The upper bound of each closed band belongs to the next band.
-const bands = factors.incomeBands;
-assert.strictEqual(estimate.bandForIncome(0, bands).id, 'under75');
-assert.strictEqual(estimate.bandForIncome(74999.99, bands).midpoint, 37500);
-assert.strictEqual(estimate.bandForIncome(75000, bands).id, '75to150');
-assert.strictEqual(estimate.bandForIncome(75000, bands).midpoint, 112500);
-assert.strictEqual(estimate.bandForIncome(149999.99, bands).midpoint, 112500);
-assert.strictEqual(estimate.bandForIncome(150000, bands).midpoint, 200000);
-assert.strictEqual(estimate.bandForIncome(249999.99, bands).midpoint, 200000);
-assert.strictEqual(estimate.bandForIncome(250000, bands).id, '250plus');
-assert.strictEqual(estimate.bandForIncome(400000, bands).midpoint, 375000);
+assert.strictEqual(estimate.formatRate(0.0275), '2.75%');
+assert.strictEqual(estimate.formatRate(0.01), '1%');
+assert.strictEqual(estimate.formatRate(0.133), '13.3%');
+assert.strictEqual(estimate.asOfLabel('2026-01-01'), 'January 1, 2026');
 
-// Ohio 2026 flat tax, married, $112,500 midpoint. Exemption for this income is $1,900 each.
-const ohio = estimate.stateIncomeTax('OH', 112500, 'married', factors.incomeTax.states);
-assert.ok(Math.abs(ohio - 2272.875) < 0.001, ohio);
-assert.strictEqual(estimate.stateIncomeTax('FL', 200000, 'single', factors.incomeTax.states), 0);
-assert.strictEqual(estimate.stateIncomeTax('WA', 200000, 'married', factors.incomeTax.states), 0);
-assert.strictEqual(estimate.filingStatus(1), 'single');
-assert.strictEqual(estimate.filingStatus(2), 'married');
+function taxText(code) {
+  return estimate.incomeTaxNote(code, factors.incomeTax.states, factors.incomeTax).text;
+}
+assert.strictEqual(taxText('OH'), 'On top of these savings, in Ohio your state income tax is currently 2.75%, and Florida has no state income tax.');
+assert.strictEqual(taxText('CA'), 'On top of these savings, in California your state income tax is currently 1% to 13.3%, and Florida has no state income tax.');
+assert.strictEqual(taxText('TX'), 'In Texas, there is no state tax on wage income, and Florida has no state income tax.');
+assert.strictEqual(taxText('WA'), 'In Washington, there is no state tax on wage income, and Florida has no state income tax.');
+assert.strictEqual(taxText('FL'), 'In Florida, there is no state tax on wage income, and Florida has no state income tax.');
+assert.ok(taxText('TX').indexOf('savings') < 0);
+assert.strictEqual(taxText('PR'), 'A state income tax rate is not available for this location.');
+assert.strictEqual(estimate.incomeTaxNote('OH', factors.incomeTax.states, factors.incomeTax).asOfLabel, 'January 1, 2026');
+assert.ok(factors.incomeTax.source.indexOf('Tax Foundation') >= 0);
+assert.ok(/^https:\/\//.test(factors.incomeTax.url));
 
 // Sales tax. Florida subtracts groceries. A taxed origin state does not.
 const exempt = estimate.salesTaxMonthly(112500, 0.07, 500, 'exempt');
@@ -110,8 +109,6 @@ const base = {
   floridaName: 'Sarasota County',
   originName: 'Franklin County, OH',
   hhSize: 2,
-  adults: 2,
-  incomeBand: '75to150',
   ownNow: 'rent',
   planFL: 'buy',
   primary: true,
@@ -127,14 +124,11 @@ const base = {
 };
 
 const result = estimate.buildEstimate(base, factors);
-assert.strictEqual(result.income, 112500);
+assert.strictEqual(result.income, undefined);
+assert.strictEqual(line(result, 'income-tax'), undefined);
+assert.strictEqual(line(result, 'sales-tax'), undefined);
+assert.strictEqual(result.incomeTaxNote.text, taxText('OH'));
 assert.strictEqual(result.sentence, 'Living in Sarasota County costs about 7% more than Franklin County, OH.');
-const tax = line(result, 'income-tax');
-assert.strictEqual(tax.difference, -190);
-assert.strictEqual(tax.originNote, 'Estimated savings.');
-const sales = line(result, 'sales-tax');
-assert.ok(sales && sales.inTotal);
-assert.ok(sales.florida < sales.origin);
 const property = line(result, 'property-tax');
 const sarasota = factors.florida.areas.sarasota;
 const sarasotaHome = estimate.propertySide(
@@ -194,8 +188,13 @@ const hoaFloridaOnly = estimate.buildEstimate(Object.assign({}, base, { hoaFL: 2
 assert.strictEqual(line(hoaFloridaOnly, 'hoa').florida, 30);
 assert.strictEqual(line(hoaFloridaOnly, 'hoa').origin, 0);
 
-const same = estimate.buildEstimate(Object.assign({}, base, { state: 'FL', incomeBand: 'under75' }), factors);
-assert.strictEqual(line(same, 'income-tax').text, 'No change.');
+const same = estimate.buildEstimate(Object.assign({}, base, { state: 'FL' }), factors);
+assert.strictEqual(same.incomeTaxNote.text, taxText('FL'));
+assert.ok(same.incomeTaxNote.text.indexOf('savings') < 0);
+const california = estimate.buildEstimate(Object.assign({}, base, { state: 'CA' }), factors);
+assert.strictEqual(california.incomeTaxNote.text, taxText('CA'));
+const texas = estimate.buildEstimate(Object.assign({}, base, { state: 'TX' }), factors);
+assert.strictEqual(texas.incomeTaxNote.text, taxText('TX'));
 
 const noDrive = estimate.buildEstimate(Object.assign({}, base, { drives: false }), factors);
 assert.strictEqual(line(noDrive, 'fuel'), undefined);
@@ -230,13 +229,12 @@ assert.strictEqual(line(result, 'fuel').difference, 0);
 assert.strictEqual(line(result, 'auto').difference, 60);
 assert.strictEqual(line(result, 'groceries').difference, 20);
 assert.strictEqual(line(result, 'insurance').difference, 280);
-assert.strictEqual(line(result, 'sales-tax').difference, -10);
-assert.strictEqual(result.total.monthly, 770);
-assert.strictEqual(result.total.low, 650);
-assert.strictEqual(result.total.high, 890);
-assert.strictEqual(result.total.yearly, 9240);
+assert.strictEqual(result.total.monthly, 970);
+assert.strictEqual(result.total.low, 820);
+assert.strictEqual(result.total.high, 1120);
+assert.strictEqual(result.total.yearly, 11640);
 const noDriveTotal = estimate.buildEstimate(Object.assign({}, base, { drives: false }), factors);
-assert.strictEqual(noDriveTotal.total.monthly, 710);
+assert.strictEqual(noDriveTotal.total.monthly, 910);
 
 const bases = estimate.homesteadBases(485000, 51411, 25000, 50000);
 assert.strictEqual(bases.school, 460000);
@@ -274,10 +272,9 @@ assert.strictEqual(line(result, 'utilities').label.indexOf('Natural gas'), -1);
 
 ['PR', 'GU', 'VI', 'AS', 'MP'].forEach(function (code) {
   const territory = estimate.buildEstimate(Object.assign({}, base, { state: code }), factors);
-  assert.strictEqual(line(territory, 'income-tax').text, 'Not available', code);
-  assert.strictEqual(line(territory, 'income-tax').inTotal, false, code);
-  assert.strictEqual(line(territory, 'sales-tax').text, 'Not available', code);
-  assert.strictEqual(line(territory, 'sales-tax').inTotal, false, code);
+  assert.strictEqual(line(territory, 'income-tax'), undefined, code);
+  assert.strictEqual(territory.incomeTaxNote.text, 'A state income tax rate is not available for this location.', code);
+  assert.ok(territory.incomeTaxNote.text.indexOf('savings') < 0, code);
   assert.ok(territory.lines.every(function (row) { return row.text === 'Not available' || row.inTotal === false || row.difference != null; }));
 });
 
@@ -292,5 +289,10 @@ assert.ok(page.indexOf('favicon.ico') > 0);
 assert.ok(page.indexOf('function selectedArea()') > 0);
 assert.ok(page.indexOf('Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.') > 0);
 assert.ok(page.indexOf('This total includes only the lines above.') > 0);
+assert.strictEqual(page.indexOf("What's your household income range?"), -1);
+assert.strictEqual(page.indexOf('How many adults?'), -1);
+assert.ok(page.indexOf("title:'Will you be driving?'") > 0);
+assert.ok(page.indexOf('id="incomeTaxNote"') > 0);
+assert.ok(page.indexOf('Default is 1,000.') > 0);
 
 console.log('cost-of-living formula checks passed');

@@ -25,77 +25,55 @@
     return Number.isFinite(n) ? n : null;
   }
 
-  function bandForIncome(income, bands) {
-    var list = bands || [];
-    var i;
-    for (i = 0; i < list.length; i++) {
-      var band = list[i];
-      if (band.max == null || income < band.max) return band;
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  function formatRate(rate) {
+    var percent = Math.round(Number(rate) * 100000) / 1000;
+    return percent.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') + '%';
+  }
+
+  function asOfLabel(asOf) {
+    var full = /^(\d{4})-(\d{2})-(\d{2})$/.exec(asOf || '');
+    if (full) return MONTHS[Number(full[2]) - 1] + ' ' + Number(full[3]) + ', ' + full[1];
+    var month = /^(\d{4})-(\d{2})$/.exec(asOf || '');
+    if (month) return MONTHS[Number(month[2]) - 1] + ' ' + month[1];
+    return asOf || '';
+  }
+
+  function rateRecord(record) {
+    if (!record) return null;
+    if (record.kind === 'none' || record.kind === 'flat' || record.kind === 'graduated') return record;
+    if (record.none) return { kind: 'none' };
+    var brackets = record.brackets && record.brackets.single;
+    if (!brackets || !brackets.length) return { kind: 'none' };
+    var rates = brackets.map(function (row) { return row.rate; });
+    var min = Math.min.apply(null, rates);
+    var max = Math.max.apply(null, rates);
+    if (Math.abs(max - min) < 1e-9) return { kind: 'flat', rate: min };
+    return { kind: 'graduated', min: min, max: max };
+  }
+
+  function incomeTaxNote(stateCode, table, meta) {
+    var name = STATE_NAME[stateCode];
+    var record = rateRecord(table && table[stateCode]);
+    var note = {
+      asOf: (meta && meta.asOf) || '',
+      asOfLabel: asOfLabel(meta && meta.asOf),
+      source: (meta && meta.source) || ''
+    };
+    if (!name || !record) {
+      note.text = 'A state income tax rate is not available for this location.';
+      return note;
     }
-    return list.length ? list[list.length - 1] : null;
-  }
-
-  function bandById(id, bands) {
-    var list = bands || [];
-    var i;
-    for (i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
-    return null;
-  }
-
-  function filingStatus(adults) {
-    return Number(adults) >= 2 ? 'married' : 'single';
-  }
-
-  function exemptionAmount(record, income, filing) {
-    if (!record || record.none) return 0;
-    var schedule = record.exemptionSchedule;
-    var amount = 0;
-    if (schedule && schedule.length) {
-      var i;
-      for (i = 0; i < schedule.length; i++) {
-        var row = schedule[i];
-        var fits = row.maxInclusive == null && row.maxExclusive == null
-          || (row.maxInclusive != null && income <= row.maxInclusive)
-          || (row.maxExclusive != null && income < row.maxExclusive);
-        if (fits) {
-          amount = row[filing] || 0;
-          break;
-        }
-      }
-    } else if (!record.personalExemptionIsCredit) {
-      amount = (record.personalExemption && record.personalExemption[filing]) || 0;
+    if (record.kind === 'none') {
+      note.text = 'In ' + name + ', there is no state tax on wage income, and Florida has no state income tax.';
+      return note;
     }
-    var phase = record.exemptionPhaseout;
-    if (phase && income > phase[filing]) amount = 0;
-    return amount;
-  }
-
-  function marginalTax(taxable, brackets) {
-    if (!(taxable > 0) || !brackets || !brackets.length) return 0;
-    var rows = brackets.slice().sort(function (a, b) { return a.over - b.over; });
-    var tax = 0;
-    var i;
-    for (i = 0; i < rows.length; i++) {
-      var start = rows[i].over;
-      var end = i + 1 < rows.length ? rows[i + 1].over : Infinity;
-      if (taxable <= start) break;
-      tax += (Math.min(taxable, end) - start) * rows[i].rate;
-    }
-    return tax;
-  }
-
-  // T = bracket tax on (income − standard deduction − filer exemption). Credits in the Tax Foundation deduction or exemption columns reduce the tax.
-  function stateIncomeTax(stateCode, income, filing, table) {
-    var record = table && table[stateCode];
-    if (!record || record.none) return 0;
-    var deduction = 0;
-    if (!record.standardDeductionIsCredit) deduction += (record.standardDeduction && record.standardDeduction[filing]) || 0;
-    deduction += exemptionAmount(record, income, filing);
-    var taxable = Math.max(0, income - deduction);
-    var tax = marginalTax(taxable, record.brackets && record.brackets[filing]);
-    if (record.standardDeductionIsCredit) tax -= (record.standardDeduction && record.standardDeduction[filing]) || 0;
-    if (record.personalExemptionIsCredit) tax -= (record.personalExemption && record.personalExemption[filing]) || 0;
-    return Math.max(0, tax);
+    var rateText = record.kind === 'flat'
+      ? formatRate(record.rate)
+      : formatRate(record.min) + ' to ' + formatRate(record.max);
+    note.text = 'On top of these savings, in ' + name + ' your state income tax is currently ' + rateText + ', and Florida has no state income tax.';
+    return note;
   }
 
   function fuelMonthly(input, price) {
@@ -273,10 +251,6 @@
     var lines = [];
     var notes = [];
     var hh = Number(input.hhSize) || 0;
-    var adults = input.adults == null || input.adults === '' ? Math.min(Math.max(hh, 1), 2) : Number(input.adults);
-    var filing = filingStatus(adults);
-    var band = bandById(input.incomeBand, factors.incomeBands) || bandForIncome(num(input.income) || 0, factors.incomeBands);
-    var income = band ? band.midpoint : null;
     var area = factors.florida && factors.florida.areas && factors.florida.areas[input.toArea];
     var originState = input.state || '';
     var groceries = groceryPair({
@@ -287,33 +261,9 @@
       usda: factors.usda
     });
 
-    if (isTerritory(originState)) {
-      lines.push(unavailableLine('income-tax', 'State income tax', sourceOf(factors.incomeTax)));
-    } else if (originState && income != null && factors.incomeTax) {
-      var annualTax = stateIncomeTax(originState, income, filing, factors.incomeTax.states);
-      var monthlyTax = annualTax / 12;
-      if (!(annualTax > 0) || round10(monthlyTax) === 0) {
-        lines.push({
-          id: 'income-tax',
-          label: 'State income tax',
-          origin: 0,
-          florida: 0,
-          difference: 0,
-          inTotal: true,
-          originNote: 'No change.',
-          floridaNote: 'No change.',
-          text: 'No change.',
-          sources: sourceOf(factors.incomeTax)
-        });
-      } else {
-        var taxLine = moneyLine('income-tax', 'State income tax', monthlyTax, 0, {
-          originNote: 'Estimated savings.',
-          floridaNote: '',
-          sources: sourceOf(factors.incomeTax)
-        });
-        if (taxLine) lines.push(taxLine);
-      }
-    }
+    var taxNote = factors.incomeTax
+      ? incomeTaxNote(originState, factors.incomeTax.states, factors.incomeTax)
+      : null;
 
     if (input.drives) {
       var gasPrice = factors.gas && factors.gas.states;
@@ -422,23 +372,6 @@
       if (flood) lines.push(flood);
     }
 
-    if (isTerritory(originState)) {
-      lines.push(unavailableLine('sales-tax', 'Sales tax', sourceOf(factors.salesTax).concat(sourceOf(factors.florida && factors.florida.salesTax))));
-    } else if (income != null && groceries && factors.salesTax && area) {
-      var originSales = factors.salesTax.states[originState];
-      var floridaRate = area.salesTax;
-      if (originSales && floridaRate != null) {
-        var originMonthly = originSales.grocery === 'reduced'
-          ? salesTaxMonthlyReduced(income, originSales.combined, originSales.groceryRate, groceries.origin)
-          : salesTaxMonthly(income, originSales.combined, groceries.origin, originSales.grocery);
-        var floridaMonthly = salesTaxMonthly(income, floridaRate, groceries.florida, 'exempt');
-        var sales = moneyLine('sales-tax', 'Sales tax', originMonthly, floridaMonthly, {
-          sources: sourceOf(factors.salesTax).concat(sourceOf(factors.florida.salesTax))
-        });
-        if (sales) lines.push(sales);
-      }
-    }
-
     if (input.ownNow && input.planFL && area) {
       var budget = num(input.homeBudget);
       var floridaPrice = budget != null ? budget : area.median;
@@ -522,10 +455,7 @@
     return {
       lines: lines,
       sentence: sentence,
-      income: income,
-      band: band,
-      filing: filing,
-      adults: adults,
+      incomeTaxNote: taxNote,
       notes: notes,
       total: {
         monthly: monthly,
@@ -540,11 +470,9 @@
   return {
     STATE_NAME: STATE_NAME,
     round10: round10,
-    bandForIncome: bandForIncome,
-    bandById: bandById,
-    filingStatus: filingStatus,
-    stateIncomeTax: stateIncomeTax,
-    marginalTax: marginalTax,
+    formatRate: formatRate,
+    asOfLabel: asOfLabel,
+    incomeTaxNote: incomeTaxNote,
     fuelMonthly: fuelMonthly,
     usdaHousehold: usdaHousehold,
     groceryPair: groceryPair,
