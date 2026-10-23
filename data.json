@@ -379,7 +379,7 @@
   "asOf": "2026",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "The local table is published for moves under 50 miles. The long-distance table is a 1,200-mile benchmark. This estimator scales between those two published prices up to 1,200 miles. Past 1,200 miles it holds the 1,200-mile price, then caps it so a DIY truck or container does not exceed full-service for the same move. That scale, hold, and cap are assumptions, not another published table."
+  "caveat": "The local table is published for moves under 50 miles. The long-distance table is a 1,200-mile benchmark. This estimator scales between those two published prices up to 1,200 miles and holds the 1,200-mile price after that. At every distance the DIY price is capped so it does not exceed full-service for the same home. A 1-bedroom house uses the 1-bedroom apartment row, matching the full-service Studio/1BR cell. That scale, hold, and cap are assumptions, not another published table."
  },
  "cmrSeason": {
   "value": {
@@ -518,7 +518,7 @@
    "url": "https://www.hireahelper.com/moving-cost-calculator/",
    "asOf": "2026-10-22",
    "status": "ASSUMPTION",
-   "caveat": "Typical price moves in a straight line from the local price at 0 miles to the 1,200-mile price. Past 1,200 miles that 1,200-mile price is held flat, then capped so it does not exceed full-service for the same home and distance. Low is 0.8 times typical and high is 1.25 times typical, and those ends are also kept at or under the full-service low and high."
+   "caveat": "Typical price moves in a straight line from the local price at 0 miles to the 1,200-mile price. Past 1,200 miles that 1,200-mile price is held flat. At every distance the result is capped so it does not exceed full-service for the same home and distance. Low is 0.8 times typical and high is 1.25 times typical, and those ends are also kept at or under the full-service low and high."
   },
   "fullLocal": {
    "lowFactor": 0.75,

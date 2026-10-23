@@ -162,6 +162,43 @@ for (const road of [1300, 1872, 3082]) {
   }
 }
 assert(/held flat/.test(boxAt(1872).note) && /cap/.test(boxAt(1872).sources.map(s => s.caveat).join(' ')), 'long DIY source note explains the flat cap');
+const oneBed = priceCore(D, { help: 'Moving container', type: 'Single-story house', size: '1 bedroom' }, 1200).line;
+const oneBedFull = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '1 bedroom', when: 'March 2027' }, 1200).line;
+assert(oneBed.typ <= oneBedFull.typ + 1e-6 && oneBed.hi <= oneBedFull.hi + 1e-6, '1-bedroom house container at 1,200 miles does not exceed full-service');
+assert(/1-bedroom apartment row/.test(oneBed.note), '1-bedroom house uses the matching apartment row');
+const homeTypes = ['Studio apartment', 'Apartment', 'Townhome', 'Single-story house', 'Multi-story house', 'Not sure'];
+const homeSizes = ['1 bedroom', '2 bedrooms', '3 bedrooms', '4 bedrooms', '5+ bedrooms', 'Not sure'];
+let sweepChecked = 0;
+for (let road = 0; road <= 4000; road += 5) {
+  for (const type of homeTypes) {
+    for (const size of homeSizes) {
+      const full = priceCore(D, { help: 'Full-service movers', type, size, when: 'March 2027' }, road);
+      for (const help of ['DIY rental truck', 'Moving container']) {
+        let diy;
+        try { diy = priceCore(D, { help, type, size, when: 'March 2027' }, road); }
+        catch (err) { assert(false, `DIY sweep threw ${type} ${size} ${road}: ${err.message}`); continue; }
+        if (diy.line.display !== 'money' || full.line.display !== 'money') continue;
+        sweepChecked += 1;
+        const finite = [diy.line.lo, diy.line.typ, diy.line.hi, full.line.lo, full.line.typ, full.line.hi].every(n => Number.isFinite(n));
+        assert(finite, `sweep numbers are finite for ${help} ${type} ${size} at ${road}`);
+        assert(diy.line.lo <= full.line.lo + 1e-6 && diy.line.typ <= full.line.typ + 1e-6 && diy.line.hi <= full.line.hi + 1e-6, `${help} ${type} ${size} at ${road} mi exceeds full-service`);
+      }
+    }
+  }
+}
+assert(sweepChecked > 1000, 'DIY sweep compared prices across homes and distances');
+for (const road of [0, 10, 25, 40, 49]) {
+  for (const type of homeTypes) {
+    for (const size of homeSizes) {
+      let line;
+      try { line = priceCore(D, { help: 'Full-service movers', type, size, when: 'March 2027' }, road).line; }
+      catch (err) { assert(false, `short full-service threw ${type} ${size} at ${road}: ${err.message}`); continue; }
+      if (line.display === 'money') {
+        assert([line.lo, line.typ, line.hi].every(n => Number.isFinite(n)), `short full-service NaN ${type} ${size} at ${road}`);
+      }
+    }
+  }
+}
 
 // Not enough info
 const unsureDest = estimateMove(Object.assign({}, base, {
@@ -202,14 +239,14 @@ const fee7 = feesFor(7), fee8 = feesFor(8), fee12 = feesFor(12);
 near(fee7.typ, fee1.typ * 7, 1e-6, 'seven vehicles are priced as seven');
 near(fee8.typ, fee7.typ, 1e-6, 'eight vehicles are priced as seven');
 near(fee12.typ, fee7.typ, 1e-6, 'twelve vehicles are priced as seven');
-const CAVEAT = 'It seems you have selected to transport more than seven vehicles. Please contact a relocation company directly for a better estimate.';
+const CAVEAT = 'It seems you have selected to transport seven or more vehicles. Please contact a relocation company directly for a better estimate.';
 function moved(veh) {
   return estimateMove(Object.assign({}, base, {
     origin: originZip('30303'), dest: area('tampa'), help: 'Full-service movers', veh: String(veh), licenses: '0', travel: 'Flying', vehHow: 'Ship them'
   }), D);
 }
 assert(moved(6).vehicleCaveat === '', 'six vehicles have no many-vehicle caveat');
-assert(moved(7).vehicleCaveat === CAVEAT, 'seven vehicles show the exact caveat');
+assert(moved(7).vehicleCaveat === CAVEAT, 'exactly seven vehicles show the caveat');
 assert(moved('7+').vehicleCaveat === CAVEAT && moved('7+').lines.find(l => l.id === 'fees').typ === fee7.typ, '7+ button prices as seven and shows the caveat');
 assert(moved(12).vehicleCaveat === CAVEAT, 'twelve vehicles show the caveat');
 assert(fee1.note.includes('85.25') && fee1.note.includes('22.50'), 'cents stay visible');
