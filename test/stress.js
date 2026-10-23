@@ -147,10 +147,21 @@ function truckAt(road) {
 }
 near(truckAt(0).typ, 589.6, 1e-6, 'truck at 0 miles is the local price');
 near(truckAt(1200).typ, 2279.75, 1e-4, 'truck at 1,200 miles is the long-distance price');
-near(truckAt(2400).typ, 2279.75 * 2, 1e-2, 'truck past 1,200 miles scales');
-assert(truckAt(200).typ < truckAt(600).typ && truckAt(600).typ < truckAt(1200).typ && truckAt(1200).typ < truckAt(2000).typ, 'truck typical rises with distance');
+near(truckAt(2400).typ, 2279.75, 1e-2, 'truck past 1,200 miles stays at the 1,200-mile price');
+assert(truckAt(200).typ < truckAt(600).typ && truckAt(600).typ < truckAt(1200).typ, 'truck typical rises up to 1,200 miles');
+assert(truckAt(2000).typ <= truckAt(1200).typ, 'truck typical does not rise past 1,200 miles');
 const boxAt = road => priceCore(D, { help: 'Moving container', type: 'Single-story house', size: '3 bedrooms' }, road).line;
-assert(boxAt(200).typ < boxAt(600).typ && boxAt(600).typ < boxAt(1600).typ, 'container typical rises with distance');
+const fullHouse = road => priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '3 bedrooms', when: 'March 2027' }, road).line;
+assert(boxAt(200).typ < boxAt(600).typ && boxAt(600).typ < boxAt(1200).typ, 'container typical rises up to 1,200 miles');
+assert(boxAt(1600).typ <= boxAt(1200).typ && boxAt(1600).typ <= fullHouse(1600).typ, 'container past 1,200 miles does not exceed full-service');
+for (const road of [1300, 1872, 3082]) {
+  for (const help of ['DIY rental truck', 'Moving container']) {
+    const diy = priceCore(D, { help, type: 'Single-story house', size: '3 bedrooms' }, road).line;
+    const full = fullHouse(road);
+    assert(diy.lo <= full.lo + 1e-6 && diy.typ <= full.typ + 1e-6 && diy.hi <= full.hi + 1e-6, `${help} at ${road} miles stays at or under full-service`);
+  }
+}
+assert(/held flat/.test(boxAt(1872).note) && /cap/.test(boxAt(1872).sources.map(s => s.caveat).join(' ')), 'long DIY source note explains the flat cap');
 
 // Not enough info
 const unsureDest = estimateMove(Object.assign({}, base, {
@@ -187,6 +198,20 @@ near(fee1.typ, 360.75, 1e-6, 'one vehicle typical fee');
 near(fee1.lo, 352.75, 1e-6, 'one vehicle low fee');
 near(fee1.hi, 370.75, 1e-6, 'one vehicle high fee');
 near(fee6.typ, fee3.typ * 2, 1e-6, 'six vehicles are double three');
+const fee7 = feesFor(7), fee8 = feesFor(8), fee12 = feesFor(12);
+near(fee7.typ, fee1.typ * 7, 1e-6, 'seven vehicles are priced as seven');
+near(fee8.typ, fee7.typ, 1e-6, 'eight vehicles are priced as seven');
+near(fee12.typ, fee7.typ, 1e-6, 'twelve vehicles are priced as seven');
+const CAVEAT = 'It seems you have selected to transport more than seven vehicles. Please contact a relocation company directly for a better estimate.';
+function moved(veh) {
+  return estimateMove(Object.assign({}, base, {
+    origin: originZip('30303'), dest: area('tampa'), help: 'Full-service movers', veh: String(veh), licenses: '0', travel: 'Flying', vehHow: 'Ship them'
+  }), D);
+}
+assert(moved(6).vehicleCaveat === '', 'six vehicles have no many-vehicle caveat');
+assert(moved(7).vehicleCaveat === CAVEAT, 'seven vehicles show the exact caveat');
+assert(moved('7+').vehicleCaveat === CAVEAT && moved('7+').lines.find(l => l.id === 'fees').typ === fee7.typ, '7+ button prices as seven and shows the caveat');
+assert(moved(12).vehicleCaveat === CAVEAT, 'twelve vehicles show the caveat');
 assert(fee1.note.includes('85.25') && fee1.note.includes('22.50'), 'cents stay visible');
 assert(formatMoney(fee1.typ) === '$360.75', 'formatter keeps cents');
 assert(formatMoney(48) === '$48', 'whole dollars have no cents');
@@ -243,6 +268,13 @@ const lodging = drive.lines.find(l => l.id === 'lodging');
 const meals = drive.lines.find(l => l.id === 'meals');
 assert(lodging.display === 'money' && lodging.note.includes('113'), 'lodging uses $113');
 assert(meals.display === 'money' && meals.note.includes('68'), 'meals use $68');
+assert(meals.lo === 0 && meals.typ > 0, 'Atlanta low column is a one-day drive, so those meals are not added');
+const samePlace = estimateMove(Object.assign({}, base, {
+  origin: originZip('34285'), dest: area('venice'), help: 'Full-service movers'
+}), D);
+const sameMeals = samePlace.lines.find(l => l.id === 'meals');
+assert(samePlace.dist.road < 50, `Venice ZIP to Venice should be a short drive (${samePlace.dist.road})`);
+assert(sameMeals.display === 'money' && sameMeals.lo === 0 && sameMeals.typ === 0 && sameMeals.hi === 0, 'a same-day local drive does not add meals');
 assert(drive.lines.find(l => l.id === 'carFuel').note.includes('4.057'), 'Florida gas price cited');
 assert(lodging.sources.some(s => s.asOf && s.asOf.includes('FY2027')), 'lodging source date');
 
