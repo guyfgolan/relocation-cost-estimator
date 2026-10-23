@@ -221,6 +221,8 @@ assert.strictEqual(factors.health.states.OH.family, 6453);
 assert.strictEqual(factors.naturalGas.enabled, false);
 assert.strictEqual(factors.florida.flood.enabled, false);
 assert.strictEqual(factors.florida.flood.statistic, 'median');
+assert.ok(factors.florida.flood.source.indexOf('median policy cost') > 0);
+assert.strictEqual(factors.florida.flood.source.indexOf('average'), -1);
 assert.strictEqual(line(result, 'health').difference, 120);
 assert.strictEqual(line(result, 'utilities').label, 'Electricity and Water');
 assert.strictEqual(line(result, 'utilities').difference, 20);
