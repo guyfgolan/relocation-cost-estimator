@@ -533,6 +533,13 @@ assert(!/@media[^{]*max-width:\s*(?:720|640|520)px/.test(cssText(moverPage)), 'm
 assert(!/@media[^{]*max-width:\s*799px/.test(cssText(colPage)), 'cost of living phone reflow is gone');
 assert(moverPage.indexOf('class="creditsLink"') > 0 && moverPage.indexOf('>Photo Credits<') > 0 && moverPage.indexOf('class="creditsBtn"') === -1, 'photo credits is a gold text link');
 assert(colPage.indexOf("label||'Book a Call'") > 0 && colPage.indexOf('Schedule a call with Guy') === -1 && colPage.indexOf('Book a Call with Guy') > 0, 'results button says Book a Call');
+assert(colPage.indexOf('content="width=1280"') > 0 && colPage.indexOf('width=device-width') === -1, 'cost of living viewport is width 1280');
+assert(colPage.indexOf('--navy:#001B35') > 0 && colPage.indexOf('#001F3F') === -1 && colPage.indexOf('#001f3f') === -1, 'navy token is #001B35');
+assert(!/#808A98|#4E5964|#5A7A9A|#F5F7FA/i.test(colPage), 'cost of living has no grey leftovers');
+assert(colPage.indexOf('Inter') === -1 && /font-family:\s*Gelasio,\s*Georgia,\s*serif/.test(colPage) && /font-family:\s*Cinzel,\s*Georgia,\s*serif/.test(colPage), 'cost of living uses Cinzel and Gelasio');
+assert(/\.sheet,input,\.tableWrap,\.areaCard\{border-radius:0\}/.test(colPage), 'sheet, inputs, table, and cards are square');
+assert(!/\.sheet\{[^}]*background:\s*(?:#fff\b|#ffffff\b|white\b|var\(--paper\))/i.test(cssText(colPage)), 'the sheet is not white');
+assert(colPage.indexOf("matchMedia('(max-width: 799px)')") === -1 && !/@media[^{]*max-width:\s*799px/.test(cssText(colPage)), 'cost of living has no mobile card layout');
 
 function show(label, est) {
   const m = est.lines.find(l => l.id === 'moving');

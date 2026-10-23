@@ -152,7 +152,8 @@ async function main() {
         pointer: style.pointerEvents,
         font: parseFloat(style.fontSize),
         color: style.color,
-        background: style.backgroundColor
+        background: style.backgroundColor,
+        radius: style.borderRadius
       };
     })()`);
     if (field.disabled || field.pointer === 'none' || !(field.font >= 16)) {
@@ -161,6 +162,7 @@ async function main() {
     if (field.color !== 'rgb(0, 27, 53)' || field.background !== 'rgb(247, 244, 236)') {
       throw new Error('zip field colors: ' + JSON.stringify(field));
     }
+    if (field.radius !== '0px') throw new Error('zip field radius ' + field.radius);
     const layout = await page.eval(`(async () => {
       Object.assign(A, {
         zip: '43215', to: 'sarasota', household: '2', adults: '2', income: '75to150',
@@ -190,7 +192,11 @@ async function main() {
         bodyScroll: document.body.scrollWidth,
         bodyClient: document.body.clientWidth,
         innerWidth: window.innerWidth,
+        viewport: (document.querySelector('meta[name="viewport"]') || {}).content || '',
+        narrow: window.matchMedia('(max-width: 799px)').matches,
         tableWidth: rect ? rect.width : 0,
+        sheetRadius: (document.querySelector('.sheet') && getComputedStyle(document.querySelector('.sheet')).borderRadius) || '',
+        sheetBg: (document.querySelector('.sheet') && getComputedStyle(document.querySelector('.sheet')).backgroundColor) || '',
         amount: amount ? amount.textContent : '',
         amountFont: amountStyle ? amountStyle.fontFamily : '',
         amountColor: amountStyle ? amountStyle.color : '',
@@ -200,9 +206,12 @@ async function main() {
     const failures = [];
     if (layout.tableHidden || layout.display !== 'table') failures.push('results did not stay a table: ' + JSON.stringify(layout));
     if (!layout.cardsHidden) failures.push('stacked cards are showing');
+    if (layout.viewport !== 'width=1280') failures.push('viewport meta is ' + layout.viewport);
+    if (layout.narrow) failures.push('390px device still matches a mobile card query: ' + JSON.stringify(layout));
     if (layout.scrollWidth > layout.clientWidth + 1 || layout.bodyScroll > layout.bodyClient + 1) failures.push('horizontal scroll: ' + JSON.stringify(layout));
-    if (layout.innerWidth !== 390) failures.push('viewport is ' + layout.innerWidth);
-    if (!(layout.tableWidth > 0) || layout.tableWidth > layout.innerWidth + 1) failures.push('table does not fit the phone: ' + JSON.stringify(layout));
+    if (!(layout.tableWidth > 0) || layout.tableWidth > layout.clientWidth + 1) failures.push('table does not fit the layout: ' + JSON.stringify(layout));
+    if (layout.sheetRadius !== '0px') failures.push('sheet radius ' + layout.sheetRadius);
+    if (layout.sheetBg !== 'rgb(0, 27, 53)') failures.push('sheet background ' + layout.sheetBg);
     if (layout.pageBg !== 'rgb(0, 27, 53)') failures.push('page background ' + layout.pageBg);
     if (!layout.amount || layout.amountFont.indexOf('Gelasio') < 0 || layout.amountColor !== 'rgb(212, 175, 55)') {
       failures.push('total is not large gold Gelasio: ' + JSON.stringify(layout));
