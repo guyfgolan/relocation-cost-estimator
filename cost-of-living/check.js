@@ -248,6 +248,39 @@ function check(doc, mode, shards) {
   return doc;
 }
 
+const FACTOR_BLOCKS = [
+  ['incomeTax'],
+  ['salesTax'],
+  ['gas'],
+  ['autoInsurance'],
+  ['homeInsurance'],
+  ['rentersInsurance'],
+  ['health'],
+  ['usda'],
+  ['homestead'],
+  ['florida', 'salesTax'],
+  ['florida', 'homeInsurance'],
+  ['florida', 'millage'],
+  ['florida', 'medianPrice']
+];
+
+function checkFactors(config) {
+  if (!config || typeof config !== 'object') fail('factors');
+  FACTOR_BLOCKS.forEach(function (keys) {
+    let block = config;
+    keys.forEach(function (key) { block = block && block[key]; });
+    const name = keys.join('.');
+    if (!block) fail('factor missing ' + name);
+    if (!block.source) fail('factor missing source ' + name);
+    if (!block.asOf || !ASOF.test(String(block.asOf))) fail('factor missing asOf ' + name);
+    if (!block.retrieved || !RETRIEVED.test(String(block.retrieved))) fail('factor retrieved ' + name);
+    if (!block.url || !/^https:\/\//.test(block.url)) fail('factor missing url ' + name);
+  });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(config.gas.asOf)) fail('gas snapshot date');
+  if (config.homestead.value !== 51411) fail('homestead amount');
+  return config;
+}
+
 function load(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
@@ -255,10 +288,11 @@ function load(file) {
 if (require.main === module) {
   const doc = load(path.join(__dirname, 'cost-of-living.json'));
   check(doc);
+  checkFactors(load(path.join(__dirname, 'factors.json')));
   const measured = doc.figures.filter(function (figure) { return figure.evidence === 'MEASURED'; }).length;
   const metro = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'cbsa'; }).length;
   const state = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'state'; }).length;
   console.log('Bundle ok:', measured, 'measured Gulf figures,', metro, 'metro rows,', state, 'state rows,', doc.crosswalk.zipCount, 'ZIPs,', doc.areas.length, 'Gulf columns');
 }
 
-module.exports = { check: check, load: load, loadShards: loadShards, CBSA_FOR: CBSA_FOR };
+module.exports = { check: check, checkFactors: checkFactors, load: load, loadShards: loadShards, CBSA_FOR: CBSA_FOR };

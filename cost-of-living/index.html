@@ -75,8 +75,18 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .metric+.metric{border-top:1px solid var(--line)}
 .areaCard.yours .metric+.metric{border-top-color:rgba(255,255,255,.35)}
 .metric b{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.credit{color:var(--gray);font-size:14px;margin:14px 0 0}
-.credit a{color:var(--gray)}
+.credit,.sources{color:var(--gray);font-size:14px;margin:14px 0 0}
+.credit a,.sources a{color:var(--gray)}
+.help,.note{color:var(--gray);font-size:14px;margin:6px 0 0}
+.field{margin:0 0 16px}
+.pair{display:grid;gap:12px}
+.route{font-weight:700;margin:0 0 8px}
+.totalBox{margin-top:16px;border:1px solid var(--gold);border-radius:8px;padding:14px 16px;background:var(--white)}
+.totalBox p{margin:0 0 6px}
+.totalAmount{font-size:clamp(28px,4vw,40px);font-weight:700;margin:0 0 6px;font-variant-numeric:tabular-nums}
+.check{display:flex;align-items:flex-start;gap:10px;font-weight:600}
+.check input{width:auto;min-height:0;margin-top:4px}
+.headlineBand p{color:var(--white);margin:12px 0 0}
 .ctaBand{margin-top:22px;border-radius:8px;padding:28px 16px}
 .ctaBand .primary{margin-top:16px;min-width:min(100%,280px)}
 .siteFooter{padding:22px 16px 28px}
@@ -89,6 +99,7 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .headlineBand :focus-visible,.ctaBand :focus-visible,.siteHeader :focus-visible,.siteFooter :focus-visible,.areaCard.yours :focus-visible,.compare .yours :focus-visible{outline:2px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 2px var(--navy)}
 @media(min-width:800px){
  .choices.wide{grid-template-columns:1fr 1fr 1fr}
+ .pair{grid-template-columns:1fr 1fr}
 }
 @media(max-width:799px){
  .choices.two,.choices.wide{grid-template-columns:1fr}
@@ -113,19 +124,29 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 <p><a href="../">Moving cost estimator</a></p>
 </footer>
 <script src="lookup.js"></script>
+<script src="estimate.js"></script>
 <script>
 const BOOKING_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7';
-const STEPS=['from','household','income','tenure','results'];
+const STEPS=['from','to','household','income','now','plan','drive','other','results'];
 const QUESTIONS=[
   {id:'from',title:'Where are you moving from?'},
+  {id:'to',title:'Which Gulf Coast area?'},
   {id:'household',title:'How many people are in your household?'},
-  {id:'income',title:"What's your yearly household income?"},
-  {id:'tenure',title:'Will you rent or buy?'}
+  {id:'income',title:"What's your household income range?"},
+  {id:'now',title:'Do you own or rent now?'},
+  {id:'plan',title:'Will you buy or rent in Florida?'},
+  {id:'drive',title:'Will you be driving?'},
+  {id:'other',title:'Anything else to include?'}
 ];
-const A={zip:'',household:'',amount:'',tenure:''};
+const FRAMING='General estimate for planning a conversation. Not a quote. Your actual costs depend on your home, coverage and habits.';
+const REPORT='This is a general estimate built from published averages. It is not a quote or tax advice. Let\'s talk through your actual numbers.';
+const A={zip:'',to:'',household:'',adults:'',adultsTouched:false,income:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null};
 let bundle=null;
+let factors=null;
 let renderGen=0;
+let busy=false;
 const panel=document.getElementById('panel');
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function focusHeading(){
   const h=panel.querySelector('h2');
@@ -134,7 +155,7 @@ function focusHeading(){
   h.focus({focusVisible:false});
 }
 function bookingLink(){
-  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Schedule a call with Guy</a>';
+  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Book a Call</a>';
 }
 function isSourced(figure){
   return !!figure && typeof figure.value==='number' && !Number.isNaN(figure.value) && figure.evidence==='MEASURED' && /^[\d.]+$/.test(String(figure.display||''));
@@ -167,62 +188,226 @@ function render(step){
   else showStep(QUESTIONS.some(q=>q.id===step)?step:'from');
 }
 function progress(n){
-  return '<p class="stepLabel" id="stepLabel">Step '+n+' of 4</p><div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="'+n+'" aria-labelledby="stepLabel"><div style="width:'+(n/4*100)+'%"></div></div>';
+  return '<p class="stepLabel" id="stepLabel">Step '+n+' of 8</p><div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="8" aria-valuenow="'+n+'" aria-labelledby="stepLabel"><div style="width:'+(n/8*100)+'%"></div></div>';
 }
 function stepBar(n){
-  return '<div class="stepBar"><button type="button" class="secondary" id="backBtn"'+(n===1?' disabled':'')+'>Back</button><button type="button" class="primary" id="nextBtn">Next</button></div>';
+  const nextLabel=n===8?'See your estimate':'Next';
+  return '<div class="stepBar"><button type="button" class="secondary" id="backBtn"'+(n===1?' disabled':'')+'>Back</button><button type="button" class="primary" id="nextBtn">'+nextLabel+'</button></div>';
 }
 function choices(group, items, current){
   return '<div class="choices'+(items.length>2?' wide':' two')+'" role="group">'+items.map(item=>'<button type="button" class="option" data-group="'+esc(group)+'" data-id="'+esc(item.id)+'" aria-pressed="'+(current===item.id?'true':'false')+'">'+esc(item.label)+'</button>').join('')+'</div>';
+}
+function readChoice(group){
+  const btn=panel.querySelector('.option[data-group="'+group+'"][aria-pressed="true"]');
+  return btn?btn.getAttribute('data-id'):'';
+}
+function fieldValue(id){
+  const el=document.getElementById(id);
+  return el?el.value.trim():'';
+}
+function areaList(){
+  const ids=(bundle.comparison&&bundle.comparison.gulfAreaIds)||[];
+  return ids.map(id=>(bundle.areas||[]).find(area=>area.id===id)).filter(Boolean);
+}
+function selectedArea(){
+  return areaList().find(area=>area.id===A.to)||null;
+}
+function defaultAdults(){
+  const size=Number(A.household)||0;
+  return size?String(Math.min(size,2)):'';
+}
+function bandRecord(){
+  return (factors.incomeBands||[]).find(band=>band.id===A.income)||null;
+}
+function midpointCopy(band){
+  if(!band) return '';
+  const dollars=Number(band.midpoint).toLocaleString('en-US');
+  let text='This estimate uses $'+dollars+', the middle of this range.';
+  if(band.id==='250plus') text+=' That midpoint is halfway from $250,000 to $500,000.';
+  return text;
+}
+function householdLabel(){
+  if(A.household==='1') return '1 person';
+  if(A.household==='6') return '6 or more people';
+  return A.household?A.household+' people':'';
+}
+function money(n, withPlus){
+  if(n==null || Number.isNaN(Number(n))) return '\u2014';
+  const rounded=Math.round(Number(n));
+  const body='$'+Math.abs(rounded).toLocaleString('en-US');
+  if(rounded<0) return '\u2212'+body;
+  if(withPlus && rounded>0) return '+'+body;
+  return body;
+}
+function asOfText(asOf){
+  const full=/^(\d{4})-(\d{2})-(\d{2})$/.exec(asOf||'');
+  if(full) return MONTHS[Number(full[2])-1]+' '+Number(full[3])+', '+full[1];
+  const month=/^(\d{4})-(\d{2})$/.exec(asOf||'');
+  if(month) return MONTHS[Number(month[2])-1]+' '+month[1];
+  return asOf||'';
+}
+function numberOrBlank(value){
+  if(value==='') return '';
+  const n=Number(String(value).replace(/[$,]/g,''));
+  if(!Number.isFinite(n) || n<0) return 'Enter a dollar amount, or leave it blank.';
+  return '';
+}
+function countOrBlank(value){
+  if(value==='') return '';
+  const n=Number(value);
+  if(!Number.isFinite(n) || n<=0) return 'Enter a number above zero.';
+  return '';
 }
 function showStep(id){
   const q=QUESTIONS.find(item=>item.id===id);
   const n=QUESTIONS.indexOf(q)+1;
   let fields='';
   if(id==='from'){
-    fields='<label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" value="'+esc(A.zip)+'"><p class="status" id="zipStatus" role="status"></p>';
+    fields='<div class="field"><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" spellcheck="false" value="'+esc(A.zip)+'"><p class="status" id="zipStatus" role="status"></p></div>';
+  }else if(id==='to'){
+    fields=choices('to',areaList().map(area=>({id:area.id,label:area.name})),A.to);
   }else if(id==='household'){
-    fields=choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5+',label:'5 or more'}],A.household);
+    const adults=A.adults||defaultAdults();
+    fields='<div class="field">'+choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5',label:'5 people'},{id:'6',label:'6 or more'}],A.household)+'</div>';
+    fields+='<div class="field"><label id="adultsLabel">How many adults?</label>'+choices('adults',[{id:'1',label:'1 adult'},{id:'2',label:'2 or more adults'}],adults)+'<p class="help">Used for the state income tax line. The default is one adult, or two when the household has two or more people.</p></div>';
   }else if(id==='income'){
-    fields='<label for="amount">Yearly household income</label><input id="amount" inputmode="decimal" autocomplete="off" value="'+esc(A.amount)+'"><p>It stays in this browser and is not saved.</p>';
+    fields=choices('income',(factors.incomeBands||[]).map(band=>({id:band.id,label:band.label})),A.income);
+    fields+='<p id="midpoint" class="help">'+esc(midpointCopy(bandRecord()))+'</p><p>It stays in this browser and is not saved.</p>';
+  }else if(id==='now'){
+    fields=choices('ownNow',[{id:'own',label:'Own'},{id:'rent',label:'Rent'}],A.ownNow);
+  }else if(id==='plan'){
+    fields=choices('planFL',[{id:'buy',label:'Buy'},{id:'rent',label:'Rent'}],A.planFL);
+    fields+='<div id="buyDetails"'+(A.planFL==='buy'?'':' hidden')+'><div class="field"><label id="primaryLabel">Is this your primary residence?</label>'+choices('primary',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],A.primary)+'</div><div class="field"><label for="homeBudget">Home budget</label><input id="homeBudget" inputmode="decimal" autocomplete="off" value="'+esc(A.homeBudget)+'"><p class="help">Leave blank to use the area\'s median sale price.</p></div></div>';
+  }else if(id==='drive'){
+    fields=choices('drives',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],A.drives);
+    fields+='<div id="driveDetails"'+(A.drives==='yes'?'':' hidden')+'><div class="pair"><div class="field"><label for="vehicles">How many vehicles?</label><input id="vehicles" inputmode="numeric" autocomplete="off" value="'+esc(A.vehicles)+'"><p class="help">Default is 1.</p></div><div class="field"><label for="miles">Miles per month</label><input id="miles" inputmode="decimal" autocomplete="off" value="'+esc(A.miles)+'"><p class="help">Default is 1,000.</p></div></div><div class="field"><label id="fuelLabel">Gas or electric?</label>'+choices('fuel',[{id:'gas',label:'Gas'},{id:'ev',label:'Electric vehicle'}],A.fuel||'gas')+'</div><div class="field" id="mpgField"'+(A.fuel==='ev'?' hidden':'')+'><label for="mpg">Miles per gallon</label><input id="mpg" inputmode="decimal" autocomplete="off" value="'+esc(A.mpg)+'"><p class="help">Default is 25.</p></div><div class="field" id="kwhField"'+(A.fuel==='ev'?'':' hidden')+'><label for="miPerKwh">Miles per kilowatt-hour</label><input id="miPerKwh" inputmode="decimal" autocomplete="off" value="'+esc(A.miPerKwh)+'"><p class="help">Default is 3.5.</p></div></div>';
   }else{
-    fields=choices('tenure',[{id:'rent',label:'Rent'},{id:'buy',label:'Buy'}],A.tenure);
+    const area=selectedArea();
+    const factorArea=factors.florida&&factors.florida.areas&&area?factors.florida.areas[area.id]:null;
+    const floodReady=!!(factors.florida&&factors.florida.flood&&factorArea&&factorArea.flood!=null);
+    const floodOn=A.flood==null?A.planFL==='buy':!!A.flood;
+    fields='<div class="field"><label for="groceriesNow">Current monthly grocery spending</label><input id="groceriesNow" inputmode="decimal" autocomplete="off" value="'+esc(A.groceriesNow)+'"><p class="help">Leave blank to use the USDA moderate food plan.</p></div>';
+    fields+='<div class="pair"><div class="field"><label for="hoaNow">HOA or CDD now, per month</label><input id="hoaNow" inputmode="decimal" autocomplete="off" value="'+esc(A.hoaNow)+'"></div><div class="field"><label for="hoaFL">HOA or CDD in Florida, per month</label><input id="hoaFL" inputmode="decimal" autocomplete="off" value="'+esc(A.hoaFL)+'"><p class="help">The figure varies by community.</p></div></div>';
+    if(floodReady) fields+='<label class="check"><input id="floodToggle" type="checkbox"'+(floodOn?' checked':'')+'>Include flood insurance estimate</label><p class="help">Flood coverage may be required by your lender depending on the property\'s flood zone.</p>';
   }
-  const optional=id==='income'?' <span class="quiet">(optional)</span>':'';
-  panel.innerHTML='<article class="sheet">'+progress(n)+'<h2>'+esc(q.title)+optional+'</h2>'+fields+stepBar(n)+'</article>';
-  const back=document.getElementById('backBtn');
-  back.onclick=()=>{if(n>1){saveStep(id);go(QUESTIONS[n-2].id)}};
+  const optional=id==='other'?' <span class="quiet">(optional)</span>':'';
+  panel.innerHTML='<article class="sheet">'+progress(n)+'<h2>'+esc(q.title)+optional+'</h2><p>'+esc(FRAMING)+'</p>'+fields+'<p class="status" id="formStatus" role="status"></p>'+stepBar(n)+'</article>';
+  document.getElementById('backBtn').onclick=()=>{if(n>1){saveStep(id);go(QUESTIONS[n-2].id)}};
   document.getElementById('nextBtn').onclick=()=>advance(id,n);
   panel.querySelectorAll('.option').forEach(btn=>{
     btn.onclick=()=>{
       const group=btn.getAttribute('data-group');
       const picked=btn.getAttribute('data-id');
       panel.querySelectorAll('[data-group="'+group+'"]').forEach(other=>other.setAttribute('aria-pressed',other===btn?'true':'false'));
-      if(group==='household') A.household=picked;
-      if(group==='tenure') A.tenure=picked;
+      A[group]=picked;
+      if(group==='adults') A.adultsTouched=true;
+      if(group==='household' && !A.adultsTouched) paintAdults();
+      if(group==='income'){
+        const note=document.getElementById('midpoint');
+        if(note) note.textContent=midpointCopy(bandRecord());
+      }
+      if(group==='planFL'){
+        const buy=document.getElementById('buyDetails');
+        if(buy) buy.hidden=picked!=='buy';
+      }
+      if(group==='drives'){
+        const drive=document.getElementById('driveDetails');
+        if(drive) drive.hidden=picked!=='yes';
+      }
+      if(group==='fuel'){
+        const mpg=document.getElementById('mpgField');
+        const kwh=document.getElementById('kwhField');
+        if(mpg) mpg.hidden=picked==='ev';
+        if(kwh) kwh.hidden=picked!=='ev';
+      }
     };
   });
-  const formInput=panel.querySelector('input');
-  if(formInput) formInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();advance(id,n)}});
+  panel.querySelectorAll('input').forEach(input=>{
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();advance(id,n)}});
+  });
   focusHeading();
 }
+function paintAdults(){
+  const chosen=A.adults||defaultAdults();
+  panel.querySelectorAll('[data-group="adults"]').forEach(btn=>btn.setAttribute('aria-pressed',btn.getAttribute('data-id')===chosen?'true':'false'));
+}
 function saveStep(id){
-  if(id==='from'){
-    const zip=document.getElementById('zip');
-    if(zip) A.zip=zip.value.trim();
+  if(id==='from') A.zip=fieldValue('zip');
+  if(id==='to') A.to=readChoice('to');
+  if(id==='household'){
+    A.household=readChoice('household');
+    A.adults=A.adultsTouched?readChoice('adults'):'';
   }
-  if(id==='income'){
-    const amount=document.getElementById('amount');
-    if(amount) A.amount=amount.value.trim();
+  if(id==='income') A.income=readChoice('income');
+  if(id==='now') A.ownNow=readChoice('ownNow');
+  if(id==='plan'){
+    A.planFL=readChoice('planFL');
+    A.primary=readChoice('primary');
+    A.homeBudget=fieldValue('homeBudget');
+  }
+  if(id==='drive'){
+    A.drives=readChoice('drives');
+    A.vehicles=fieldValue('vehicles');
+    A.miles=fieldValue('miles');
+    A.fuel=readChoice('fuel')||A.fuel||'gas';
+    A.mpg=fieldValue('mpg');
+    A.miPerKwh=fieldValue('miPerKwh');
+  }
+  if(id==='other'){
+    A.groceriesNow=fieldValue('groceriesNow');
+    A.hoaNow=fieldValue('hoaNow');
+    A.hoaFL=fieldValue('hoaFL');
+    const flood=document.getElementById('floodToggle');
+    if(flood) A.flood=flood.checked;
   }
 }
+function setStatus(id, message){
+  const el=document.getElementById(id);
+  if(el) el.textContent=message;
+}
 function advance(id,n){
+  if(busy) return;
   saveStep(id);
-  if(id==='from' && A.zip && !/^\d{5}(-\d{4})?$/.test(A.zip)){
-    document.getElementById('zipStatus').textContent='Use a 5-digit ZIP code.';
+  if(id==='from'){
+    if(!A.zip){setStatus('zipStatus','Enter a 5-digit ZIP code.');return}
+    if(!/^\d{5}(-\d{4})?$/.test(A.zip)){setStatus('zipStatus','Use a 5-digit ZIP code.');return}
+    busy=true;
+    document.getElementById('nextBtn').disabled=true;
+    loadZipShard(A.zip).then(function(){
+      const keys=CostLookup.resolveKeys(bundle.crosswalk,A.zip);
+      if(!keys.state){setStatus('zipStatus','We couldn\'t match that ZIP, so this page has no comparison yet.');return}
+      go('to');
+    }).catch(function(){
+      setStatus('zipStatus','We couldn\'t match that ZIP, so this page has no comparison yet.');
+    }).then(function(){busy=false});
     return;
   }
-  if(n<4) go(QUESTIONS[n].id);
+  if(id==='to' && !A.to){setStatus('formStatus','Choose one to continue.');return}
+  if(id==='household' && !A.household){setStatus('formStatus','Choose one to continue.');return}
+  if(id==='income' && !A.income){setStatus('formStatus','Choose one to continue.');return}
+  if(id==='now' && !A.ownNow){setStatus('formStatus','Choose one to continue.');return}
+  if(id==='plan'){
+    if(!A.planFL){setStatus('formStatus','Choose one to continue.');return}
+    if(A.planFL==='buy' && !A.primary){setStatus('formStatus','Say whether this will be your primary residence.');return}
+    const budget=numberOrBlank(A.homeBudget);
+    if(budget){setStatus('formStatus',budget);return}
+  }
+  if(id==='drive'){
+    if(!A.drives){setStatus('formStatus','Choose one to continue.');return}
+    if(A.drives==='yes'){
+      const vehicles=countOrBlank(A.vehicles);
+      const miles=countOrBlank(A.miles);
+      const rate=A.fuel==='ev'?countOrBlank(A.miPerKwh):countOrBlank(A.mpg);
+      if(vehicles||miles||rate){setStatus('formStatus',vehicles||miles||rate);return}
+    }
+  }
+  if(id==='other'){
+    const grocery=numberOrBlank(A.groceriesNow);
+    const hoaNow=numberOrBlank(A.hoaNow);
+    const hoaFL=numberOrBlank(A.hoaFL);
+    if(grocery||hoaNow||hoaFL){setStatus('formStatus',grocery||hoaNow||hoaFL);return}
+  }
+  if(n<8) go(QUESTIONS[n].id);
   else go('results');
 }
 function showResults(){
@@ -235,49 +420,23 @@ function showResults(){
     focusHeading();
   });
 }
-function readerFigure(componentId){
-  if(!/^\d{5}(-\d{4})?$/.test(A.zip)) return {figure:null,level:'',keys:null};
-  return CostLookup.lookup(bundle,A.zip,'price-index',componentId||null);
+function areaIndex(areaId, componentId){
+  return (bundle.figures||[]).find(figure=>figure.areaId===areaId && figure.categoryId==='price-index' && (figure.componentId||null)===(componentId||null) && isSourced(figure))||null;
 }
-function placePhrase(found){
-  if(!found||!isSourced(found.figure)) return '';
-  const keys=found.keys||{};
-  if(found.level==='metro value') return keys.cbsaName||'';
-  if(found.level==='county value') return keys.countyName||'';
-  if(found.level==='state value') return keys.state||'';
-  if(found.level==='ZIP value') return keys.zip?'ZIP '+keys.zip:'';
+function originIndex(componentId){
+  if(!/^\d{5}(-\d{4})?$/.test(A.zip)) return null;
+  const hit=CostLookup.lookup(bundle,A.zip,'price-index',componentId||null);
+  return isSourced(hit.figure)?hit:null;
+}
+function originPlace(keys){
+  if(keys.countyName && keys.state) return keys.countyName+', '+keys.state;
+  if(keys.cbsaName) return keys.cbsaName;
+  if(keys.state && CostEstimate.STATE_NAME[keys.state]) return CostEstimate.STATE_NAME[keys.state];
   return '';
 }
-function gulfAreas(){
-  return (bundle.areas||[]).map(area=>{
-    const figure=bundle.figures.find(f=>f.areaId===area.id&&f.categoryId==='price-index'&&(f.componentId||null)===null&&isSourced(f));
-    return figure?{id:area.id,name:area.name,value:figure.value,display:figure.display,figure}:null;
-  }).filter(Boolean).sort((a,b)=>a.value-b.value||a.name.localeCompare(b.name));
-}
-function areaFigure(areaId, componentId){
-  return bundle.figures.find(f=>f.areaId===areaId&&f.categoryId==='price-index'&&(f.componentId||null)===(componentId||null)&&isSourced(f))||null;
-}
-function joinNames(names){
-  if(names.length<=1) return names[0]||'';
-  if(names.length===2) return names[0]+' and '+names[1];
-  return names.slice(0,-1).join(', ')+', and '+names[names.length-1];
-}
-function comparisonSentence(reader, areas){
-  if(!reader||!areas.length) return '';
-  const lowest=areas[0].value;
-  const best=areas.filter(area=>area.value===lowest);
-  const gulf=best[0].value;
-  const home=reader.value;
-  if(!home) return '';
-  const pct=Math.round(Math.abs(gulf-home)/home*100);
-  const where=joinNames(best.map(area=>area.name));
-  const homeName=reader.name;
-  if(pct===0) return 'Living in '+where+' costs about the same as '+homeName+'.';
-  const word=gulf>home?'more':'less';
-  return 'Living in '+where+' costs about '+pct+'% '+word+' than '+homeName+'.';
-}
-function cellText(figure){
-  return figure?esc(figure.display):'\u2014';
+function floridaPlace(area){
+  if(!area) return 'Florida';
+  return /,\s*FL$/.test(area.name)?area.name:area.name+', FL';
 }
 function censusCredit(){
   const source=((bundle.crosswalk&&bundle.crosswalk.sources)||[])[0];
@@ -285,32 +444,105 @@ function censusCredit(){
   const label=source.url?'<a href="'+esc(source.url)+'">'+esc(source.name)+'</a>':esc(source.name);
   return '<p class="credit">ZIP lookup: '+label+'.</p>';
 }
-function drawResults(){
-  const readerHit=readerFigure(null);
-  const reader=isSourced(readerHit.figure)?{name:placePhrase(readerHit)||'your area',value:readerHit.figure.value,display:readerHit.figure.display,figure:readerHit.figure}:null;
-  const areas=gulfAreas();
-  const lowest=areas.length?areas[0].value:null;
-  const columns=[{id:'reader',name:'Your area',best:false,reader:true}].concat(areas.map(area=>({id:area.id,name:area.name,best:area.value===lowest,reader:false,value:area.value})));
-  const category=(bundle.categories||[]).find(c=>c.id==='price-index');
-  const parts=[{id:null,label:'Price index'}].concat((category&&category.components)||[]).filter(part=>{
-    const readerPart=part.id?readerFigure(part.id).figure:readerHit.figure;
-    if(isSourced(readerPart)) return true;
-    return areas.some(area=>areaFigure(area.id,part.id));
-  });
-  function figureFor(column, part){
-    if(column.reader) return isSourced(part.id?readerFigure(part.id).figure:readerHit.figure)?(part.id?readerFigure(part.id).figure:readerHit.figure):null;
-    return areaFigure(column.id, part.id);
+function lineNotes(row){
+  const bits=[];
+  if(row.originNote && row.originNote!==row.text) bits.push(row.originNote);
+  if(row.floridaNote && row.floridaNote!==row.originNote) bits.push(row.floridaNote);
+  return bits;
+}
+function cellValue(row, side, indexDisplay){
+  if(row.index){
+    if(side==='difference') return '\u2014';
+    return esc(side==='origin'?indexDisplay.origin:indexDisplay.florida);
   }
-  const head='<tr><th scope="col"><span class="sr">Category</span></th>'+columns.map(column=>'<th scope="col" class="'+(column.reader?'yours':column.best?'best':'')+'">'+esc(column.name)+(column.best?'<span class="tag">Best value</span>':'')+'</th>').join('')+'</tr>';
-  const body=parts.map(part=>'<tr><th scope="row">'+esc(part.label)+'</th>'+columns.map(column=>'<td class="'+(column.reader?'yours':column.best?'best':'')+'">'+cellText(figureFor(column,part))+'</td>').join('')+'</tr>').join('');
-  const cards=columns.map(column=>{
-    const metrics=parts.map(part=>'<div class="metric"><span>'+esc(part.label)+'</span><b>'+cellText(figureFor(column,part))+'</b></div>').join('');
-    return '<article class="areaCard'+(column.reader?' yours':column.best?' best':'')+'"><h3>'+esc(column.name)+(column.best?' <span class="tag">Best value</span>':'')+'</h3>'+metrics+'</article>';
+  if(row.text && side==='difference') return esc(row.text);
+  const value=side==='origin'?row.origin:side==='florida'?row.florida:row.difference;
+  if(row.id==='median-price' && side==='difference') return '\u2014';
+  return esc(money(value, side==='difference'));
+}
+function drawResults(){
+  const ready=A.zip && A.to && A.household && A.income && A.ownNow && A.planFL && A.drives && (A.planFL!=='buy' || A.primary);
+  const keys=ready?CostLookup.resolveKeys(bundle.crosswalk,A.zip):{state:''};
+  const area=selectedArea();
+  if(!ready || !keys.state || !area){
+    const message=!keys.state && A.zip?'We couldn\'t match that ZIP, so this page has no comparison yet.':'Answer each question to see your estimate.';
+    panel.innerHTML='<article class="sheet"><h2>Your comparison</h2><p>'+esc(message)+'</p><p>'+esc(FRAMING)+'</p><div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section>';
+    document.getElementById('backBtn').onclick=()=>go(ready&&!keys.state?'from':'other');
+    return;
+  }
+  const allOrigin=originIndex(null);
+  const goodsOrigin=originIndex('goods');
+  const utilOrigin=originIndex('utilities');
+  const allFlorida=areaIndex(area.id,null);
+  const goodsFlorida=areaIndex(area.id,'goods');
+  const utilFlorida=areaIndex(area.id,'utilities');
+  const factorArea=factors.florida&&factors.florida.areas?factors.florida.areas[area.id]:null;
+  const floodReady=!!(factors.florida&&factors.florida.flood&&factorArea&&factorArea.flood!=null);
+  const adults=A.adults?Number(A.adults):Math.min(Number(A.household)||1,2);
+  const result=CostEstimate.buildEstimate({
+    state:keys.state,
+    toArea:area.id,
+    floridaName:area.name,
+    originName:originPlace(keys),
+    hhSize:Number(A.household),
+    adults:adults,
+    incomeBand:A.income,
+    ownNow:A.ownNow,
+    planFL:A.planFL,
+    primary:A.primary==='yes',
+    homeBudget:A.homeBudget,
+    drives:A.drives==='yes',
+    vehicles:A.vehicles===''?1:Number(A.vehicles),
+    miles:A.miles===''?1000:Number(A.miles),
+    fuel:A.fuel||'gas',
+    mpg:A.mpg===''?25:Number(A.mpg),
+    miPerKwh:A.miPerKwh===''?3.5:Number(A.miPerKwh),
+    groceriesNow:A.groceriesNow,
+    hoaNow:A.hoaNow,
+    hoaFL:A.hoaFL,
+    flood:floodReady && (A.flood==null?A.planFL==='buy':!!A.flood),
+    rppOriginGoods:goodsOrigin?goodsOrigin.figure.value:null,
+    rppFloridaGoods:goodsFlorida?goodsFlorida.value:null,
+    rppOriginAll:allOrigin?allOrigin.figure.value:null,
+    rppFloridaAll:allFlorida?allFlorida.value:null,
+    rppOriginUtilities:utilOrigin?utilOrigin.figure.value:null,
+    rppFloridaUtilities:utilFlorida?utilFlorida.value:null
+  }, factors);
+  const indexDisplay={
+    origin:allOrigin?allOrigin.figure.display:'\u2014',
+    florida:allFlorida?allFlorida.display:'\u2014'
+  };
+  const floridaName=area.name;
+  const head='<tr><th scope="col"><span class="sr">Line</span></th><th scope="col" class="yours">Your area</th><th scope="col">'+esc(floridaName)+'</th><th scope="col">Difference</th></tr>';
+  const body=result.lines.map(row=>{
+    const notes=lineNotes(row);
+    const note=notes.length?'<div class="note">'+notes.map(esc).join(' ')+'</div>':'';
+    return '<tr><th scope="row">'+esc(row.label)+note+'</th><td class="yours">'+cellValue(row,'origin',indexDisplay)+'</td><td>'+cellValue(row,'florida',indexDisplay)+'</td><td>'+cellValue(row,'difference',indexDisplay)+'</td></tr>';
   }).join('');
-  const sentence=reader?comparisonSentence(reader,areas):'';
-  const headline=sentence?'<h2 class="compareHeadline">'+esc(sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
-  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'</div><div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Price index comparison. U.S. average is 100.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">'+bookingLink()+'</section></div>';
-  document.getElementById('backBtn').onclick=()=>go('tenure');
+  const cards=result.lines.map(row=>{
+    const notes=lineNotes(row);
+    return '<article class="areaCard"><h3>'+esc(row.label)+'</h3><div class="metric"><span>Your area</span><b>'+cellValue(row,'origin',indexDisplay)+'</b></div><div class="metric"><span>'+esc(floridaName)+'</span><b>'+cellValue(row,'florida',indexDisplay)+'</b></div><div class="metric"><span>Difference</span><b>'+cellValue(row,'difference',indexDisplay)+'</b></div>'+(notes.length?'<p class="note">'+notes.map(esc).join(' ')+'</p>':'')+'</article>';
+  }).join('');
+  const seen={};
+  const sources=[];
+  result.lines.forEach(row=>{
+    (row.sources||[]).forEach(source=>{
+      if(!source || !source.name) return;
+      const key=source.name+'|'+source.asOf;
+      if(seen[key]) return;
+      seen[key]=true;
+      sources.push(source);
+    });
+  });
+  const sourceList=sources.map(source=>esc(source.name)+(source.asOf?', as of '+esc(asOfText(source.asOf)):'' )).join('. ');
+  const band=bandRecord();
+  const filing=adults>=2?'The state income tax line uses a joint return.':'The state income tax line uses a single return.';
+  const evNote=A.drives==='yes' && A.fuel==='ev' && !result.lines.some(row=>row.id==='fuel')?'<p>Car insurance is included. Charging cost is not included in this estimate.</p>':'';
+  const headline=result.sentence?'<h2 class="compareHeadline">'+esc(result.sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
+  const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p><p class="note">This total includes only the lines above.</p></div>';
+  const notes=(result.notes||[]).map(note=>'<p>'+esc(note)+'</p>').join('');
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+(sourceList?'<p class="sources">Sources: '+sourceList+'.</p>':'')+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
+  document.getElementById('backBtn').onclick=()=>go('other');
   layoutResults();
 }
 function layoutResults(){
@@ -325,8 +557,12 @@ window.addEventListener('popstate',()=>{
   const step=(location.hash||'#from').replace('#','');
   render(STEPS.includes(step)?step:'from');
 });
-fetch('cost-of-living.json').then(r=>{if(!r.ok) throw new Error('bundle');return r.json()}).then(data=>{
-  bundle=data;
+Promise.all([
+  fetch('cost-of-living.json').then(r=>{if(!r.ok) throw new Error('bundle');return r.json()}),
+  fetch('factors.json').then(r=>{if(!r.ok) throw new Error('factors');return r.json()})
+]).then(function(loaded){
+  bundle=loaded[0];
+  factors=loaded[1];
   if(!bundle.crosswalk.zips) bundle.crosswalk.zips=[];
   const step=(location.hash||'#from').replace('#','');
   render(STEPS.includes(step)?step:'from');
