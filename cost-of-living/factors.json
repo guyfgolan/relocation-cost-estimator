@@ -2970,7 +2970,7 @@
     "flood": {
       "enabled": false,
       "statistic": "median",
-      "source": "FEMA OpenFEMA NFIP Policies v3, single-family policies effective July 1, 2025 to June 30, 2026, average policy cost",
+      "source": "FEMA OpenFEMA NFIP Policies v3, single-family policies effective July 1, 2025 to June 30, 2026, median policy cost",
       "url": "https://www.fema.gov/api/open/v3/NfipPolicies",
       "asOf": "2026-06",
       "retrieved": "2026-10-23",
