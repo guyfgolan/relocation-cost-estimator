@@ -1,48 +1,104 @@
 {
  "meta": {
   "built": "2026-10-22",
-  "note": "Moving costs only. Every dollar figure is cited, or status UNSOURCED and excluded from totals. Road miles are an estimate: great-circle times 1.2."
+  "note": "Moving costs only. Destinations are Hillsborough, Pinellas, Manatee, and Sarasota counties. Every dollar figure is cited, or marked not included and kept out of the total. Road miles are an estimate: great-circle times 1.2."
  },
  "areas": [
   {
-   "id": "sarasota",
-   "name": "Sarasota",
-   "county": "Sarasota",
-   "lat": 27.33826,
-   "lon": -82.54372,
-   "point": "Census 2024 Gazetteer internal point for Sarasota city, Florida."
+   "id": "tarponsprings",
+   "name": "Tarpon Springs",
+   "county": "Pinellas",
+   "lat": 28.149054,
+   "lon": -82.779371,
+   "point": "Census 2024 Gazetteer internal point for Tarpon Springs city, Pinellas County, Florida (28.149054, -82.779371). County from Census 2020 place-by-county codes."
   },
   {
-   "id": "northport",
-   "name": "North Port",
-   "county": "Sarasota",
-   "lat": 27.05817,
-   "lon": -82.19804,
-   "point": "Census 2024 Gazetteer internal point for North Port city, Florida."
+   "id": "palmharbor",
+   "name": "Palm Harbor",
+   "county": "Pinellas",
+   "lat": 28.08477,
+   "lon": -82.757569,
+   "point": "Census 2024 Gazetteer internal point for Palm Harbor CDP, Pinellas County, Florida (28.08477, -82.757569). County from Census 2020 place-by-county codes."
   },
   {
-   "id": "venice",
-   "name": "Venice",
-   "county": "Sarasota",
-   "lat": 27.11697,
-   "lon": -82.41519,
-   "point": "Census 2024 Gazetteer internal point for Venice city, Florida."
+   "id": "dunedin",
+   "name": "Dunedin",
+   "county": "Pinellas",
+   "lat": 28.038054,
+   "lon": -82.794776,
+   "point": "Census 2024 Gazetteer internal point for Dunedin city, Pinellas County, Florida (28.038054, -82.794776). County from Census 2020 place-by-county codes."
   },
   {
-   "id": "wellenpark",
-   "name": "Wellen Park",
-   "county": "Sarasota",
-   "lat": 27.05817,
-   "lon": -82.19804,
-   "point": "Wellen Park is not a Census place and has no USGS GNIS populated-place point (Domestic Names, Florida, checked 2026-10-22). The Census 2024 internal point for North Port city is used."
+   "id": "clearwater",
+   "name": "Clearwater",
+   "county": "Pinellas",
+   "lat": 27.979419,
+   "lon": -82.771256,
+   "point": "Census 2024 Gazetteer internal point for Clearwater city, Pinellas County, Florida (27.979419, -82.771256). County from Census 2020 place-by-county codes."
   },
   {
-   "id": "lwr",
-   "name": "Lakewood Ranch",
-   "county": "Manatee/Sarasota",
-   "lat": 27.42353,
-   "lon": -82.38672,
-   "point": "Census 2024 Gazetteer internal point for Lakewood Ranch CDP, Florida."
+   "id": "largo",
+   "name": "Largo",
+   "county": "Pinellas",
+   "lat": 27.908685,
+   "lon": -82.774174,
+   "point": "Census 2024 Gazetteer internal point for Largo city, Pinellas County, Florida (27.908685, -82.774174). County from Census 2020 place-by-county codes."
+  },
+  {
+   "id": "stpetersburg",
+   "name": "St. Petersburg",
+   "county": "Pinellas",
+   "lat": 27.762727,
+   "lon": -82.644131,
+   "point": "Census 2024 Gazetteer internal point for St. Petersburg city, Pinellas County, Florida (27.762727, -82.644131). County from Census 2020 place-by-county codes."
+  },
+  {
+   "id": "pebblecreek",
+   "name": "Pebble Creek",
+   "county": "Hillsborough",
+   "lat": 28.160204,
+   "lon": -82.342436,
+   "point": "Census 2024 Gazetteer internal point for Pebble Creek CDP, Hillsborough County, Florida (28.160204, -82.342436). County from Census 2020 place-by-county codes. Pebble Creek is the Census place in Hillsborough County beside Wesley Chapel. Wesley Chapel CDP is in Pasco County and is not a destination."
+  },
+  {
+   "id": "tampa",
+   "name": "Tampa",
+   "county": "Hillsborough",
+   "lat": 27.970086,
+   "lon": -82.479673,
+   "point": "Census 2024 Gazetteer internal point for Tampa city, Hillsborough County, Florida (27.970086, -82.479673). County from Census 2020 place-by-county codes."
+  },
+  {
+   "id": "plantcity",
+   "name": "Plant City",
+   "county": "Hillsborough",
+   "lat": 28.015355,
+   "lon": -82.117805,
+   "point": "Census 2024 Gazetteer internal point for Plant City city, Hillsborough County, Florida (28.015355, -82.117805). County from Census 2020 place-by-county codes."
+  },
+  {
+   "id": "brandon",
+   "name": "Brandon",
+   "county": "Hillsborough",
+   "lat": 27.935985,
+   "lon": -82.299255,
+   "point": "Census 2024 Gazetteer internal point for Brandon CDP, Hillsborough County, Florida (27.935985, -82.299255). County from Census 2020 place-by-county codes."
+  },
+  {
+   "id": "riverview",
+   "name": "Riverview",
+   "county": "Hillsborough",
+   "lat": 27.824275,
+   "lon": -82.304486,
+   "point": "Census 2024 Gazetteer internal point for Riverview CDP, Hillsborough County, Florida (27.824275, -82.304486). County from Census 2020 place-by-county codes."
+  },
+  {
+   "id": "apollobeach",
+   "name": "Apollo Beach",
+   "county": "Hillsborough",
+   "lat": 27.76302,
+   "lon": -82.403313,
+   "point": "Census 2024 Gazetteer internal point for Apollo Beach CDP, Hillsborough County, Florida (27.76302, -82.403313). County from Census 2020 place-by-county codes."
   },
   {
    "id": "parrish",
@@ -53,28 +109,44 @@
    "point": "USGS GNIS populated place Parrish, Manatee County, Florida (feature coordinates 27.5875357, -82.4250941)."
   },
   {
-   "id": "portcharlotte",
-   "name": "Port Charlotte",
-   "county": "Charlotte",
-   "lat": 26.98947,
-   "lon": -82.11365,
-   "point": "Census 2024 Gazetteer internal point for Port Charlotte CDP, Florida."
+   "id": "lwr",
+   "name": "Lakewood Ranch",
+   "county": "Manatee/Sarasota",
+   "lat": 27.42353,
+   "lon": -82.38672,
+   "point": "Census 2024 Gazetteer internal point for Lakewood Ranch CDP, Florida."
   },
   {
-   "id": "fortmyers",
-   "name": "Fort Myers",
-   "county": "Lee",
-   "lat": 26.61982,
-   "lon": -81.83167,
-   "point": "Census 2024 Gazetteer internal point for Fort Myers city, Florida."
+   "id": "sarasota",
+   "name": "Sarasota",
+   "county": "Sarasota",
+   "lat": 27.33826,
+   "lon": -82.54372,
+   "point": "Census 2024 Gazetteer internal point for Sarasota city, Florida."
   },
   {
-   "id": "capecoral",
-   "name": "Cape Coral",
-   "county": "Lee",
-   "lat": 26.64319,
-   "lon": -81.99736,
-   "point": "Census 2024 Gazetteer internal point for Cape Coral city, Florida."
+   "id": "venice",
+   "name": "Venice",
+   "county": "Sarasota",
+   "lat": 27.11697,
+   "lon": -82.41519,
+   "point": "Census 2024 Gazetteer internal point for Venice city, Florida."
+  },
+  {
+   "id": "northport",
+   "name": "North Port",
+   "county": "Sarasota",
+   "lat": 27.05817,
+   "lon": -82.19804,
+   "point": "Census 2024 Gazetteer internal point for North Port city, Florida."
+  },
+  {
+   "id": "wellenpark",
+   "name": "Wellen Park",
+   "county": "Sarasota",
+   "lat": 27.05817,
+   "lon": -82.19804,
+   "point": "Wellen Park is not a Census place and has no USGS GNIS populated-place point (Domestic Names, Florida, checked 2026-10-22). The Census 2024 internal point for North Port city is used."
   }
  ],
  "distance": {
@@ -236,7 +308,7 @@
   "asOf": "Jan 2025-Sep 2026",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "Cells marked limited sample are flagged that way by CMR. The 2,000+ miles / 4+ bedroom median in this CSV is $10,000."
+  "caveat": "Cells marked limited sample are flagged that way by CMR. The 1,500-1,999 miles / 4+ bedroom cell covers Dec 2022-Sep 2026. The other cells cover Jan 2025-Sep 2026. The 2,000+ miles / 4+ bedroom median in this CSV is $10,000."
  },
  "hah": {
   "value": {
@@ -307,7 +379,7 @@
   "asOf": "2026",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "Long-distance figures are for a 1,200-mile move; used as the benchmark for all long-distance DIY/container moves."
+  "caveat": "The local table is published for moves under 50 miles. The long-distance table is a 1,200-mile benchmark. This estimator scales between those two published prices; the scaled amount is an assumption, not another published table."
  },
  "cmrSeason": {
   "value": {
@@ -350,14 +422,27 @@
    "status": "SOURCED"
   },
   "regTax": {
-   "value": 22.5,
-   "label": "FL base vehicle tax, auto 2,500-3,499 lb",
+   "low": 14.5,
+   "typical": 22.5,
+   "high": 32.5,
+   "label": "FL base vehicle tax by weight",
    "source": "FLHSMV fee schedule",
    "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
    "asOf": "2026-10-22",
    "checked": "2026-10-22",
    "status": "SOURCED",
-   "caveat": "Base tax only; other statutory fees apply"
+   "caveat": "Autos 2,499 lb or less $14.50; 2,500-3,499 lb $22.50; 3,500 lb or more $32.50. Base vehicle tax only. Other statutory fees apply."
+  },
+  "dl": {
+   "value": 48,
+   "serviceFee": 6.25,
+   "label": "FL original Class E driver license",
+   "source": "FLHSMV fee schedule",
+   "url": "https://www.flhsmv.gov/motor-vehicles-tags-titles/fees/",
+   "asOf": "2026-10-22",
+   "checked": "2026-10-22",
+   "status": "SOURCED",
+   "caveat": "An additional $6.25 service fee may apply at a tax collector office."
   }
  },
  "gas": {
@@ -370,14 +455,14 @@
   "status": "SOURCED"
  },
  "lodging": {
-  "value": 110,
-  "label": "Lodging per night (proxy)",
-  "source": "GSA FY2026 standard CONUS lodging per diem",
-  "url": "https://www.gsa.gov/policy-regulations/regulations/federal-travel-regulation/ftr-and-related-files/gsa-per-diem-bulletin-ftr-2601",
-  "asOf": "FY2026",
+  "value": 113,
+  "label": "Standard CONUS lodging per diem",
+  "source": "GSA Per Diem Bulletin FTR 27-01",
+  "url": "https://www.gsa.gov/policy-regulations/regulations/federal-travel-regulation/ftr-and-related-files/gsa-per-diem-bulletin-ftr-2701",
+  "asOf": "FY2027 (Oct 1, 2026-Sep 30, 2027)",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "Federal reimbursement cap, used as a lodging proxy"
+  "caveat": "Federal lodging cap, used as a lodging proxy. Not a hotel quote."
  },
  "unsourced": {
   "packing": {
@@ -391,22 +476,6 @@
   "ship": {
    "value": null,
    "label": "Vehicle shipping (auto transport)",
-   "source": "Not yet sourced",
-   "url": null,
-   "asOf": null,
-   "status": "UNSOURCED"
-  },
-  "mpg": {
-   "value": null,
-   "label": "Vehicle fuel economy for drive cost",
-   "source": "Not yet sourced (EPA/FHWA)",
-   "url": null,
-   "asOf": null,
-   "status": "UNSOURCED"
-  },
-  "milesPerDay": {
-   "value": null,
-   "label": "Driving miles per day (for lodging nights)",
    "source": "Not yet sourced",
    "url": null,
    "asOf": null,
@@ -427,6 +496,96 @@
    "url": null,
    "asOf": null,
    "status": "UNSOURCED"
+  }
+ },
+ "meals": {
+  "value": 68,
+  "label": "Standard CONUS meals and incidental expenses",
+  "source": "GSA Per Diem Bulletin FTR 27-01",
+  "url": "https://www.gsa.gov/policy-regulations/regulations/federal-travel-regulation/ftr-and-related-files/gsa-per-diem-bulletin-ftr-2701",
+  "asOf": "FY2027 (Oct 1, 2026-Sep 30, 2027)",
+  "checked": "2026-10-22",
+  "status": "SOURCED",
+  "caveat": "Standard M&IE is $68. Published tiers run higher in some places; this estimator uses the standard rate. First and last travel day are counted at 75%."
+ },
+ "assumptions": {
+  "diyScale": {
+   "lowFactor": 0.8,
+   "highFactor": 1.25,
+   "anchorMiles": 1200,
+   "label": "DIY truck and container distance scaling",
+   "source": "Scaled from the HireAHelper local and 1,200-mile tables. Not a second published table.",
+   "url": "https://www.hireahelper.com/moving-cost-calculator/",
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION",
+   "caveat": "Typical price moves in a straight line from the local price at 0 miles to the 1,200-mile price, then in proportion to distance after 1,200 miles. Low is 0.8 times typical and high is 1.25 times typical."
+  },
+  "fullLocal": {
+   "lowFactor": 0.75,
+   "highFactor": 1.25,
+   "label": "Local full-service range",
+   "source": "HireAHelper local table, with a low and high added by this estimator",
+   "url": "https://www.hireahelper.com/moving-cost-calculator/",
+   "asOf": "2026",
+   "status": "ASSUMPTION",
+   "caveat": "The published local figure is the typical price. Low is 0.75 times that figure and high is 1.25 times that figure."
+  },
+  "fullBridge": {
+   "fromMiles": 50,
+   "toMiles": 100,
+   "label": "50 to 100 mile full-service blend",
+   "source": "Blended from the HireAHelper local table at 50 miles to the CMR 100-499 mile band at 100 miles",
+   "url": null,
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION",
+   "caveat": "The under-50-mile table is not used as the price for a 50-100 mile move. At 100 miles the blend matches the CMR band, so the price does not jump."
+  },
+  "carMpg": {
+   "lowCost": 30,
+   "typical": 25,
+   "highCost": 20,
+   "label": "Car fuel economy",
+   "source": "Assumption for a cost range. Not an EPA figure.",
+   "url": null,
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION",
+   "caveat": "High cost uses 20 mpg, typical 25, and low cost 30. The gasoline price is the Florida average for the whole drive."
+  },
+  "truckMpg": {
+   "value": 10,
+   "label": "Rental truck fuel economy",
+   "source": "Assumption, about 10 mpg, used for low, typical, and high.",
+   "url": null,
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION"
+  },
+  "milesPerDay": {
+   "lowCost": 600,
+   "typical": 500,
+   "highCost": 400,
+   "label": "Miles driven per day",
+   "source": "Assumption used only to count nights and meal days.",
+   "url": null,
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION",
+   "caveat": "Nights are zero or more, from ceil(miles divided by miles per day) minus 1. Fewer miles per day means more nights and a higher cost."
+  },
+  "rooms": {
+   "label": "Hotel rooms",
+   "source": "Assumption: low uses 1 room, typical uses one room for every two adults, and high uses one room per adult.",
+   "url": null,
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION"
+  },
+  "adultsUnsure": {
+   "low": 1,
+   "typical": 2,
+   "high": 4,
+   "label": "Adults when not chosen",
+   "source": "Assumption used only when the adult count is Not sure.",
+   "url": null,
+   "asOf": "2026-10-22",
+   "status": "ASSUMPTION"
   }
  }
 }
