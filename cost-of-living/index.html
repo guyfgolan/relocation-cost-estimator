@@ -54,6 +54,8 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .resultsWrap .sheet{width:100%;max-width:none;margin:0}
 .headlineBand{border:1px solid var(--gold);border-radius:8px;padding:22px 18px;margin:0}
 .compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:clamp(36px,5vw,56px);line-height:1.2;color:var(--gold);text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
+.estimateLabel{margin:0 0 8px;color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.ctaBand .secondary{display:flex;margin:12px auto 0;min-width:min(100%,280px);background:transparent;color:var(--white);border-color:var(--gold)}
 .compareHeadline::after{display:none}
 .tableWrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--white)}
 .compare{width:100%;border-collapse:separate;border-spacing:0;font-size:16px}
@@ -152,7 +154,8 @@ const QUESTIONS=[
 ];
 const FRAMING='General estimate for planning a conversation. Not a quote. Your actual costs depend on your home, coverage and habits.';
 const REPORT='This is a general estimate built from published averages. It is not a quote or tax advice. Let\'s talk through your actual numbers.';
-const A={zip:'',to:'',household:'',adults:'',adultsTouched:false,income:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null};
+const A={zip:'',to:'',household:'',adults:'',adultsTouched:false,income:'',ownNow:'',planFL:'',primary:'',homeBudget:'',drives:'',vehicles:'',miles:'',fuel:'gas',mpg:'',miPerKwh:'',groceriesNow:'',hoaNow:'',hoaFL:'',flood:null,picks:{}};
+let durations=[],flowStart=0,shownAt=0;
 let bundle=null;
 let factors=null;
 let renderGen=0;
@@ -166,8 +169,28 @@ function focusHeading(){
   h.tabIndex=-1;
   h.focus({focusVisible:false});
 }
-function bookingLink(){
-  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Schedule a call with Guy</a>';
+function bookingLink(label){
+  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">'+esc(label||'Schedule a call with Guy')+'</a>';
+}
+function noteShown(){const now=Date.now();if(!flowStart)flowStart=now;shownAt=now}
+function noteLeft(){if(!shownAt)return;durations.push(Date.now()-shownAt);shownAt=0}
+function recordPicks(){
+  A.picks=A.picks||{};
+  ['to','household','adults','income','ownNow','planFL','primary','drives','fuel'].forEach(group=>{
+    const buttons=[...panel.querySelectorAll('[data-group="'+group+'"]')];
+    if(!buttons.length)return;
+    const index=buttons.findIndex(btn=>btn.getAttribute('aria-pressed')==='true');
+    if(index>=0)A.picks[group]=index;
+  });
+}
+function engagementMeta(){
+  return {timing:{durationsMs:durations.slice(),elapsedMs:flowStart?Date.now()-flowStart:null},choiceIndexes:Object.keys(A.picks||{}).map(key=>A.picks[key])};
+}
+function retake(){durations=[];flowStart=0;shownAt=0;go('from')}
+function showLowInfo(){
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand"><p class="estimateLabel">Your Estimate</p><h2 class="compareHeadline">Thank you for filling out the information!</h2><p>It seems as if you are still narrowing down your plans, so a number right now might not tell you much. I encourage you to book a call. I am happy to help in any way I can.</p></div><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">'+bookingLink('Book a Call with Guy')+'<button type="button" class="secondary" id="retakeBtn">Retake</button></section></div>';
+  document.getElementById('retakeBtn').onclick=retake;
+  focusHeading();
 }
 function isSourced(figure){
   return !!figure && typeof figure.value==='number' && !Number.isNaN(figure.value) && figure.evidence==='MEASURED' && /^[\d.]+$/.test(String(figure.display||''));
@@ -289,18 +312,18 @@ function showStep(id){
     fields=choices('to',areaList().map(area=>({id:area.id,label:area.name})),A.to);
   }else if(id==='household'){
     const adults=A.adults||defaultAdults();
-    fields='<div class="field">'+choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5',label:'5 people'},{id:'6',label:'6 or more'}],A.household)+'</div>';
+    fields='<div class="field">'+choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5',label:'5 people'},{id:'6',label:'6 or more'},{id:'not-sure',label:'Not sure'}],A.household)+'</div>';
     fields+='<div class="field"><label id="adultsLabel">How many adults?</label>'+choices('adults',[{id:'1',label:'1 adult'},{id:'2',label:'2 or more adults'}],adults)+'<p class="help">Used for the state income tax line. The default is one adult, or two when the household has two or more people.</p></div>';
   }else if(id==='income'){
-    fields=choices('income',(factors.incomeBands||[]).map(band=>({id:band.id,label:band.label})),A.income);
+    fields=choices('income',(factors.incomeBands||[]).map(band=>({id:band.id,label:band.label})).concat([{id:'not-sure',label:'Not sure'}]),A.income);
     fields+='<p id="midpoint" class="help">'+esc(midpointCopy(bandRecord()))+'</p><p>It stays in this browser and is not saved.</p>';
   }else if(id==='now'){
-    fields=choices('ownNow',[{id:'own',label:'Own'},{id:'rent',label:'Rent'}],A.ownNow);
+    fields=choices('ownNow',[{id:'own',label:'Own'},{id:'rent',label:'Rent'},{id:'not-sure',label:'Not sure'}],A.ownNow);
   }else if(id==='plan'){
-    fields=choices('planFL',[{id:'buy',label:'Buy'},{id:'rent',label:'Rent'}],A.planFL);
+    fields=choices('planFL',[{id:'buy',label:'Buy'},{id:'rent',label:'Rent'},{id:'not-sure',label:'Not sure'}],A.planFL);
     fields+='<div id="buyDetails"'+(A.planFL==='buy'?'':' hidden')+'><div class="field"><label id="primaryLabel">Is this your primary residence?</label>'+choices('primary',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],A.primary)+'</div><div class="field"><label for="homeBudget">Home budget</label><input id="homeBudget" inputmode="decimal" autocomplete="off" value="'+esc(A.homeBudget)+'"><p class="help">Leave blank to use the area\'s median sale price.</p></div></div>';
   }else if(id==='drive'){
-    fields=choices('drives',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],A.drives);
+    fields=choices('drives',[{id:'yes',label:'Yes'},{id:'no',label:'No'},{id:'not-sure',label:'Not sure'}],A.drives);
     fields+='<div id="driveDetails"'+(A.drives==='yes'?'':' hidden')+'><div class="pair"><div class="field"><label for="vehicles">How many vehicles?</label><input id="vehicles" inputmode="numeric" autocomplete="off" value="'+esc(A.vehicles)+'"><p class="help">Default is 1.</p></div><div class="field"><label for="miles">Miles per month</label><input id="miles" inputmode="decimal" autocomplete="off" value="'+esc(A.miles)+'"><p class="help">Default is 1,000.</p></div></div><div class="field"><label id="fuelLabel">Gas or electric?</label>'+choices('fuel',[{id:'gas',label:'Gas'},{id:'ev',label:'Electric vehicle'}],A.fuel||'gas')+'</div><div class="field" id="mpgField"'+(A.fuel==='ev'?' hidden':'')+'><label for="mpg">Miles per gallon</label><input id="mpg" inputmode="decimal" autocomplete="off" value="'+esc(A.mpg)+'"><p class="help">Default is 25.</p></div><div class="field" id="kwhField"'+(A.fuel==='ev'?'':' hidden')+'><label for="miPerKwh">Miles per kilowatt-hour</label><input id="miPerKwh" inputmode="decimal" autocomplete="off" value="'+esc(A.miPerKwh)+'"><p class="help">Default is 3.5.</p></div></div>';
   }else{
     const area=selectedArea();
@@ -347,6 +370,7 @@ function showStep(id){
     input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();advance(id,n)}});
   });
   focusHeading();
+  noteShown();
 }
 function paintAdults(){
   const chosen=A.adults||defaultAdults();
@@ -388,6 +412,7 @@ function setStatus(id, message){
 }
 function advance(id,n){
   if(busy) return;
+  recordPicks();
   saveStep(id);
   if(id==='from'){
     if(!A.zip){setStatus('zipStatus','Enter a 5-digit ZIP code.');return}
@@ -397,6 +422,7 @@ function advance(id,n){
     loadZipShard(A.zip).then(function(){
       const keys=CostLookup.resolveKeys(bundle.crosswalk,A.zip);
       if(!keys.state){setStatus('zipStatus','We couldn\'t match that ZIP, so this page has no comparison yet.');return}
+      noteLeft();
       go('to');
     }).catch(function(){
       setStatus('zipStatus','We couldn\'t match that ZIP, so this page has no comparison yet.');
@@ -410,14 +436,14 @@ function advance(id,n){
   if(id==='plan'){
     if(!A.planFL){setStatus('formStatus','Choose one to continue.');return}
     if(A.planFL==='buy' && !A.primary){setStatus('formStatus','Say whether this will be your primary residence.');return}
-    const budget=numberOrBlank(A.homeBudget);
+    const budget=CostEstimate.boundMessage('budget',A.homeBudget);
     if(budget){setStatus('formStatus',budget);return}
   }
   if(id==='drive'){
     if(!A.drives){setStatus('formStatus','Choose one to continue.');return}
     if(A.drives==='yes'){
-      const vehicles=countOrBlank(A.vehicles);
-      const miles=countOrBlank(A.miles);
+      const vehicles=CostEstimate.boundMessage('vehicles',A.vehicles);
+      const miles=CostEstimate.boundMessage('miles',A.miles);
       const rate=A.fuel==='ev'?countOrBlank(A.miPerKwh):countOrBlank(A.mpg);
       if(vehicles||miles||rate){setStatus('formStatus',vehicles||miles||rate);return}
     }
@@ -428,6 +454,7 @@ function advance(id,n){
     const hoaFL=numberOrBlank(A.hoaFL);
     if(grocery||hoaNow||hoaFL){setStatus('formStatus',grocery||hoaNow||hoaFL);return}
   }
+  noteLeft();
   if(n<8) go(QUESTIONS[n].id);
   else go('results');
 }
@@ -492,6 +519,10 @@ function drawResults(){
     document.getElementById('backBtn').onclick=()=>go(ready&&!keys.state?'from':'other');
     return;
   }
+  if(CostEstimate.lowInformation(A,engagementMeta()).show){
+    showLowInfo();
+    return;
+  }
   const allOrigin=originIndex(null);
   const goodsOrigin=originIndex('goods');
   const utilOrigin=originIndex('utilities');
@@ -509,11 +540,11 @@ function drawResults(){
     toArea:area.id,
     floridaName:area.name,
     originName:originPlace(keys),
-    hhSize:Number(A.household),
+    hhSize:A.household==='not-sure'?null:Number(A.household),
     adults:adults,
-    incomeBand:A.income,
-    ownNow:A.ownNow,
-    planFL:A.planFL,
+    incomeBand:A.income==='not-sure'?'':A.income,
+    ownNow:A.ownNow==='not-sure'?'':A.ownNow,
+    planFL:A.planFL==='not-sure'?'':A.planFL,
     primary:A.primary==='yes',
     homeBudget:A.homeBudget,
     drives:A.drives==='yes',
@@ -576,7 +607,8 @@ function drawResults(){
   const band=bandRecord();
   const filing=adults>=2?'The state income tax line uses a joint return.':'The state income tax line uses a single return.';
   const evNote=A.drives==='yes' && A.fuel==='ev' && !result.lines.some(row=>row.id==='fuel')?'<p>Car insurance is included. Charging cost is not included in this estimate.</p>':'';
-  const headline=result.sentence?'<h2 class="compareHeadline">'+esc(result.sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
+  const sentence=CostEstimate.alignedSentence(result.sentence,result.total.monthly,area.name,originPlace(keys));
+  const headline=sentence?'<h2 class="compareHeadline">'+esc(sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
   const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p></div><p class="note">This total includes only the lines above.</p>';
   const notes=(result.notes||[]).map(note=>'<p>'+esc(note)+'</p>').join('');
   const sourceBlock=sourceList?'<details class="sourcesToggle"><summary>Sources</summary><p>'+sourceList+'.</p></details>':'';

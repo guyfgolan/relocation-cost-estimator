@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { estimateMove, classifyZip, formatMoney, priceCore } = require('../estimate.js');
+const { estimateMove, classifyZip, formatMoney, priceCore, lowInformation, visiblePlace, vehicleCaveat } = require('../estimate.js');
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf8'));
 const Z = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'zips.json'), 'utf8'));
 
@@ -239,7 +239,7 @@ const fee7 = feesFor(7), fee8 = feesFor(8), fee12 = feesFor(12);
 near(fee7.typ, fee1.typ * 7, 1e-6, 'seven vehicles are priced as seven');
 near(fee8.typ, fee7.typ, 1e-6, 'eight vehicles are priced as seven');
 near(fee12.typ, fee7.typ, 1e-6, 'twelve vehicles are priced as seven');
-const CAVEAT = 'It seems you have selected to transport seven or more vehicles. Please contact a relocation company directly for a better estimate.';
+const CAVEAT = vehicleCaveat;
 function moved(veh) {
   return estimateMove(Object.assign({}, base, {
     origin: originZip('30303'), dest: area('tampa'), help: 'Full-service movers', veh: String(veh), licenses: '0', travel: 'Flying', vehHow: 'Ship them'
@@ -338,6 +338,38 @@ assert(/not applied/.test(summer.line.note), 'July note');
 // 4+ bedroom long cell keeps the longer period
 const oldCell = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '4 bedrooms', when: 'March 2027' }, 1600);
 assert(oldCell.line.sources.some(s => s.asOf === 'Dec 2022-Sep 2026'), '1500-1999 / 4+BR period');
+
+const slow = { timing: { durationsMs: [4000, 4000, 4000, 4000, 4000], elapsedMs: 30000 }, choiceIndexes: [0, 1, 2, 3, 0] };
+const thoughtful = Object.assign({}, base, { origin: originZip('30303'), dest: area('venice') });
+assert(!lowInformation(thoughtful, slow).show, 'a complete move with a slow, varied path is priced');
+assert(lowInformation(Object.assign({}, thoughtful, { origin: null }), slow).show, 'origin Not sure is low information');
+assert(lowInformation(Object.assign({}, thoughtful, { dest: null, area: 'Not sure' }), slow).show, 'destination Not sure is low information');
+const manyUnsure = Object.assign({}, thoughtful, {
+  when: 'Not sure', type: 'Not sure', size: 'Not sure', help: 'Not sure', packing: 'Not sure', veh: 'Not sure'
+});
+assert(lowInformation(manyUnsure, slow).reasons.indexOf('unsure') >= 0, 'six Not sure answers are low information');
+assert(lowInformation(thoughtful, { timing: { durationsMs: [800, 900, 700, 1000], elapsedMs: 20000 }, choiceIndexes: [0, 1, 2, 0, 1] }).show, 'median under 1.5 seconds is low information');
+assert(lowInformation(thoughtful, { timing: { durationsMs: [3000, 3000], elapsedMs: 9000 }, choiceIndexes: [0, 1, 2, 3, 4] }).show, 'a flow under 10 seconds is low information');
+assert(lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, 'every first option is low information');
+assert(lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [2, 2, 2, 2, 2] }).show, 'the same button position every time is low information');
+assert(lowInformation(Object.assign({}, thoughtful, { veh: '0', vehHow: 'Drive them' }), slow).show, 'zero vehicles plus drive is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { travel: 'Flying', help: 'DIY rental truck' }), slow).show, 'flying plus a DIY truck is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { size: '1 bedroom', adults: '4' }), slow).show, 'one bedroom and four adults is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { storage: 'Yes', origin: null, dest: null }), slow).show, 'storage without a move is a contradiction');
+assert(lowInformation(Object.assign({}, thoughtful, { type: 'Studio apartment', size: '3 bedrooms' }), slow).show, 'studio and three bedrooms is a contradiction');
+assert(vehicleCaveat === "Moving seven or more vehicles takes a custom plan. Book a call and I'll help you work through it.", 'seven-vehicle note');
+assert(visiblePlace('Wellen Park is not a Census place and has no USGS GNIS populated-place point (Domestic Names, Florida, checked 2026-10-22). The Census 2024 internal point for North Port city is used.') === '', 'internal place notes stay off the page');
+assert(visiblePlace('Census 2024 Gazetteer internal point for Venice city, Florida.') === 'Census 2024 Gazetteer internal point for Venice city, Florida.', 'ordinary place text stays');
+const moverPage = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+['UNSOURCED', 'Not yet sourced', 'ASSUMPTION', 'checked '].forEach(word => {
+  assert(moverPage.indexOf(word) === -1, 'customer page hides ' + word);
+});
+assert(moverPage.indexOf('https://commons.wikimedia.org') === -1, 'photo credits are not outside links');
+assert(moverPage.indexOf('https://www.census.gov') === -1, 'census credit is not an outside link');
+assert(moverPage.indexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7') === moverPage.lastIndexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'), 'booking url once');
+assert(moverPage.indexOf('Your Estimate') > 0 && moverPage.indexOf('Thank you for filling out the information!') > 0, 'low-info copy');
+assert(moverPage.indexOf('Book a Call with Guy') > 0 && moverPage.indexOf('onclick="retake()"') > 0, 'low-info buttons');
+assert(moverPage.indexOf('function retake(){durations=[];flowStart=0;stepShownAt=0;stack=[\'fromMethod\'];show()}') > 0, 'retake keeps the answers');
 
 function show(label, est) {
   const m = est.lines.find(l => l.id === 'moving');

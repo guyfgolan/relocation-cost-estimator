@@ -290,5 +290,52 @@ assert.ok(page.indexOf('favicon.ico') > 0);
 assert.ok(page.indexOf('function selectedArea()') > 0);
 assert.ok(page.indexOf('Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.') > 0);
 assert.ok(page.indexOf('This total includes only the lines above.') > 0);
+assert.ok(page.indexOf("{id:'not-sure',label:'Not sure'}") > 0);
+assert.ok(page.indexOf('Your Estimate') > 0);
+assert.ok(page.indexOf('Thank you for filling out the information!') > 0);
+assert.ok(page.indexOf('It seems as if you are still narrowing down your plans, so a number right now might not tell you much. I encourage you to book a call. I am happy to help in any way I can.') > 0);
+assert.ok(page.indexOf('Book a Call with Guy') > 0);
+assert.ok(page.indexOf('>Retake<') > 0);
+assert.ok(page.indexOf('function retake(){durations=[];flowStart=0;shownAt=0;go(\'from\')}') > 0);
+
+const slow = { timing: { durationsMs: [4000, 4000, 4000, 4000, 4000, 4000], elapsedMs: 40000 }, choiceIndexes: [3, 1, 1, 1, 0, 0] };
+const answered = { household: '2', income: '75to150', ownNow: 'rent', planFL: 'buy', drives: 'yes' };
+assert.strictEqual(estimate.lowInformation(answered, slow).show, false);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { household: 'not-sure', income: 'not-sure', drives: 'not-sure' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { income: 'not-sure', ownNow: 'not-sure' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(answered, { timing: { durationsMs: [500, 600, 700], elapsedMs: 20000 }, choiceIndexes: [0, 1, 2, 1, 0] }).show, true);
+assert.strictEqual(estimate.lowInformation(answered, { timing: { durationsMs: [4000], elapsedMs: 8000 }, choiceIndexes: [0, 1, 2, 3, 1] }).show, true);
+assert.strictEqual(estimate.lowInformation(answered, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { household: '1', income: '250plus', groceriesNow: '0', hoaNow: '0', hoaFL: '0' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { homeBudget: '99999999' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { homeBudget: '5000' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { vehicles: '50' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { miles: '999999' }), slow).show, true);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { mpg: '0' }), slow).show, true);
+assert.strictEqual(estimate.boundMessage('budget', '250000'), '');
+assert.strictEqual(estimate.boundMessage('budget', ''), '');
+assert.ok(estimate.boundMessage('budget', '99999999'));
+assert.ok(estimate.boundMessage('budget', '1000'));
+assert.ok(estimate.boundMessage('vehicles', '11'));
+assert.strictEqual(estimate.boundMessage('vehicles', '2'), '');
+assert.ok(estimate.boundMessage('miles', '9000'));
+assert.strictEqual(estimate.boundMessage('miles', '1000'), '');
+assert.ok(estimate.boundMessage('miles', '0'));
+
+const less = 'Living in Sarasota County costs about 11% less than San Francisco.';
+assert.strictEqual(
+  estimate.alignedSentence(less, 10, 'Sarasota County', 'San Francisco'),
+  'The monthly lines in this estimate cost more in Sarasota County than in San Francisco.'
+);
+assert.strictEqual(estimate.alignedSentence(less, -20, 'Sarasota County', 'New York'), less);
+assert.strictEqual(
+  estimate.alignedSentence('Living in Manatee County costs about 2% more than Hillsborough County, FL.', 50, 'Manatee County', 'Hillsborough County, FL'),
+  'Living in Manatee County costs about 2% more than Hillsborough County, FL.'
+);
+const partial = estimate.buildEstimate(Object.assign({}, base, { hhSize: null, incomeBand: '' }), factors);
+assert.strictEqual(line(partial, 'groceries'), undefined);
+assert.strictEqual(line(partial, 'health'), undefined);
+assert.strictEqual(line(partial, 'income-tax'), undefined);
+assert.strictEqual(line(partial, 'sales-tax'), undefined);
 
 console.log('cost-of-living formula checks passed');

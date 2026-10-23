@@ -142,7 +142,60 @@
     };
   }
 
-  const VEHICLE_CAVEAT = 'It seems you have selected to transport seven or more vehicles. Please contact a relocation company directly for a better estimate.';
+  const VEHICLE_CAVEAT = "Moving seven or more vehicles takes a custom plan. Book a call and I'll help you work through it.";
+
+  function medianOf(nums) {
+    if (!nums.length) return null;
+    const s = nums.slice().sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  // The 11 questions a customer can leave as Not sure. Vehicle transport is not one of them when no vehicle is coming.
+  function unsureFlags(A) {
+    const vehAsked = !!(A.veh && A.veh !== '0');
+    return [
+      !A.origin,
+      !A.dest || A.area === 'Not sure',
+      !A.when || A.when === 'Not sure',
+      !A.type || A.type === 'Not sure',
+      !A.size || A.size === 'Not sure',
+      !A.help || A.help === 'Not sure',
+      !A.packing || A.packing === 'Not sure',
+      !A.veh || A.veh === 'Not sure',
+      vehAsked ? (!A.vehHow || A.vehHow === 'Not sure') : false,
+      !A.travel || A.travel === 'Not sure',
+      !A.storage || A.storage === 'Not sure'
+    ];
+  }
+
+  function visiblePlace(point) {
+    if (!point) return '';
+    if (/\bchecked\b|UNSOURCED|Not yet sourced|ASSUMPTION/i.test(point)) return '';
+    return point;
+  }
+
+  function lowInformation(answers, meta) {
+    const A = answers || {};
+    const reasons = [];
+    const unsure = unsureFlags(A).filter(Boolean).length;
+    if (!A.origin || !A.dest || A.area === 'Not sure') reasons.push('place');
+    if (unsure >= 6) reasons.push('unsure');
+    const timing = meta && meta.timing;
+    if (timing) {
+      const mid = medianOf((timing.durationsMs || []).filter(n => typeof n === 'number'));
+      if (mid != null && mid < 1500) reasons.push('rush');
+      if (typeof timing.elapsedMs === 'number' && timing.elapsedMs < 10000) reasons.push('rush-total');
+    }
+    const picks = (meta && meta.choiceIndexes) || [];
+    if (picks.length >= 5 && picks.every(i => i === picks[0] && i >= 0)) reasons.push('defaults');
+    if (A.veh === '0' && (A.vehHow === 'Drive them' || A.vehHow === 'Ship them')) reasons.push('zero-vehicles');
+    if (A.travel === 'Flying' && A.help === 'DIY rental truck') reasons.push('fly-diy');
+    if (A.size === '1 bedroom' && (A.adults === '4' || Number(A.adults) >= 4)) reasons.push('crowded');
+    if (A.storage === 'Yes' && (!A.origin || !A.dest)) reasons.push('storage');
+    if (contradictory(A.type, A.size)) reasons.push('contradiction');
+    return { show: reasons.length > 0, reasons: reasons };
+  }
 
   function diyTypical(local, ld, road) {
     const capped = Math.min(Math.max(road, 0), 1200);
@@ -654,6 +707,9 @@
     roadBetween,
     formatMoney,
     isOverseasState,
-    priceCore
+    priceCore,
+    lowInformation,
+    visiblePlace,
+    vehicleCaveat: VEHICLE_CAVEAT
   };
 });

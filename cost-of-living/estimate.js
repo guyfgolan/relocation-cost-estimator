@@ -136,7 +136,9 @@
     if (entered != null) {
       return { origin: entered, florida: entered * floridaRpp / originRpp };
     }
-    var base = usdaHousehold(input.hhSize, input.usda);
+    var size = Number(input.hhSize);
+    if (!(size >= 1)) return null;
+    var base = usdaHousehold(size, input.usda);
     if (base == null) return null;
     return { origin: base * originRpp / 100, florida: base * floridaRpp / 100 };
   }
@@ -235,6 +237,78 @@
     return null;
   }
 
+  function dollarSentence(sign, floridaName, originName) {
+    if (!floridaName || !originName) return '';
+    if (sign > 0) return 'The monthly lines in this estimate cost more in ' + floridaName + ' than in ' + originName + '.';
+    if (sign < 0) return 'The monthly lines in this estimate cost less in ' + floridaName + ' than in ' + originName + '.';
+    return 'The monthly lines in this estimate cost about the same in ' + floridaName + ' as in ' + originName + '.';
+  }
+
+  // The BEA percent and the monthly total measure different baskets. The headline follows the monthly total when they point different ways, and it does not invent a percent.
+  function alignedSentence(rppSentence, monthly, floridaName, originName) {
+    var sentence = rppSentence || '';
+    var rppSign = sentence.indexOf(' more than ') >= 0 ? 1 : sentence.indexOf(' less than ') >= 0 ? -1 : sentence.indexOf(' about the same as ') >= 0 ? 0 : null;
+    var sign = monthly > 0 ? 1 : monthly < 0 ? -1 : 0;
+    if (rppSign == null) return dollarSentence(sign, floridaName, originName) || sentence;
+    if (rppSign === sign) return sentence;
+    return dollarSentence(sign, floridaName, originName);
+  }
+
+  function medianOf(nums) {
+    if (!nums || !nums.length) return null;
+    var s = nums.slice().sort(function (a, b) { return a - b; });
+    var m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  function lowInformation(answers, meta) {
+    var a = answers || {};
+    var reasons = [];
+    var core = ['household', 'income', 'ownNow', 'planFL', 'drives'];
+    var unsure = core.filter(function (key) { return a[key] === 'not-sure'; }).length;
+    if (unsure >= 3) reasons.push('unsure');
+    if (a.income === 'not-sure' && a.ownNow === 'not-sure') reasons.push('income-tenure');
+    var timing = meta && meta.timing;
+    if (timing) {
+      var mid = medianOf((timing.durationsMs || []).filter(function (n) { return typeof n === 'number'; }));
+      if (mid != null && mid < 1500) reasons.push('rush');
+      if (typeof timing.elapsedMs === 'number' && timing.elapsedMs < 10000) reasons.push('rush-total');
+    }
+    var picks = (meta && meta.choiceIndexes) || [];
+    if (picks.length >= 5 && picks.every(function (i) { return i === picks[0] && i >= 0; })) reasons.push('defaults');
+    var groceryZero = a.groceriesNow === 0 || a.groceriesNow === '0';
+    var hoaNow = a.hoaNow;
+    var hoaFL = a.hoaFL;
+    var hoaQuiet = hoaNow === 0 || hoaNow === '0' || hoaNow === '' || hoaNow == null;
+    var hoaQuietFL = hoaFL === 0 || hoaFL === '0' || hoaFL === '' || hoaFL == null;
+    if (a.household === '1' && a.income === '250plus' && groceryZero && hoaQuiet && hoaQuietFL) reasons.push('thin');
+    var budget = num(a.homeBudget);
+    if (budget != null && (budget < 10000 || budget > 20000000)) reasons.push('budget');
+    var vehicles = a.vehicles === '' || a.vehicles == null ? null : Number(a.vehicles);
+    if (vehicles != null && vehicles > 10) reasons.push('vehicles');
+    var miles = a.miles === '' || a.miles == null ? null : Number(a.miles);
+    if (miles != null && miles * 12 > 100000) reasons.push('miles');
+    var mpg = a.mpg === '' || a.mpg == null ? null : Number(a.mpg);
+    if (a.fuel !== 'ev' && mpg === 0) reasons.push('mpg');
+    return { show: reasons.length > 0, reasons: reasons };
+  }
+
+  function boundMessage(kind, value) {
+    if (kind === 'budget') {
+      if (value == null || String(value).trim() === '') return '';
+      var budget = num(value);
+      if (budget == null || budget < 0) return 'Enter a dollar amount, or leave it blank.';
+      if (budget < 10000 || budget > 20000000) return 'Enter a home budget from $10,000 to $20,000,000, or leave it blank.';
+      return '';
+    }
+    if (value == null || String(value).trim() === '') return '';
+    var n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) return 'Enter a number above zero.';
+    if (kind === 'vehicles' && n > 10) return 'Enter 1 to 10 vehicles.';
+    if (kind === 'miles' && n * 12 > 100000) return 'Enter 8,333 miles a month or less. That is 100,000 miles a year.';
+    return '';
+  }
+
   function priceLevelSentence(floridaName, floridaIndex, originName, originIndex) {
     if (!(originIndex > 0) || floridaIndex == null || !floridaName || !originName) return '';
     var pct = Math.round(Math.abs(floridaIndex - originIndex) / originIndex * 100);
@@ -275,7 +349,8 @@
     var hh = Number(input.hhSize) || 0;
     var adults = input.adults == null || input.adults === '' ? Math.min(Math.max(hh, 1), 2) : Number(input.adults);
     var filing = filingStatus(adults);
-    var band = bandById(input.incomeBand, factors.incomeBands) || bandForIncome(num(input.income) || 0, factors.incomeBands);
+    var band = input.incomeBand ? bandById(input.incomeBand, factors.incomeBands) : null;
+    if (!band && input.income != null && input.income !== '') band = bandForIncome(num(input.income) || 0, factors.incomeBands);
     var income = band ? band.midpoint : null;
     var area = factors.florida && factors.florida.areas && factors.florida.areas[input.toArea];
     var originState = input.state || '';
@@ -558,6 +633,9 @@
     electricityBill: electricityBill,
     waterBill: waterBill,
     priceLevelSentence: priceLevelSentence,
+    alignedSentence: alignedSentence,
+    lowInformation: lowInformation,
+    boundMessage: boundMessage,
     buildEstimate: buildEstimate
   };
 });
