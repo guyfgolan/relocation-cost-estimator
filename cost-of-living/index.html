@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cost of Living Estimator | Florida Gulf Coast Guide</title>
+<style>
+:root{--navy:#0d2235;--gold:#c7a25a;--cream:#f6e7c3;--ink:#15202b;--goldtext:#f1d79f}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;min-height:100%;background:#0d2235;color:#fff;font-family:Arial,Helvetica,sans-serif}
+button,input{font:inherit}
+.skip{position:absolute;left:12px;top:-40px;background:#c7a25a;color:#0d2235;padding:8px 12px;z-index:9;font-weight:800}
+.skip:focus{top:8px}
+.app{min-height:100vh;position:relative}
+.bg{position:fixed;inset:0;background:#0d2235 center/cover no-repeat;z-index:0}
+.bg:after{content:"";position:absolute;inset:0;background:rgba(6,20,32,.78)}
+.shell{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(16px,4vw,48px)}
+.logo{width:min(250px,46vw);max-height:74px;object-fit:contain;object-position:left center}
+.topExp{width:105px;max-height:48px;object-fit:contain}
+.previewBanner{position:sticky;top:0;z-index:4;margin:0;padding:12px 16px;background:#c7a25a;color:#0d2235;text-align:center;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:clamp(13px,2vw,15px);line-height:1.35}
+.progressWrap{padding:14px clamp(16px,4vw,48px) 0;text-align:right}
+.progressText{font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px;color:#f1d79f}
+.progress{height:5px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
+.progress>div{height:100%;background:#c7a25a;width:0}
+.main{flex:1;display:grid;place-items:center;padding:18px clamp(14px,4vw,48px) 36px}
+.panel{width:min(820px,100%);background:rgba(16,40,60,.9);border:2px solid #c7a25a;border-radius:2px;box-shadow:0 0 0 7px rgba(13,34,53,.55),0 0 0 8px #c7a25a;padding:clamp(22px,4vw,48px)}
+.panel.wide{width:min(1180px,100%)}
+.hero{text-align:center;max-width:680px;margin:0 auto}
+.eyebrow{color:#f1d79f;font-family:Cinzel,Georgia,serif;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
+h1,h2,h3{font-family:Cinzel,Georgia,"Times New Roman",serif;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:0 0 14px;line-height:1.15}
+h1{font-size:clamp(32px,5vw,58px);max-width:16ch;margin-left:auto;margin-right:auto}
+h2{font-size:clamp(26px,3.4vw,42px);text-wrap:balance}
+h3{font-size:clamp(18px,2vw,22px);color:#f1d79f;letter-spacing:.08em}
+p,li{font-size:clamp(16px,2vw,18px);line-height:1.5}
+.hint{color:rgba(255,255,255,.86);margin-top:0}
+.questionNo{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#f1d79f;margin:0 0 10px}
+.options{display:grid;gap:12px;margin-top:8px}
+.options.two{grid-template-columns:1fr 1fr}
+.option,.primary,.secondary,.back{border:0;border-radius:14px;cursor:pointer}
+.option{width:100%;padding:16px 18px;text-align:left;background:rgba(255,255,255,.95);color:#15202b;font-weight:700;border:2px solid transparent}
+.option[aria-pressed="true"]{background:#f6e7c3;border-color:#c7a25a}
+.primary{padding:15px 22px;background:#c7a25a;color:#102334;font-weight:800}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.secondary{padding:14px 18px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}
+.back{background:transparent;color:#fff;padding:8px 0;text-decoration:underline;text-underline-offset:4px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:22px}
+.fields{display:grid;gap:16px;margin-top:8px}
+.fields label{display:block;font-weight:700;margin-bottom:8px}
+.fields input{width:100%;padding:16px 18px;border-radius:14px;border:2px solid transparent;color:#15202b;font-weight:700}
+.status{min-height:1.4em;color:#f7f3eb;margin:8px 0 0}
+.areaList{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0 0;padding:0;list-style:none}
+.areaList li{border:1px solid #c7a25a;padding:8px 12px;font-size:15px}
+.answers{margin:0 auto 16px;max-width:70ch;text-align:center;color:#f7f3eb}
+.tableWrap{overflow-x:auto;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:760px}
+caption{caption-side:bottom;text-align:left;padding-top:10px;color:#f7f3eb;font-size:14px}
+th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.18);text-align:left;vertical-align:top}
+th{color:#f1d79f;font-family:Cinzel,Georgia,serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:12px}
+td strong,th.row{font-weight:700;color:#fff}
+.cellNote{display:block;margin-top:4px;color:#f1d79f;font-size:12px;letter-spacing:.02em;text-transform:uppercase}
+.readerCol{box-shadow:inset 3px 0 0 #c7a25a}
+.totalRow td,.totalRow th{border-top:2px solid #c7a25a;background:rgba(13,34,53,.45)}
+.cards{display:grid;gap:14px;margin-top:8px}
+.areaCard{border:1px solid #c7a25a;padding:14px 14px 6px;background:rgba(13,34,53,.45)}
+.areaCard.reader{box-shadow:inset 4px 0 0 #c7a25a}
+.areaCard dl{margin:0}
+.areaCard div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.16)}
+.areaCard dt{font-weight:700}
+.areaCard dd{margin:0}
+details{margin-top:18px;border-top:1px solid rgba(255,255,255,.2);padding-top:12px}
+summary{cursor:pointer;color:#f1d79f;font-weight:700}
+details p,details li{font-size:15px}
+details ol{padding-left:1.2em}
+.footerNote{position:relative;z-index:1;text-align:center;padding:8px 16px 22px;color:#f7f3eb;font-size:14px}
+.footerNote a{color:#f1d79f}
+h1:focus:not(:focus-visible),h2:focus:not(:focus-visible),button:focus:not(:focus-visible),a:focus:not(:focus-visible),input:focus:not(:focus-visible),summary:focus:not(:focus-visible){outline:none}
+h1:focus-visible,h2:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #c7a25a;outline-offset:3px}
+input:focus-visible{border-color:#c7a25a}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:720px){
+ .logo{width:168px}
+ .topExp{width:78px}
+ .panel{box-shadow:0 0 0 5px #0d2235,0 0 0 6px #c7a25a}
+ .options.two{grid-template-columns:1fr}
+ .actions{display:grid}
+ .actions button,.actions .primary,.actions .secondary{width:100%}
+ h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#panel">Skip to the estimator</a>
+<div class="app">
+<div class="bg" id="bg"></div>
+<div class="shell">
+<header class="topbar">
+<img class="logo" src="../assets/fgcg-logo-white.svg" alt="Florida Gulf Coast Guide">
+<img class="topExp" src="https://expknowledgebase.exprealty.com/hs-fs/hubfs/eXp%20Realty%20-%20White.png?height=48&amp;name=eXp+Realty+-+White.png" alt="eXp Realty">
+</header>
+<p class="previewBanner" role="status">Design preview. Sample placeholders only. These are not cost-of-living figures.</p>
+<div class="progressWrap" id="progressWrap" hidden>
+<p class="progressText" id="progressText"></p>
+<div class="progress" id="progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Question progress"><div id="progressBar"></div></div>
+</div>
+<div id="live" class="sr" aria-live="polite" aria-atomic="true"></div>
+<main class="main"><section class="panel" id="panel" aria-labelledby="stepTitle"></section></main>
+<p class="footerNote"><a href="../">Moving cost estimator</a>. This page only previews the comparison. It does not call a paid data service.</p>
+</div>
+</div>
+<script>
+const STEPS=['intro','place','household','income','tenure','compare'];
+const QUESTIONS=['place','household','income','tenure'];
+const IMG={intro:'../assets/intro.jpg',place:'../assets/travel.jpg',household:'../assets/when.jpg',income:'../assets/travel.jpg',tenure:'../assets/when.jpg',compare:'../assets/result.jpg'};
+const A={zip:'',city:'',household:'',incomeKind:'',amount:'',tenure:''};
+let bundle=null;
+const panel=document.getElementById('panel');
+const live=document.getElementById('live');
+const bg=document.getElementById('bg');
+
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function focusStep(){
+  const h=panel.querySelector('h1,h2');
+  if(!h)return;
+  h.tabIndex=-1;
+  h.id='stepTitle';
+  h.focus({focusVisible:false});
+  live.textContent=h.textContent;
+}
+function setProgress(step){
+  const wrap=document.getElementById('progressWrap');
+  const i=QUESTIONS.indexOf(step);
+  wrap.hidden=i<0;
+  if(i<0)return;
+  const n=i+1;
+  document.getElementById('progressText').textContent=n+' of '+QUESTIONS.length;
+  document.getElementById('progressBar').style.width=(n/QUESTIONS.length*100)+'%';
+  const bar=document.getElementById('progress');
+  bar.setAttribute('aria-valuenow',String(n));
+  bar.setAttribute('aria-valuetext',n+' of '+QUESTIONS.length);
+}
+function go(step){
+  if(!STEPS.includes(step))step='intro';
+  history.pushState({step},'',step==='intro'?'#':'#'+step);
+  render(step);
+}
+function render(step){
+  bg.style.backgroundImage='url("'+IMG[step]+'")';
+  panel.className=step==='compare'?'panel wide':'panel';
+  setProgress(step);
+  if(step==='intro')intro();
+  else if(step==='place')place();
+  else if(step==='household')household();
+  else if(step==='income')income();
+  else if(step==='tenure')tenure();
+  else compare();
+  focusStep();
+}
+function actions(backStep,primary){
+  return '<div class="actions">'+(primary||'')+'<button type="button" class="back" id="backBtn">Back</button></div>';
+}
+function bindBack(step){
+  document.getElementById('backBtn').onclick=()=>go(step);
+}
+function intro(){
+  const areas=(bundle?bundle.areas.filter(a=>a.id!=='reader'):[]).map(a=>'<li>'+esc(a.name)+'</li>').join('');
+  panel.innerHTML='<div class="hero"><p class="eyebrow">Cost of living estimator</p><h1>How does the Gulf Coast compare with home?</h1><p>A design for comparing your current area with Manatee, Hillsborough, Pinellas, Sarasota County, and Venice. Housing, utilities, home and flood insurance, property tax, groceries, transportation, healthcare, and state income tax. Florida has no state income tax.</p><ul class="areaList">'+areas+'</ul><div class="actions"><button type="button" class="primary" id="startBtn">Start the preview</button></div></div>';
+  document.getElementById('startBtn').onclick=()=>go('place');
+}
+function place(){
+  panel.innerHTML='<p class="questionNo">Your comparison · Question 1</p><h2>Where do you live now?</h2><p class="hint">Enter a ZIP or a city. This preview keeps the words you type. It does not look them up.</p><div class="fields"><div><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="00000" value="'+esc(A.zip)+'"></div><div><label for="city">City and state</label><input id="city" autocomplete="address-level2" maxlength="80" placeholder="Sample City, ST" value="'+esc(A.city)+'"></div></div><p class="status" id="placeStatus" role="alert"></p>'+actions('intro','<button type="button" class="primary" id="nextBtn">Continue</button><button type="button" class="secondary" id="skipBtn">Skip</button>');
+  bindBack('intro');
+  const zip=document.getElementById('zip'),city=document.getElementById('city');
+  zip.addEventListener('keydown',e=>{if(e.key==='Enter')savePlace(false)});
+  city.addEventListener('keydown',e=>{if(e.key==='Enter')savePlace(false)});
+  document.getElementById('nextBtn').onclick=()=>savePlace(false);
+  document.getElementById('skipBtn').onclick=()=>savePlace(true);
+}
+function savePlace(skip){
+  const zip=document.getElementById('zip').value.trim();
+  const city=document.getElementById('city').value.trim();
+  const status=document.getElementById('placeStatus');
+  if(!skip && !zip && !city){status.textContent='Enter a ZIP or a city, or skip this question.';return}
+  if(zip && !/^\d{5}(-\d{4})?$/.test(zip)){status.textContent='Use five digits, or leave the ZIP blank and enter a city.';return}
+  A.zip=skip?'':zip;
+  A.city=skip?'':city;
+  go('household');
+}
+function choiceStep(opts){
+  panel.innerHTML='<p class="questionNo">Your comparison · Question '+opts.n+'</p><h2>'+esc(opts.title)+'</h2>'+(opts.hint?'<p class="hint">'+esc(opts.hint)+'</p>':'')+'<div class="options'+(opts.wide?'':' two')+'" role="group" aria-label="'+esc(opts.title)+'">'+opts.choices.map(c=>'<button type="button" class="option" aria-pressed="'+(opts.current===c.id?'true':'false')+'" data-id="'+esc(c.id)+'">'+esc(c.label)+'</button>').join('')+'</div>'+(opts.extra||'')+'<p class="status" id="stepStatus" role="alert"></p>'+actions(opts.back,'<button type="button" class="primary" id="nextBtn"'+(opts.require&&!opts.current?' disabled':'')+'>Continue</button>');
+  bindBack(opts.back);
+  let picked=opts.current||'';
+  panel.querySelectorAll('.option').forEach(btn=>{
+    btn.onclick=()=>{
+      picked=btn.getAttribute('data-id');
+      panel.querySelectorAll('.option').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));
+      const next=document.getElementById('nextBtn');
+      if(next)next.disabled=false;
+      if(opts.onPick)opts.onPick(picked);
+    };
+  });
+  document.getElementById('nextBtn').onclick=()=>{
+    if(opts.require&&!picked){document.getElementById('stepStatus').textContent='Choose one to continue.';return}
+    opts.save(picked);
+  };
+  if(opts.after)opts.after();
+}
+function household(){
+  choiceStep({
+    n:2,title:'How many people are in the household?',
+    hint:'Used later to pick a household-size series. It does not change the placeholders.',
+    back:'place',require:true,current:A.household,
+    choices:[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5+',label:'5 or more'}],
+    save:id=>{A.household=id;go('income')}
+  });
+}
+function income(){
+  choiceStep({
+    n:3,title:'Income or a monthly budget?',
+    hint:'Optional. An amount typed here is kept for the layout and is not turned into a cost.',
+    back:'household',current:A.incomeKind,wide:true,
+    choices:[{id:'annual-income',label:'Annual income'},{id:'monthly-budget',label:'Monthly budget'},{id:'skip',label:'Skip'}],
+    extra:'<div class="fields" id="amountWrap" hidden><label for="amount">Amount</label><input id="amount" inputmode="decimal" autocomplete="off" placeholder="Not used in this preview" value="'+esc(A.amount)+'"></div>',
+    onPick:id=>{document.getElementById('amountWrap').hidden=id==='skip'},
+    after:()=>{if(A.incomeKind&&A.incomeKind!=='skip')document.getElementById('amountWrap').hidden=false},
+    save:id=>{
+      A.incomeKind=id;
+      A.amount=id==='skip'?'':document.getElementById('amount').value.trim();
+      go('tenure');
+    }
+  });
+}
+function tenure(){
+  choiceStep({
+    n:4,title:'Renting or buying?',
+    hint:'Optional. Housing, insurance, and property tax will eventually follow this answer.',
+    back:'income',current:A.tenure,
+    choices:[{id:'rent',label:'Renting'},{id:'buy',label:'Buying'},{id:'skip',label:'Not sure'}],
+    save:id=>{A.tenure=id;go('compare')}
+  });
+}
+function answerLine(){
+  const bits=[];
+  if(A.zip)bits.push('ZIP '+A.zip);
+  if(A.city)bits.push(A.city);
+  if(!A.zip&&!A.city)bits.push('Current area not entered');
+  const house={1:'1 person',2:'2 people',3:'3 people',4:'4 people','5+':'5 or more'}[A.household];
+  if(house)bits.push(house);
+  if(A.incomeKind==='annual-income')bits.push('Annual income');
+  if(A.incomeKind==='monthly-budget')bits.push('Monthly budget');
+  if(A.amount)bits.push('An amount was typed and is not applied');
+  if(A.tenure==='rent')bits.push('Renting');
+  if(A.tenure==='buy')bits.push('Buying');
+  if(A.tenure==='skip')bits.push('Renting or buying not chosen');
+  return bits.join(' · ');
+}
+function cell(figure){
+  if(!figure)return '<td>PLACEHOLDER<span class="cellNote">Missing from the bundle</span></td>';
+  const url=figure.url?'<span class="cellNote">'+esc(figure.url)+'</span>':'<span class="cellNote">URL not chosen</span>';
+  return '<td class="'+(figure.areaId==='reader'?'readerCol':'')+'"><strong>'+esc(figure.display)+'</strong><span class="cellNote">'+esc(figure.source)+'</span><span class="cellNote">'+esc(figure.asOf)+'</span>'+url+'</td>';
+}
+function figureFor(areaId,categoryId){
+  return bundle.figures.find(f=>f.areaId===areaId&&f.categoryId===categoryId);
+}
+function compare(){
+  const areas=bundle.areas;
+  const cats=bundle.categories;
+  const head='<tr><th scope="col">Category</th>'+areas.map(a=>'<th scope="col">'+esc(a.name)+'</th>').join('')+'</tr>';
+  const rows=cats.map(c=>{
+    const total=c.id==='total-difference'?' class="totalRow"':'';
+    return '<tr'+total+'><th class="row" scope="row">'+esc(c.label)+'</th>'+areas.map(a=>cell(figureFor(a.id,c.id))).join('')+'</tr>';
+  }).join('');
+  const cards=areas.map(a=>{
+    const rows=cats.map(c=>{
+      const f=figureFor(a.id,c.id);
+      return '<div><dt>'+esc(c.label)+'</dt><dd><strong>'+esc(f.display)+'</strong><span class="cellNote">'+esc(f.source)+'</span><span class="cellNote">'+esc(f.asOf)+'</span></dd></div>';
+    }).join('');
+    return '<article class="areaCard'+(a.id==='reader'?' reader':'')+'"><h3>'+esc(a.name)+'</h3><dl>'+rows+'</dl></article>';
+  }).join('');
+  const questions=bundle.openQuestions.map(q=>'<li>'+esc(q.question)+'</li>').join('');
+  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">Design preview</p><h2>Side by side</h2><p class="answers">'+esc(answerLine())+'</p><p class="hint">Each cell is a placeholder. Source, URL, and as-of date stay unchosen. The total difference is not a sum of the rows. Florida state income tax is labeled only. It is not a calculated bill.</p></div><div class="tableWrap" id="compareTable"><table><caption>Placeholder comparison of your current area with Manatee, Hillsborough, Pinellas, Sarasota County, and Venice. Nothing in this table is a cost figure.</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>Open questions for the data</summary><ol>'+questions+'</ol></details>';
+  bindBack('tenure');
+  document.getElementById('againBtn').onclick=()=>{A.zip=A.city=A.household=A.incomeKind=A.amount=A.tenure='';go('intro')};
+  layoutCompare();
+}
+function layoutCompare(){
+  const table=document.getElementById('compareTable');
+  const cards=document.getElementById('compareCards');
+  if(!table||!cards)return;
+  const narrow=window.matchMedia('(max-width: 800px)').matches;
+  table.hidden=narrow;
+  cards.hidden=!narrow;
+}
+window.addEventListener('resize',layoutCompare);
+window.addEventListener('popstate',()=>render(location.hash.replace('#','')||'intro'));
+
+fetch('cost-of-living.json').then(r=>{if(!r.ok)throw new Error('bundle');return r.json()}).then(data=>{
+  bundle=data;
+  const step=location.hash.replace('#','');
+  render(STEPS.includes(step)?step:'intro');
+}).catch(()=>{
+  panel.innerHTML='<h2>The preview could not load its placeholder file.</h2><p>cost-of-living.json needs to sit next to this page.</p>';
+});
+</script>
+</body>
+</html>
