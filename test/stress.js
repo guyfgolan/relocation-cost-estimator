@@ -410,28 +410,20 @@ function expandHex(hex) {
   return h;
 }
 function paletteProblems(css, label) {
-  const allowed = new Set(['0d2235', 'c7a25a', 'f1d79f', 'ffffff', 'f7f3eb', 'f5f7fa', '4e5964', '000000']);
-  const translucent = new Set(['0d2235', 'c7a25a', 'ffffff', '000000']);
+  const allowed = new Set(['001b35', '052643', 'd4af37', 'e9dcb0', 'f7f4ec', 'e6e1d4']);
   const solids = {
-    '13,34,53': '0d2235',
-    '199,162,90': 'c7a25a',
-    '241,215,159': 'f1d79f',
-    '255,255,255': 'ffffff',
-    '247,243,235': 'f7f3eb',
-    '245,247,250': 'f5f7fa',
-    '78,89,100': '4e5964',
-    '0,0,0': '000000'
+    '0,27,53': '001b35',
+    '5,38,67': '052643',
+    '212,175,55': 'd4af37',
+    '233,220,176': 'e9dcb0',
+    '247,244,236': 'f7f4ec',
+    '230,225,212': 'e6e1d4'
   };
   const problems = [];
   for (const match of css.matchAll(/#([0-9a-fA-F]{3,8})\b/g)) {
     const h = expandHex(match[1]);
-    if (h.length === 6) {
-      if (!allowed.has(h)) problems.push(label + ' ' + match[0]);
-    } else if (h.length === 8) {
-      const solid = h.slice(0, 6);
-      const opaque = h.slice(6) === 'ff';
-      if (opaque ? !allowed.has(solid) : !translucent.has(solid)) problems.push(label + ' ' + match[0]);
-    } else problems.push(label + ' ' + match[0]);
+    const solid = h.length === 8 ? h.slice(0, 6) : h;
+    if ((h.length !== 6 && h.length !== 8) || !allowed.has(solid)) problems.push(label + ' ' + match[0]);
   }
   const rgbCalls = css.match(/rgba?\([^)]*\)/gi) || [];
   const rgbRe = /rgba?\(\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)\s*,\s*([0-9.]+%?)(?:\s*,\s*([0-9.]+%?)\s*)?\)/i;
@@ -442,9 +434,7 @@ function paletteProblems(css, label) {
       return;
     }
     const channels = parts.slice(1, 4).map(part => part.endsWith('%') ? Math.round(parseFloat(part) * 2.55) : Math.round(parseFloat(part)));
-    const alpha = parts[4] == null ? 1 : (parts[4].endsWith('%') ? parseFloat(parts[4]) / 100 : parseFloat(parts[4]));
-    const hex = solids[channels.join(',')];
-    if (!hex || (alpha < 1 && !translucent.has(hex))) problems.push(label + ' ' + call);
+    if (!solids[channels.join(',')]) problems.push(label + ' ' + call);
   });
   return problems;
 }
@@ -454,6 +444,13 @@ function paletteProblems(css, label) {
 });
 assert(moverPage.indexOf('.flag{') === -1 && moverPage.indexOf('#7a5c12') === -1 && moverPage.indexOf('#7A5C12') === -1, 'old flag styles are gone');
 assert(moverPage.indexOf('class="flagNote"') > 0, 'the vehicle warning uses the navy and gold note');
+assert(/\.flagNote\{[^}]*background:#052643;[^}]*color:#E9DCB0;[^}]*border:1px solid #D4AF37;[^}]*border-radius:0/.test(moverPage), 'flag note is panel navy, gold, and light gold with square corners');
+assert(moverPage.indexOf('fgcg-logo-white.svg') === -1 && moverPage.indexOf('logo_h_white.png') > 0, 'moving page uses the shared wordmark');
+assert(moverPage.indexOf('expknowledgebase.exprealty.com') === -1 && moverPage.indexOf('assets/exp-realty-white.svg') > 0, 'eXp logo is hosted locally');
+assert(moverPage.indexOf('Arial') === -1 && colPage.indexOf('Arial') === -1 && colPage.indexOf('Inter') === -1, 'Inter and Arial are gone');
+assert(moverPage.indexOf('family=Cinzel:wght@400;700') > 0 && moverPage.indexOf('Gelasio:ital,wght@0,400;0,700;1,400') > 0, 'moving page loads Cinzel and Gelasio');
+assert(colPage.indexOf('family=Cinzel:wght@400;700') > 0 && colPage.indexOf('Gelasio:ital,wght@0,400;0,700;1,400') > 0, 'cost of living loads Cinzel and Gelasio');
+assert(!/border-radius:\s*(?:8|1[2-9]|[2-9]\d)px/i.test(cssText(moverPage) + cssText(colPage)), 'cards and buttons stay within a 2px radius');
 
 function show(label, est) {
   const m = est.lines.find(l => l.id === 'moving');
