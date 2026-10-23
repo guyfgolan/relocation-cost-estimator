@@ -1,0 +1,3348 @@
+{
+  "schemaVersion": "0.3-design",
+  "status": "DESIGN_PREVIEW",
+  "banner": "DESIGN PREVIEW — sample placeholders only. These are not cost-of-living figures.",
+  "currency": "USD",
+  "asOfRange": {
+    "from": null,
+    "to": null,
+    "label": "As-of range: not chosen yet"
+  },
+  "comparison": {
+    "baseline": "reader",
+    "readerLookup": [
+      "zip",
+      "county",
+      "cbsa",
+      "state",
+      "not-available"
+    ],
+    "gulfAreaIds": [
+      "manatee",
+      "hillsborough",
+      "pinellas",
+      "sarasota",
+      "venice",
+      "north-port"
+    ],
+    "headline": [
+      "price-index",
+      "equivalent-income"
+    ],
+    "monthlySumExcludes": [
+      "price-index",
+      "state-income-tax",
+      "insurance-flood"
+    ]
+  },
+  "dimensions": {
+    "householdSize": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5+"
+    ],
+    "tenure": [
+      "rent",
+      "own",
+      "both",
+      null
+    ],
+    "incomeKind": [
+      "annual-income",
+      "monthly-budget"
+    ],
+    "filingStatus": [
+      "not-asked"
+    ],
+    "note": "Income is optional and stays in the browser. Tenure null means the figure applies to both rent and own. both is the explicit form of that."
+  },
+  "nationalTables": {
+    "note": "The reader column is looked up here at runtime. Fallback is ZIP, then county (largest Census ZCTA-to-county share), then metro, then state, then Not available. Geography for a ZIP comes from crosswalk.zips. This preview ships one SAMPLE crosswalk row, ZIP 00000, and no cost rows, so a real ZIP still resolves to Not available. A national-only series, if one is added later, is labelled U.S. average and is not a silent fallback.",
+    "fallback": [
+      "zip",
+      "county",
+      "cbsa",
+      "state"
+    ],
+    "exhaustedLabel": "Not available",
+    "rows": []
+  },
+  "areas": [
+    {
+      "id": "manatee",
+      "name": "Manatee County",
+      "kind": "county",
+      "state": "FL",
+      "fips": "12081",
+      "cbsa": "35840",
+      "placeFips": null,
+      "zips": [],
+      "note": "Gulf Coast column. North Port-Bradenton-Sarasota metro."
+    },
+    {
+      "id": "hillsborough",
+      "name": "Hillsborough County",
+      "kind": "county",
+      "state": "FL",
+      "fips": "12057",
+      "cbsa": "45300",
+      "placeFips": null,
+      "zips": [],
+      "note": "Gulf Coast column. Tampa-St. Petersburg-Clearwater metro."
+    },
+    {
+      "id": "pinellas",
+      "name": "Pinellas County",
+      "kind": "county",
+      "state": "FL",
+      "fips": "12103",
+      "cbsa": "45300",
+      "placeFips": null,
+      "zips": [],
+      "note": "Gulf Coast column. Tampa-St. Petersburg-Clearwater metro."
+    },
+    {
+      "id": "sarasota",
+      "name": "Sarasota County",
+      "kind": "county",
+      "state": "FL",
+      "fips": "12115",
+      "cbsa": "35840",
+      "placeFips": null,
+      "zips": [],
+      "note": "Gulf Coast column. North Port-Bradenton-Sarasota metro. Venice and North Port are also their own columns."
+    },
+    {
+      "id": "venice",
+      "name": "Venice",
+      "kind": "place",
+      "state": "FL",
+      "county": "Sarasota",
+      "fips": "12115",
+      "cbsa": "35840",
+      "placeFips": "1273900",
+      "zips": [],
+      "note": "Place inside Sarasota County. The place FIPS is unverified. ZIP list is not loaded in this preview."
+    },
+    {
+      "id": "north-port",
+      "name": "North Port",
+      "kind": "place",
+      "state": "FL",
+      "county": "Sarasota",
+      "fips": "12115",
+      "cbsa": "35840",
+      "placeFips": "1249675",
+      "zips": [],
+      "note": "Place inside Sarasota County, shown beside Venice. The place FIPS is unverified. ZIP list is not loaded in this preview."
+    }
+  ],
+  "categories": [
+    {
+      "id": "price-index",
+      "label": "Price index",
+      "period": "year",
+      "unit": "index",
+      "inMonthlySum": false,
+      "hiddenFor": null,
+      "definition": "Headline index for the area compared with the reader’s area, plus an equivalent income. Never added to the monthly dollar sum."
+    },
+    {
+      "id": "monthly-sum",
+      "label": "Monthly sum",
+      "period": "month",
+      "unit": "USD/month",
+      "inMonthlySum": false,
+      "hiddenFor": null,
+      "definition": "Sum of the non-overlapping monthly rows only. Excludes the price index and state income tax. Not calculated in this preview."
+    },
+    {
+      "id": "housing",
+      "label": "Housing",
+      "period": "month",
+      "unit": "USD/month",
+      "inMonthlySum": true,
+      "hiddenFor": null,
+      "definition": "Renters: gross rent, utilities included except telephone. Buyers: principal and interest at a median price, taxes and insurance excluded."
+    },
+    {
+      "id": "utilities",
+      "label": "Utilities",
+      "period": "month",
+      "unit": "USD/month",
+      "inMonthlySum": true,
+      "hiddenFor": "rent",
+      "definition": "One row. Expands to electricity, water and sewer, and internet. Hidden for renters because gross rent already includes utilities. Internet is not estimated.",
+      "components": [
+        {
+          "id": "electricity",
+          "label": "Electricity"
+        },
+        {
+          "id": "water-sewer",
+          "label": "Water and sewer"
+        },
+        {
+          "id": "internet",
+          "label": "Internet"
+        }
+      ]
+    },
+    {
+      "id": "insurance-home",
+      "label": "Home insurance",
+      "period": "year",
+      "unit": "USD/year",
+      "inMonthlySum": true,
+      "hiddenFor": null,
+      "definition": "Home policy, separate from flood. The monthly sum will use a monthly equivalent once a source exists."
+    },
+    {
+      "id": "insurance-flood",
+      "label": "Flood insurance",
+      "period": "year",
+      "unit": "USD/year",
+      "inMonthlySum": false,
+      "hiddenFor": null,
+      "definition": "Not estimated. It depends on the address, not the county."
+    },
+    {
+      "id": "property-tax",
+      "label": "Property tax",
+      "period": "year",
+      "unit": "USD/year",
+      "inMonthlySum": true,
+      "hiddenFor": "rent",
+      "definition": "Owners only. Florida buyer cells are an example at the median price, not a calculated bill."
+    },
+    {
+      "id": "groceries",
+      "label": "Groceries",
+      "period": "month",
+      "unit": "USD/month",
+      "inMonthlySum": true,
+      "hiddenFor": null,
+      "definition": "Scales with household size once a source is chosen."
+    },
+    {
+      "id": "transportation",
+      "label": "Transportation",
+      "period": "month",
+      "unit": "USD/month",
+      "inMonthlySum": true,
+      "hiddenFor": null,
+      "definition": "Day-to-day transportation, not the one-time move. Scales with adults or vehicles once a source is chosen."
+    },
+    {
+      "id": "healthcare",
+      "label": "Healthcare",
+      "period": "month",
+      "unit": "USD/month",
+      "inMonthlySum": true,
+      "hiddenFor": null,
+      "definition": "Scales per person once a source is chosen."
+    },
+    {
+      "id": "state-income-tax",
+      "label": "State income tax",
+      "period": "year",
+      "unit": "USD/year",
+      "inMonthlySum": false,
+      "hiddenFor": null,
+      "definition": "Below the monthly sum, not inside it. Florida has no state income tax. The reader’s tax needs income, which stays in the browser."
+    }
+  ],
+  "figures": [
+    {
+      "areaId": "manatee",
+      "categoryId": "price-index",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "index",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Headline index only. Do not add it to the monthly sum."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "monthly-sum",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "rent",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "utilities",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "utilities",
+      "componentId": "electricity",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "utilities",
+      "componentId": "water-sewer",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "utilities",
+      "componentId": "internet",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "not estimated",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "No free national internet price series is loaded."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "insurance-home",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "insurance-flood",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "Not estimated: depends on the address",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "https://msc.fema.gov/portal/home",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "property-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "Example at the median price",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview."
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "groceries",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "transportation",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "healthcare",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "manatee",
+      "categoryId": "state-income-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "No state income tax",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12081",
+      "areaCodes": {
+        "fips": "12081",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "price-index",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "index",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Headline index only. Do not add it to the monthly sum."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "monthly-sum",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "rent",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "utilities",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "utilities",
+      "componentId": "electricity",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "utilities",
+      "componentId": "water-sewer",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "utilities",
+      "componentId": "internet",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "not estimated",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "No free national internet price series is loaded."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "insurance-home",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "insurance-flood",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "Not estimated: depends on the address",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "https://msc.fema.gov/portal/home",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "property-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "Example at the median price",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview."
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "groceries",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "transportation",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "healthcare",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "hillsborough",
+      "categoryId": "state-income-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "No state income tax",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12057",
+      "areaCodes": {
+        "fips": "12057",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "price-index",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "index",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Headline index only. Do not add it to the monthly sum."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "monthly-sum",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "rent",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "utilities",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "utilities",
+      "componentId": "electricity",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "utilities",
+      "componentId": "water-sewer",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "utilities",
+      "componentId": "internet",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "not estimated",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "No free national internet price series is loaded."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "insurance-home",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "insurance-flood",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "Not estimated: depends on the address",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "https://msc.fema.gov/portal/home",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "property-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "Example at the median price",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview."
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "groceries",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "transportation",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "healthcare",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "pinellas",
+      "categoryId": "state-income-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "No state income tax",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12103",
+      "areaCodes": {
+        "fips": "12103",
+        "cbsa": "45300",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "price-index",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "index",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Headline index only. Do not add it to the monthly sum."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "monthly-sum",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "rent",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "utilities",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "utilities",
+      "componentId": "electricity",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "utilities",
+      "componentId": "water-sewer",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "utilities",
+      "componentId": "internet",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "not estimated",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "No free national internet price series is loaded."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "insurance-home",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "insurance-flood",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "Not estimated: depends on the address",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "https://msc.fema.gov/portal/home",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "property-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "Example at the median price",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview."
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "groceries",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "transportation",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "healthcare",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "CAVEAT NOT CHOSEN"
+    },
+    {
+      "areaId": "sarasota",
+      "categoryId": "state-income-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "No state income tax",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "county",
+      "geoId": "12115",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": null,
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "price-index",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "index",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Headline index only. Do not add it to the monthly sum. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "monthly-sum",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "rent",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "utilities",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "utilities",
+      "componentId": "electricity",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "utilities",
+      "componentId": "water-sewer",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "utilities",
+      "componentId": "internet",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "not estimated",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "No free national internet price series is loaded. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "insurance-home",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "insurance-flood",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "Not estimated: depends on the address",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "https://msc.fema.gov/portal/home",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote. UNVERIFIED place code 1273900.",
+      "linkLabel": "FEMA Flood Map Service Center"
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "property-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "Example at the median price",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "groceries",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "transportation",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "healthcare",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "venice",
+      "categoryId": "state-income-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "No state income tax",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1273900",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1273900",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row. UNVERIFIED place code 1273900."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "price-index",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "index",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Headline index only. Do not add it to the monthly sum. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "monthly-sum",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "rent",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "housing",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "utilities",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "utilities",
+      "componentId": "electricity",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "utilities",
+      "componentId": "water-sewer",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "utilities",
+      "componentId": "internet",
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "not estimated",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "No free national internet price series is loaded. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "insurance-home",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "insurance-flood",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "Not estimated: depends on the address",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "https://msc.fema.gov/portal/home",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote. UNVERIFIED place code 1249675.",
+      "linkLabel": "FEMA Flood Map Service Center"
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "property-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "own",
+      "value": null,
+      "status": "placeholder",
+      "display": "Example at the median price",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview. UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "groceries",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "transportation",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "healthcare",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "PLACEHOLDER",
+      "unit": "USD/month",
+      "period": "month",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "UNVERIFIED place code 1249675."
+    },
+    {
+      "areaId": "north-port",
+      "categoryId": "state-income-tax",
+      "componentId": null,
+      "householdSize": null,
+      "tenure": "both",
+      "value": null,
+      "status": "placeholder",
+      "display": "No state income tax",
+      "unit": "USD/year",
+      "period": "year",
+      "geoLevel": "place",
+      "geoId": "1249675",
+      "areaCodes": {
+        "fips": "12115",
+        "cbsa": "35840",
+        "placeFips": "1249675",
+        "zips": []
+      },
+      "source": "SOURCE NOT CHOSEN",
+      "url": "",
+      "asOf": null,
+      "retrieved": null,
+      "license": "LICENSE NOT CHOSEN",
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row. UNVERIFIED place code 1249675."
+    }
+  ],
+  "signOff": [
+    "Dexter sources a figure: value, unit, geography used, source, URL, as-of, retrieved, and license. The URL is checked. Unverified figures do not ship.",
+    "Franklin ships it in a pull request that changes data and the check. The check then requires a number, an https URL, a date-formatted as-of, a known geography level, and the same source and vintage across the row.",
+    "Dexter retests the source sheet.",
+    "Guy approves before merge. The status stays DESIGN_PREVIEW until that approval."
+  ],
+  "jsonSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Cost of living preview bundle",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "schemaVersion",
+      "status",
+      "areas",
+      "categories",
+      "figures",
+      "nationalTables",
+      "crosswalk"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "DESIGN_PREVIEW",
+          "SOURCED"
+        ]
+      },
+      "banner": {
+        "type": "string"
+      },
+      "currency": {
+        "type": "string"
+      },
+      "asOfRange": {
+        "type": "object"
+      },
+      "comparison": {
+        "type": "object"
+      },
+      "dimensions": {
+        "type": "object"
+      },
+      "signOff": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "jsonSchema": {
+        "type": "object"
+      },
+      "nationalTables": {
+        "type": "object",
+        "required": [
+          "fallback",
+          "rows"
+        ],
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "fallback": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "zip",
+                "county",
+                "cbsa",
+                "state"
+              ]
+            }
+          },
+          "exhaustedLabel": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array"
+          }
+        }
+      },
+      "crosswalk": {
+        "$ref": "#/$defs/crosswalk"
+      },
+      "areas": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/area"
+        }
+      },
+      "categories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/category"
+        }
+      },
+      "figures": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/figure"
+        }
+      }
+    },
+    "$defs": {
+      "area": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "state",
+          "fips",
+          "cbsa",
+          "placeFips",
+          "zips"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "county",
+              "place"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "minLength": 2
+          },
+          "county": {
+            "type": "string"
+          },
+          "fips": {
+            "type": "string",
+            "pattern": "^\\d{5}$"
+          },
+          "cbsa": {
+            "type": "string",
+            "pattern": "^\\d{5}$"
+          },
+          "placeFips": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "pattern": "^\\d{7}$"
+              }
+            ]
+          },
+          "zips": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{5}$"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "place"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "placeFips": {
+                  "type": "string",
+                  "pattern": "^\\d{7}$"
+                }
+              },
+              "required": [
+                "placeFips"
+              ]
+            }
+          }
+        ]
+      },
+      "category": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "definition",
+          "inMonthlySum",
+          "unit",
+          "period"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "definition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period": {
+            "enum": [
+              "month",
+              "year"
+            ]
+          },
+          "unit": {
+            "enum": [
+              "USD/month",
+              "USD/year",
+              "index"
+            ]
+          },
+          "inMonthlySum": {
+            "type": "boolean"
+          },
+          "hiddenFor": {
+            "enum": [
+              "rent",
+              "own",
+              null
+            ]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/month"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "month"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/year"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "index"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "crosswalk": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zips"
+        ],
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "zips": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zip",
+                "label",
+                "countyFips",
+                "cbsa",
+                "state"
+              ],
+              "properties": {
+                "zip": {
+                  "type": "string",
+                  "pattern": "^\\d{5}$"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "countyFips": {
+                  "type": "string",
+                  "pattern": "^\\d{5}$"
+                },
+                "countyName": {
+                  "type": "string"
+                },
+                "cbsa": {
+                  "type": "string",
+                  "pattern": "^\\d{5}$"
+                },
+                "cbsaName": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 2
+                }
+              }
+            }
+          }
+        }
+      },
+      "figure": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "areaId",
+          "categoryId",
+          "tenure",
+          "value",
+          "display",
+          "unit",
+          "period",
+          "geoLevel",
+          "geoId",
+          "areaCodes",
+          "source",
+          "url",
+          "asOf",
+          "retrieved",
+          "license",
+          "caveat"
+        ],
+        "properties": {
+          "areaId": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "componentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "householdSize": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tenure": {
+            "enum": [
+              "rent",
+              "own",
+              "both",
+              null
+            ]
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "placeholder",
+              "sourced"
+            ]
+          },
+          "display": {
+            "type": "string"
+          },
+          "unit": {
+            "enum": [
+              "USD/month",
+              "USD/year",
+              "index"
+            ]
+          },
+          "period": {
+            "enum": [
+              "month",
+              "year"
+            ]
+          },
+          "geoLevel": {
+            "enum": [
+              "zip",
+              "place",
+              "county",
+              "cbsa",
+              "state",
+              "us",
+              null
+            ]
+          },
+          "geoId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "areaCodes": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fips",
+              "cbsa",
+              "placeFips",
+              "zips"
+            ],
+            "properties": {
+              "fips": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d{5}$"
+              },
+              "cbsa": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d{5}$"
+              },
+              "placeFips": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{7}$"
+                  }
+                ]
+              },
+              "zips": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "source": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "linkLabel": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asOf": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "pattern": "^(\\d{4}|\\d{4}-\\d{2}|\\d{4}-\\d{2}-\\d{2}|FY\\d{4})$"
+              }
+            ]
+          },
+          "retrieved": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              }
+            ]
+          },
+          "license": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "evidence": {
+            "enum": [
+              "MEASURED",
+              "INFERENCE",
+              "UNVERIFIED",
+              null
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/month"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "month"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/year"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "index"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "value"
+              ]
+            },
+            "then": {
+              "properties": {
+                "source": {
+                  "not": {
+                    "const": "SOURCE NOT CHOSEN"
+                  }
+                }
+              },
+              "required": [
+                "url",
+                "license",
+                "asOf",
+                "retrieved",
+                "evidence"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "sourced"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "url": {
+                  "type": "string",
+                  "pattern": "^https://"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "SOURCE NOT CHOSEN"
+                  }
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "LICENSE NOT CHOSEN"
+                  }
+                },
+                "asOf": {
+                  "type": "string",
+                  "pattern": "^(\\d{4}|\\d{4}-\\d{2}|\\d{4}-\\d{2}-\\d{2}|FY\\d{4})$"
+                },
+                "retrieved": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "evidence": {
+                  "const": "MEASURED"
+                }
+              },
+              "required": [
+                "value",
+                "url",
+                "source",
+                "license",
+                "asOf",
+                "retrieved",
+                "evidence",
+                "geoLevel"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "then": {
+              "required": [
+                "linkLabel"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "crosswalk": {
+    "note": "SAMPLE only. Not a Census ZCTA crosswalk. ZIP 00000 is a labeled stand-in so the ZIP, county, metro, then state lookup can be exercised. It is not a real place.",
+    "zips": [
+      {
+        "zip": "00000",
+        "label": "SAMPLE",
+        "countyFips": "99000",
+        "countyName": "Sample County",
+        "cbsa": "99999",
+        "cbsaName": "Sample Metro",
+        "state": "XX"
+      }
+    ]
+  }
+}
