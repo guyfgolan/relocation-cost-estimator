@@ -130,7 +130,7 @@
   function cmrCell(D, road, sizeI) {
     const b = cmrBand(road);
     const mv = D.movers.value;
-    const period = (b === 3 && sizeI === 3) ? 'Dec 2022-Sep 2026' : D.movers.asOf;
+    const period = (b === 3 && sizeI === 3) ? (D.movers.specialPeriod || 'Dec 2022-Sep 2026') : D.movers.asOf;
     return {
       lo: mv.low[b][sizeI],
       md: mv.median[b][sizeI],
