@@ -53,6 +53,15 @@ p,li{font-size:clamp(16px,2vw,18px);line-height:1.5}
 .areaList{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0 0;padding:0;list-style:none}
 .areaList li{border:1px solid #c7a25a;padding:8px 12px;font-size:15px}
 .answers{margin:0 auto 16px;max-width:70ch;text-align:center;color:#f7f3eb}
+.asOfRange{margin:0 0 8px;color:#f1d79f;font-weight:700;text-align:center}
+.headlines{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 14px}
+.headline,.sumBox{border:1px solid #c7a25a;padding:14px;text-align:center;background:rgba(13,34,53,.45)}
+.sumBox{margin:0 0 16px}
+.headline span,.sumBox span{display:block;color:#f1d79f;font-family:Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.headline strong,.sumBox strong{display:block;font-family:Cinzel,Georgia,serif;font-size:clamp(18px,2.4vw,28px);font-weight:600;margin-top:6px}
+.separate{margin:8px 0 0;font-size:15px}
+.utilChild th,.utilChild td{background:rgba(13,34,53,.28)}
+.level{display:block;margin-top:4px;color:#f1d79f;font-size:12px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
 .tableWrap{overflow-x:auto;margin-top:8px}
 table{width:100%;border-collapse:collapse;font-size:15px;min-width:760px}
 caption{caption-side:bottom;text-align:left;padding-top:10px;color:#f7f3eb;font-size:14px}
@@ -80,6 +89,7 @@ h1:focus-visible,h2:focus-visible,button:focus-visible,a:focus-visible,input:foc
 input:focus-visible{border-color:#c7a25a}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:720px){
+ .headlines{grid-template-columns:1fr}
  .logo{width:168px}
  .topExp{width:78px}
  .panel{box-shadow:0 0 0 5px #0d2235,0 0 0 6px #c7a25a}
@@ -168,7 +178,7 @@ function bindBack(step){
 }
 function intro(){
   const areas=(bundle?bundle.areas.filter(a=>a.id!=='reader'):[]).map(a=>'<li>'+esc(a.name)+'</li>').join('');
-  panel.innerHTML='<div class="hero"><p class="eyebrow">Cost of living estimator</p><h1>How does the Gulf Coast compare with home?</h1><p>A design for comparing your current area with Manatee, Hillsborough, Pinellas, Sarasota County, and Venice. Housing, utilities, home and flood insurance, property tax, groceries, transportation, healthcare, and state income tax. Florida has no state income tax.</p><ul class="areaList">'+areas+'</ul><div class="actions"><button type="button" class="primary" id="startBtn">Start the preview</button></div></div>';
+  panel.innerHTML='<div class="hero"><p class="eyebrow">Cost of living estimator</p><h1>How does the Gulf Coast compare with home?</h1><p>A design for comparing your current area with Manatee, Hillsborough, Pinellas, Sarasota County, Venice, and North Port. Housing, utilities, home and flood insurance, property tax, groceries, transportation, healthcare, and state income tax. Florida has no state income tax.</p><ul class="areaList">'+areas+'</ul><div class="actions"><button type="button" class="primary" id="startBtn">Start the preview</button></div></div>';
   document.getElementById('startBtn').onclick=()=>go('place');
 }
 function place(){
@@ -221,7 +231,7 @@ function household(){
 function income(){
   choiceStep({
     n:3,title:'Income or a monthly budget?',
-    hint:'Optional. An amount typed here is kept for the layout and is not turned into a cost.',
+    hint:'Optional. An amount stays in this browser only. It is not saved or sent. Skip it and the equivalent income stays blank.',
     back:'household',current:A.incomeKind,wide:true,
     choices:[{id:'annual-income',label:'Annual income'},{id:'monthly-budget',label:'Monthly budget'},{id:'skip',label:'Skip'}],
     extra:'<div class="fields" id="amountWrap" hidden><label for="amount">Amount</label><input id="amount" inputmode="decimal" autocomplete="off" placeholder="Not used in this preview" value="'+esc(A.amount)+'"></div>',
@@ -237,9 +247,9 @@ function income(){
 function tenure(){
   choiceStep({
     n:4,title:'Renting or buying?',
-    hint:'Optional. Housing, insurance, and property tax will eventually follow this answer.',
+    hint:'Optional. Renting uses gross rent and hides utilities. Buying uses principal and interest, and shows property tax.',
     back:'income',current:A.tenure,
-    choices:[{id:'rent',label:'Renting'},{id:'buy',label:'Buying'},{id:'skip',label:'Not sure'}],
+    choices:[{id:'rent',label:'Renting'},{id:'own',label:'Buying'},{id:'skip',label:'Not sure'}],
     save:id=>{A.tenure=id;go('compare')}
   });
 }
@@ -252,39 +262,115 @@ function answerLine(){
   if(house)bits.push(house);
   if(A.incomeKind==='annual-income')bits.push('Annual income');
   if(A.incomeKind==='monthly-budget')bits.push('Monthly budget');
-  if(A.amount)bits.push('An amount was typed and is not applied');
+  if(A.amount)bits.push('Income is in this browser and is not saved');
   if(A.tenure==='rent')bits.push('Renting');
-  if(A.tenure==='buy')bits.push('Buying');
+  if(A.tenure==='own')bits.push('Buying');
   if(A.tenure==='skip')bits.push('Renting or buying not chosen');
   return bits.join(' · ');
 }
-function cell(figure){
-  if(!figure)return '<td>PLACEHOLDER<span class="cellNote">Missing from the bundle</span></td>';
-  const url=figure.url?'<span class="cellNote">'+esc(figure.url)+'</span>':'<span class="cellNote">URL not chosen</span>';
-  return '<td class="'+(figure.areaId==='reader'?'readerCol':'')+'"><strong>'+esc(figure.display)+'</strong><span class="cellNote">'+esc(figure.source)+'</span><span class="cellNote">'+esc(figure.asOf)+'</span>'+url+'</td>';
+function owning(){return A.tenure==='own'}
+function renting(){return A.tenure==='rent'}
+function categoryShown(c){
+  if(c.id==='price-index'||c.id==='monthly-sum')return false;
+  if(c.hiddenFor==='rent'&&renting())return false;
+  return true;
 }
-function figureFor(areaId,categoryId){
-  return bundle.figures.find(f=>f.areaId===areaId&&f.categoryId===categoryId);
+function housingLabel(){
+  if(renting())return 'Gross rent';
+  if(owning())return 'Principal and interest';
+  return 'Housing';
+}
+function figureFor(areaId,categoryId,componentId){
+  const want=owning()?'own':renting()?'rent':null;
+  const rows=bundle.figures.filter(f=>f.areaId===areaId&&f.categoryId===categoryId&&(f.componentId||null)===(componentId||null));
+  return rows.find(f=>f.tenure===want)||rows.find(f=>f.tenure==='both'||f.tenure==null)||rows[0]||null;
+}
+function readerLookup(categoryId,componentId){
+  const order=bundle.nationalTables.fallback;
+  const keys={zip:A.zip||'',county:'',cbsa:'',state:''};
+  const rows=bundle.nationalTables.rows||[];
+  for(const level of order){
+    const geoId=keys[level];
+    if(!geoId)continue;
+    const hit=rows.find(r=>r.geoLevel===level&&r.geoId===geoId&&r.categoryId===categoryId&&(r.componentId||null)===(componentId||null)&&r.value!=null);
+    if(hit)return {figure:hit,level:level==='cbsa'?'metro value':level+' value'};
+  }
+  return {figure:null,level:'Not available'};
+}
+function dateNote(figure){
+  if(!figure)return '';
+  const asOf=figure.asOf?'As of '+figure.asOf:'As-of not chosen';
+  const got=figure.retrieved?'Retrieved '+figure.retrieved:'Retrieved not chosen';
+  return '<span class="cellNote">'+esc(asOf)+'</span><span class="cellNote">'+esc(got)+'</span>';
+}
+function cellBody(figure,level){
+  if(!figure)return '<strong>Not available</strong>'+(level?'<span class="level">Level used: '+esc(level)+'</span>':'');
+  const link=figure.url?'<a href="'+esc(figure.url)+'">FEMA flood map</a>':'';
+  const levelNote=level?'<span class="level">Level used: '+esc(level)+'</span>':'';
+  return '<strong>'+esc(figure.display)+'</strong>'+levelNote+dateNote(figure)+(link?'<span class="cellNote">'+link+'</span>':'');
+}
+function readerCell(categoryId,componentId){
+  if(categoryId==='insurance-flood'){
+    const sample=bundle.figures.find(f=>f.categoryId==='insurance-flood');
+    return '<td class="readerCol">'+cellBody(sample)+'</td>';
+  }
+  if(componentId==='internet')return '<td class="readerCol"><strong>not estimated</strong></td>';
+  if(categoryId==='state-income-tax'){
+    const text=A.incomeKind&&A.incomeKind!=='skip'?'PLACEHOLDER':'Rate structure not loaded';
+    return '<td class="readerCol"><strong>'+text+'</strong><span class="level">Level used: Not available</span><span class="cellNote">Stays in this browser. Not saved.</span></td>';
+  }
+  const found=readerLookup(categoryId,componentId);
+  return '<td class="readerCol">'+cellBody(found.figure,found.level)+'</td>';
+}
+function gulfCell(area,categoryId,componentId){
+  return '<td>'+cellBody(figureFor(area.id,categoryId,componentId))+'</td>';
+}
+function rowLabel(c){
+  if(c.id==='housing')return housingLabel();
+  if(c.id==='utilities')return 'Utilities';
+  return c.label;
+}
+function componentRows(columns){
+  const util=bundle.categories.find(c=>c.id==='utilities');
+  return (util.components||[]).map(component=>'<tr class="utilChild"><th class="row" scope="row">'+esc(component.label)+'</th>'+columns.map(area=>area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id)).join('')+'</tr>').join('');
 }
 function compare(){
-  const areas=bundle.areas;
-  const cats=bundle.categories;
-  const head='<tr><th scope="col">Category</th>'+areas.map(a=>'<th scope="col">'+esc(a.name)+'</th>').join('')+'</tr>';
-  const rows=cats.map(c=>{
-    const total=c.id==='total-difference'?' class="totalRow"':'';
-    return '<tr'+total+'><th class="row" scope="row">'+esc(c.label)+'</th>'+areas.map(a=>cell(figureFor(a.id,c.id))).join('')+'</tr>';
-  }).join('');
-  const cards=areas.map(a=>{
-    const rows=cats.map(c=>{
-      const f=figureFor(a.id,c.id);
-      return '<div><dt>'+esc(c.label)+'</dt><dd><strong>'+esc(f.display)+'</strong><span class="cellNote">'+esc(f.source)+'</span><span class="cellNote">'+esc(f.asOf)+'</span></dd></div>';
+  const columns=[{id:'reader',name:'Your current area'}].concat(bundle.areas);
+  const cats=bundle.categories.filter(categoryShown);
+  const range=(bundle.asOfRange&&bundle.asOfRange.label)||'As-of range: not chosen yet';
+  const incomeLine=A.incomeKind&&A.incomeKind!=='skip'?'PLACEHOLDER':'Not shown. Income was not entered.';
+  const sumNames=cats.filter(c=>c.inMonthlySum&&c.id!=='insurance-flood').map(rowLabel);
+  const head='<tr><th scope="col">Category</th>'+columns.map(a=>'<th scope="col">'+esc(a.name)+(a.id==='reader'?'<span class="level">Level used: Not available</span>':'')+'</th>').join('')+'</tr>';
+  let rows='';
+  cats.forEach(c=>{
+    const tax=c.id==='state-income-tax'?' class="totalRow"':'';
+    const toggle=c.id==='utilities'?' <button type="button" class="back" id="utilToggle" aria-expanded="true">Hide the split</button>':'';
+    rows+='<tr'+tax+'><th class="row" scope="row">'+esc(rowLabel(c))+toggle+'</th>'+columns.map(a=>a.id==='reader'?readerCell(c.id):gulfCell(a,c.id)).join('')+'</tr>';
+    if(c.id==='utilities')rows+=componentRows(columns);
+  });
+  const cards=columns.map(area=>{
+    const bits=cats.map(c=>{
+      const body=area.id==='reader'?readerCell(c.id):gulfCell(area,c.id);
+      let extra='';
+      if(c.id==='utilities')extra='<details open><summary>Electricity, water, and internet</summary>'+(bundle.categories.find(x=>x.id==='utilities').components||[]).map(component=>{
+        const inner=area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id);
+        return '<div><dt>'+esc(component.label)+'</dt><dd>'+inner.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>';
+      }).join('')+'</details>';
+      return '<div><dt>'+esc(rowLabel(c))+'</dt><dd>'+body.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>'+extra;
     }).join('');
-    return '<article class="areaCard'+(a.id==='reader'?' reader':'')+'"><h3>'+esc(a.name)+'</h3><dl>'+rows+'</dl></article>';
+    return '<article class="areaCard'+(area.id==='reader'?' reader':'')+'"><h3>'+esc(area.name)+(area.id==='reader'?'<span class="level">Level used: Not available</span>':'')+'</h3><dl>'+bits+'</dl></article>';
   }).join('');
-  const questions=bundle.openQuestions.map(q=>'<li>'+esc(q.question)+'</li>').join('');
-  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">Design preview</p><h2>Side by side</h2><p class="answers">'+esc(answerLine())+'</p><p class="hint">Each cell is a placeholder. Source, URL, and as-of date stay unchosen. The total difference is not a sum of the rows. Florida state income tax is labeled only. It is not a calculated bill.</p></div><div class="tableWrap" id="compareTable"><table><caption>Placeholder comparison of your current area with Manatee, Hillsborough, Pinellas, Sarasota County, and Venice. Nothing in this table is a cost figure.</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>Open questions for the data</summary><ol>'+questions+'</ol></details>';
+  const steps=(bundle.signOff||[]).map(s=>'<li>'+esc(s)+'</li>').join('');
+  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">Design preview</p><h2>Side by side</h2><p class="asOfRange">'+esc(range)+'</p><p class="answers">'+esc(answerLine())+'</p><div class="headlines"><div class="headline"><span>Price index</span><strong>PLACEHOLDER</strong></div><div class="headline"><span>Equivalent income</span><strong>'+esc(incomeLine)+'</strong></div></div><p class="separate">The price index and the equivalent income stay together. They are not added to the monthly sum.</p><div class="sumBox"><span>Your monthly costs</span><strong>PLACEHOLDER</strong><p class="separate">Sum of non-overlapping rows only: '+esc(sumNames.join(', '))+'. Flood insurance is not in the sum. State income tax is below it.</p></div></div><div class="tableWrap" id="compareTable"><table><caption>Placeholder comparison. Your area is looked up ZIP, then county, then metro, then state. None of those tables are loaded, so the level used is Not available. North Port is its own column. Nothing here is a cost figure.</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>How a placeholder becomes a figure</summary><ol>'+steps+'</ol></details>';
   bindBack('tenure');
   document.getElementById('againBtn').onclick=()=>{A.zip=A.city=A.household=A.incomeKind=A.amount=A.tenure='';go('intro')};
+  const utilBtn=document.getElementById('utilToggle');
+  if(utilBtn)utilBtn.onclick=()=>{
+    const open=utilBtn.getAttribute('aria-expanded')==='true';
+    utilBtn.setAttribute('aria-expanded',open?'false':'true');
+    utilBtn.textContent=open?'Show the split':'Hide the split';
+    document.querySelectorAll('.utilChild').forEach(row=>{row.hidden=open});
+  };
   layoutCompare();
 }
 function layoutCompare(){
