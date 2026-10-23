@@ -350,8 +350,11 @@ const manyUnsure = Object.assign({}, thoughtful, {
 assert(lowInformation(manyUnsure, slow).reasons.indexOf('unsure') >= 0, 'six Not sure answers are low information');
 assert(lowInformation(thoughtful, { timing: { durationsMs: [800, 900, 700, 1000], elapsedMs: 20000 }, choiceIndexes: [0, 1, 2, 0, 1] }).show, 'median under 1.5 seconds is low information');
 assert(lowInformation(thoughtful, { timing: { durationsMs: [3000, 3000], elapsedMs: 9000 }, choiceIndexes: [0, 1, 2, 3, 4] }).show, 'a flow under 10 seconds is low information');
-assert(lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, 'every first option is low information');
-assert(lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [2, 2, 2, 2, 2] }).show, 'the same button position every time is low information');
+assert(!lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, 'every first option is priced when the same-position flag is off');
+assert(!lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [2, 2, 2, 2, 2] }).show, 'the same button position is priced when the flag is off');
+assert(lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0], samePosition: true }).show, 'the same-position flag can still send a repeated path to the call page');
+assert(!lowInformation(thoughtful, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0], samePosition: false }).show, 'an explicit off flag stays off');
+assert(D.engagement.samePosition === false, 'the shipped same-position flag is off');
 assert(lowInformation(Object.assign({}, thoughtful, { veh: '0', vehHow: 'Drive them' }), slow).show, 'zero vehicles plus drive is a contradiction');
 assert(lowInformation(Object.assign({}, thoughtful, { travel: 'Flying', help: 'DIY rental truck' }), slow).show, 'flying plus a DIY truck is a contradiction');
 assert(lowInformation(Object.assign({}, thoughtful, { size: '1 bedroom', adults: '4' }), slow).show, 'one bedroom and four adults is a contradiction');
@@ -367,6 +370,33 @@ const moverPage = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf
 assert(moverPage.indexOf('https://commons.wikimedia.org') === -1, 'photo credits are not outside links');
 assert(moverPage.indexOf('https://www.census.gov') === -1, 'census credit is not an outside link');
 assert(moverPage.indexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7') === moverPage.lastIndexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'), 'booking url once');
+assert(moverPage.indexOf('href="${BOOK_URL}"') > 0, 'Book a Call is a link');
+assert(moverPage.indexOf('window.open(BOOK_URL') === -1, 'Book a Call is not a scripted popup');
+const booking = 'https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+const phone = 'tel:+13019196726';
+function customerAddresses(html) {
+  const found = [];
+  const re = /<a\b[^>]*?\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const href = match[1] || match[2] || match[3] || '';
+    const address = href.indexOf('BOOK_URL') >= 0 || href.indexOf('BOOKING_URL') >= 0 ? booking : href;
+    if (/^https?:|^tel:/i.test(address)) found.push(address);
+  }
+  return Array.from(new Set(found)).sort();
+}
+const colPage = fs.readFileSync(path.join(__dirname, '..', 'cost-of-living', 'index.html'), 'utf8');
+const lowInfo = moverPage.slice(moverPage.indexOf('function lowInfoCopy'), moverPage.indexOf('function result'));
+const results = moverPage.slice(moverPage.indexOf('function result'), moverPage.indexOf('function sendEmail'));
+function sameAddresses(found, expected, msg) {
+  assert(JSON.stringify(found) === JSON.stringify(expected), msg + ': ' + JSON.stringify(found));
+}
+sameAddresses(customerAddresses(lowInfo), [booking], 'moving low-info links');
+sameAddresses(customerAddresses(results), [booking], 'moving results links');
+sameAddresses(customerAddresses(moverPage), [booking], 'moving page outside links');
+sameAddresses(customerAddresses(colPage), [booking, phone].sort(), 'cost-of-living results and low-info links');
+const censusFn = colPage.slice(colPage.indexOf('function censusCredit'), colPage.indexOf('function lineNotes'));
+assert(censusFn.indexOf('<a') === -1 && censusFn.indexOf('ZIP lookup:') > 0, 'census credit is plain text');
 assert(moverPage.indexOf('Your Estimate') > 0 && moverPage.indexOf('Thank you for filling out the information!') > 0, 'low-info copy');
 assert(moverPage.indexOf('Book a Call with Guy') > 0 && moverPage.indexOf('onclick="retake()"') > 0, 'low-info buttons');
 assert(moverPage.indexOf('function retake(){durations=[];flowStart=0;stepShownAt=0;stack=[\'fromMethod\'];show()}') > 0, 'retake keeps the answers');

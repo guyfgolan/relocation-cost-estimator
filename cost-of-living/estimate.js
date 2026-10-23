@@ -254,6 +254,12 @@
     return dollarSentence(sign, floridaName, originName);
   }
 
+  // A blank field is the default, not an entered zero. '' == 0 in JavaScript, so blank has to be rejected first.
+  function enteredZero(value) {
+    if (value == null || String(value).trim() === '') return false;
+    return Number(value) === 0;
+  }
+
   function medianOf(nums) {
     if (!nums || !nums.length) return null;
     var s = nums.slice().sort(function (a, b) { return a - b; });
@@ -275,13 +281,9 @@
       if (typeof timing.elapsedMs === 'number' && timing.elapsedMs < 10000) reasons.push('rush-total');
     }
     var picks = (meta && meta.choiceIndexes) || [];
-    if (picks.length >= 5 && picks.every(function (i) { return i === picks[0] && i >= 0; })) reasons.push('defaults');
-    var groceryZero = a.groceriesNow === 0 || a.groceriesNow === '0';
-    var hoaNow = a.hoaNow;
-    var hoaFL = a.hoaFL;
-    var hoaQuiet = hoaNow === 0 || hoaNow === '0' || hoaNow === '' || hoaNow == null;
-    var hoaQuietFL = hoaFL === 0 || hoaFL === '0' || hoaFL === '' || hoaFL == null;
-    if (a.household === '1' && a.income === '250plus' && groceryZero && hoaQuiet && hoaQuietFL) reasons.push('thin');
+    // Off unless the config flag is passed in. An honest run of first choices is a real answer.
+    if (meta && meta.samePosition === true && picks.length >= 5 && picks.every(function (i) { return i === picks[0] && i >= 0; })) reasons.push('defaults');
+    if (a.household === '1' && a.income === '250plus' && enteredZero(a.groceriesNow) && enteredZero(a.hoaNow) && enteredZero(a.hoaFL)) reasons.push('thin');
     var budget = num(a.homeBudget);
     if (budget != null && (budget < 10000 || budget > 20000000)) reasons.push('budget');
     var vehicles = a.vehicles === '' || a.vehicles == null ? null : Number(a.vehicles);
@@ -361,9 +363,16 @@
       rppFloridaGoods: input.rppFloridaGoods,
       usda: factors.usda
     });
+    var householdNotSure = input.householdNotSure === true;
+    var incomeNotSure = input.incomeNotSure === true;
+    var unsureNote = false;
 
     if (isTerritory(originState)) {
       lines.push(unavailableLine('income-tax', 'State income tax', sourceOf(factors.incomeTax)));
+      if (incomeNotSure) unsureNote = true;
+    } else if (incomeNotSure) {
+      lines.push(unavailableLine('income-tax', 'State income tax', sourceOf(factors.incomeTax)));
+      unsureNote = true;
     } else if (originState && income != null && factors.incomeTax) {
       var annualTax = stateIncomeTax(originState, income, filing, factors.incomeTax.states);
       var monthlyTax = annualTax / 12;
@@ -414,6 +423,9 @@
     if (groceries) {
       var food = moneyLine('groceries', 'Groceries', groceries.origin, groceries.florida, { sources: sourceOf(factors.usda) });
       if (food) lines.push(food);
+    } else if (householdNotSure) {
+      lines.push(unavailableLine('groceries', 'Groceries', sourceOf(factors.usda)));
+      unsureNote = true;
     }
 
     if (area && area.median != null) {
@@ -460,7 +472,10 @@
       if (utility) lines.push(utility);
     }
 
-    if (hh && factors.health && factors.health.states && factors.health.states[originState] && factors.health.states.FL) {
+    if (householdNotSure) {
+      lines.push(unavailableLine('health', 'Health insurance', sourceOf(factors.health)));
+      unsureNote = true;
+    } else if (hh && factors.health && factors.health.states && factors.health.states[originState] && factors.health.states.FL) {
       var healthKey = hh === 1 ? 'single' : 'family';
       var health = moneyLine('health', 'Health insurance', factors.health.states[originState][healthKey] / 12, factors.health.states.FL[healthKey] / 12, {
         sources: sourceOf(factors.health)
@@ -499,6 +514,10 @@
 
     if (isTerritory(originState)) {
       lines.push(unavailableLine('sales-tax', 'Sales tax', sourceOf(factors.salesTax).concat(sourceOf(factors.florida && factors.florida.salesTax))));
+      if (incomeNotSure || (householdNotSure && !groceries)) unsureNote = true;
+    } else if (incomeNotSure || (householdNotSure && !groceries)) {
+      lines.push(unavailableLine('sales-tax', 'Sales tax', sourceOf(factors.salesTax).concat(sourceOf(factors.florida && factors.florida.salesTax))));
+      unsureNote = true;
     } else if (income != null && groceries && factors.salesTax && area) {
       var originSales = factors.salesTax.states[originState];
       var floridaRate = area.salesTax;
@@ -581,6 +600,8 @@
         sources: [{ name: 'U.S. Bureau of Economic Analysis, Regional Price Parities', asOf: '2024' }]
       });
     }
+
+    if (unsureNote) notes.push('Some lines are left out because an answer was Not sure.');
 
     var monthly = 0;
     lines.forEach(function (line) {

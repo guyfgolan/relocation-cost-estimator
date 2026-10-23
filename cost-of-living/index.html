@@ -184,7 +184,7 @@ function recordPicks(){
   });
 }
 function engagementMeta(){
-  return {timing:{durationsMs:durations.slice(),elapsedMs:flowStart?Date.now()-flowStart:null},choiceIndexes:Object.keys(A.picks||{}).map(key=>A.picks[key])};
+  return {timing:{durationsMs:durations.slice(),elapsedMs:flowStart?Date.now()-flowStart:null},choiceIndexes:Object.keys(A.picks||{}).map(key=>A.picks[key]),samePosition:!!(factors&&factors.engagement&&factors.engagement.samePosition===true)};
 }
 function retake(){durations=[];flowStart=0;shownAt=0;go('from')}
 function showLowInfo(){
@@ -271,6 +271,7 @@ function midpointCopy(band){
   return text;
 }
 function householdLabel(){
+  if(A.household==='not-sure') return 'not sure';
   if(A.household==='1') return '1 person';
   if(A.household==='6') return '6 or more people';
   return A.household?A.household+' people':'';
@@ -488,9 +489,8 @@ function floridaPlace(area){
 }
 function censusCredit(){
   const source=((bundle.crosswalk&&bundle.crosswalk.sources)||[])[0];
-  if(!source) return '';
-  const label=source.url?'<a href="'+esc(source.url)+'">'+esc(source.name)+'</a>':esc(source.name);
-  return '<p class="credit">ZIP lookup: '+label+'.</p>';
+  if(!source||!source.name) return '';
+  return '<p class="credit">ZIP lookup: '+esc(source.name)+'.</p>';
 }
 function lineNotes(row){
   const bits=[];
@@ -543,6 +543,8 @@ function drawResults(){
     hhSize:A.household==='not-sure'?null:Number(A.household),
     adults:adults,
     incomeBand:A.income==='not-sure'?'':A.income,
+    householdNotSure:A.household==='not-sure',
+    incomeNotSure:A.income==='not-sure',
     ownNow:A.ownNow==='not-sure'?'':A.ownNow,
     planFL:A.planFL==='not-sure'?'':A.planFL,
     primary:A.primary==='yes',
@@ -612,7 +614,7 @@ function drawResults(){
   const total='<div class="totalBox"><p>'+esc(result.total.label)+'</p><p class="totalAmount">'+esc(money(result.total.monthly,true))+'</p><p>Range '+esc(money(result.total.low))+' to '+esc(money(result.total.high))+'.</p><p>'+esc(money(result.total.yearly,true))+' a year.</p></div><p class="note">This total includes only the lines above.</p>';
   const notes=(result.notes||[]).map(note=>'<p>'+esc(note)+'</p>').join('');
   const sourceBlock=sourceList?'<details class="sourcesToggle"><summary>Sources</summary><p>'+sourceList+'.</p></details>':'';
-  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'<p>'+esc(FRAMING)+'</p></div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>'+esc(A.income==='not-sure'?'Income: not sure.':'Income: '+(band?band.label:'')+'. '+midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+sourceBlock+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
   document.getElementById('backBtn').onclick=()=>go('other');
   layoutResults();
 }

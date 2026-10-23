@@ -223,6 +223,7 @@ assert.strictEqual(factors.florida.flood.enabled, false);
 assert.strictEqual(factors.florida.flood.statistic, 'median');
 assert.ok(factors.florida.flood.source.indexOf('median policy cost') > 0);
 assert.strictEqual(factors.florida.flood.source.indexOf('average'), -1);
+assert.strictEqual(factors.engagement.samePosition, false);
 assert.strictEqual(line(result, 'health').difference, 120);
 assert.strictEqual(line(result, 'utilities').label, 'Electricity and Water');
 assert.strictEqual(line(result, 'utilities').difference, 20);
@@ -307,8 +308,22 @@ assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { househo
 assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { income: 'not-sure', ownNow: 'not-sure' }), slow).show, true);
 assert.strictEqual(estimate.lowInformation(answered, { timing: { durationsMs: [500, 600, 700], elapsedMs: 20000 }, choiceIndexes: [0, 1, 2, 1, 0] }).show, true);
 assert.strictEqual(estimate.lowInformation(answered, { timing: { durationsMs: [4000], elapsedMs: 8000 }, choiceIndexes: [0, 1, 2, 3, 1] }).show, true);
-assert.strictEqual(estimate.lowInformation(answered, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, true);
+assert.strictEqual(estimate.lowInformation(answered, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] }).show, false);
+assert.strictEqual(estimate.lowInformation(answered, { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0], samePosition: true }).show, true);
+assert.strictEqual(estimate.lowInformation(answered, { timing: slow.timing, choiceIndexes: [2, 2, 2, 2, 2], samePosition: false }).show, false);
+// Dexter's honest first-option path: 1 person, under $75k, own, buy, drives yes.
+const honestFirst = { household: '1', income: 'under75', ownNow: 'own', planFL: 'buy', drives: 'yes' };
+const firstOptions = { timing: slow.timing, choiceIndexes: [0, 0, 0, 0, 0] };
+assert.strictEqual(estimate.lowInformation(honestFirst, firstOptions).show, false);
+assert.strictEqual(estimate.lowInformation(honestFirst, Object.assign({ samePosition: true }, firstOptions)).reasons.indexOf('defaults') >= 0, true);
 assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { household: '1', income: '250plus', groceriesNow: '0', hoaNow: '0', hoaFL: '0' }), slow).show, true);
+// Dexter's blank HOA: the default empty field is not an entered zero.
+const blankHoa = Object.assign({}, answered, { household: '1', income: '250plus', groceriesNow: '0' });
+assert.strictEqual(estimate.lowInformation(blankHoa, slow).show, false);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, blankHoa, { hoaNow: '', hoaFL: '' }), slow).show, false);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, blankHoa, { hoaNow: null, hoaFL: null }), slow).show, false);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, blankHoa, { hoaNow: '0', hoaFL: '' }), slow).show, false);
+assert.strictEqual(estimate.lowInformation(Object.assign({}, blankHoa, { groceriesNow: '', hoaNow: '0', hoaFL: '0' }), slow).show, false);
 assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { homeBudget: '99999999' }), slow).show, true);
 assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { homeBudget: '5000' }), slow).show, true);
 assert.strictEqual(estimate.lowInformation(Object.assign({}, answered, { vehicles: '50' }), slow).show, true);
@@ -339,5 +354,102 @@ assert.strictEqual(line(partial, 'groceries'), undefined);
 assert.strictEqual(line(partial, 'health'), undefined);
 assert.strictEqual(line(partial, 'income-tax'), undefined);
 assert.strictEqual(line(partial, 'sales-tax'), undefined);
+assert.ok(!partial.notes.some(function (note) { return note.indexOf('Not sure') >= 0; }));
+
+const bothUnsure = estimate.buildEstimate(Object.assign({}, base, {
+  hhSize: null,
+  incomeBand: '',
+  householdNotSure: true,
+  incomeNotSure: true
+}), factors);
+['income-tax', 'groceries', 'health', 'sales-tax'].forEach(function (id) {
+  assert.strictEqual(line(bothUnsure, id).text, 'Not available', id);
+  assert.strictEqual(line(bothUnsure, id).inTotal, false, id);
+  assert.strictEqual(line(bothUnsure, id).difference, null, id);
+});
+assert.strictEqual(bothUnsure.notes.filter(function (note) { return note === 'Some lines are left out because an answer was Not sure.'; }).length, 1);
+assert.strictEqual(bothUnsure.total.monthly, partial.total.monthly);
+assert.ok(JSON.stringify(bothUnsure).indexOf('not-sure people') === -1);
+assert.ok(JSON.stringify(bothUnsure).indexOf('Income: .') === -1);
+
+const householdUnsure = estimate.buildEstimate(Object.assign({}, base, { hhSize: null, householdNotSure: true }), factors);
+assert.strictEqual(line(householdUnsure, 'groceries').text, 'Not available');
+assert.strictEqual(line(householdUnsure, 'health').text, 'Not available');
+assert.strictEqual(line(householdUnsure, 'sales-tax').text, 'Not available');
+assert.notStrictEqual(line(householdUnsure, 'income-tax').text, 'Not available');
+assert.strictEqual(line(householdUnsure, 'income-tax').inTotal, true);
+assert.strictEqual(householdUnsure.notes.filter(function (note) { return note.indexOf('Not sure') >= 0; }).length, 1);
+
+const incomeUnsure = estimate.buildEstimate(Object.assign({}, base, { incomeBand: '', incomeNotSure: true }), factors);
+assert.strictEqual(line(incomeUnsure, 'income-tax').text, 'Not available');
+assert.strictEqual(line(incomeUnsure, 'sales-tax').text, 'Not available');
+assert.strictEqual(line(incomeUnsure, 'groceries').inTotal, true);
+assert.strictEqual(line(incomeUnsure, 'health').inTotal, true);
+assert.strictEqual(incomeUnsure.notes.filter(function (note) { return note.indexOf('Not sure') >= 0; }).length, 1);
+
+assert.ok(page.indexOf("if(A.household==='not-sure') return 'not sure'") > 0);
+assert.ok(page.indexOf("A.income==='not-sure'?'Income: not sure.'") > 0);
+assert.strictEqual(page.indexOf('not-sure people'), -1);
+assert.ok(page.indexOf('householdNotSure:A.household===\'not-sure\'') > 0);
+assert.ok(page.indexOf('incomeNotSure:A.income===\'not-sure\'') > 0);
+assert.ok(page.indexOf('samePosition:!!(factors&&factors.engagement&&factors.engagement.samePosition===true)') > 0);
+
+const BOOKING = 'https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+const PHONE = 'tel:+13019196726';
+function anchorHrefs(html) {
+  const found = [];
+  const re = /<a\b[^>]*?\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const href = match[1] || match[2] || match[3] || '';
+    found.push(href.indexOf('BOOKING_URL') >= 0 || href.indexOf('BOOK_URL') >= 0 ? BOOKING : href);
+  }
+  return found;
+}
+function addresses(html) {
+  return anchorHrefs(html).filter(function (href) { return /^https?:|^tel:/i.test(href); });
+}
+function sliceFn(html, name, nextName) {
+  const start = html.indexOf('function ' + name);
+  const end = html.indexOf('function ' + nextName);
+  assert.ok(start >= 0 && end > start, name);
+  return html.slice(start, end);
+}
+const creditStart = page.indexOf('function censusCredit()');
+const creditEnd = page.indexOf('function lineNotes');
+const creditFn = new Function('bundle', 'esc', page.slice(creditStart, creditEnd) + '\nreturn censusCredit();');
+const bundle = JSON.parse(fs.readFileSync(path.join(__dirname, 'cost-of-living.json'), 'utf8'));
+const esc = function (s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+};
+const credit = creditFn(bundle, esc);
+assert.strictEqual(credit, '<p class="credit">ZIP lookup: U.S. Census Bureau, 2020 ZCTA5 to County relationship file.</p>');
+assert.strictEqual(credit.indexOf('<a'), -1);
+assert.strictEqual(credit.indexOf('census.gov'), -1);
+
+const colResults = sliceFn(page, 'drawResults', 'layoutResults') + sliceFn(page, 'bookingLink', 'noteShown') + sliceFn(page, 'censusCredit', 'lineNotes') + credit;
+const colLowInfo = sliceFn(page, 'showLowInfo', 'isSourced') + sliceFn(page, 'bookingLink', 'noteShown');
+[colResults, colLowInfo].forEach(function (html) {
+  const found = addresses(html);
+  found.forEach(function (href) {
+    assert.ok(href === BOOKING || href === PHONE, href);
+  });
+  assert.ok(found.indexOf(BOOKING) >= 0);
+  assert.strictEqual(html.indexOf('census.gov'), -1);
+});
+const colPageAddresses = Array.from(new Set(addresses(page))).sort();
+assert.deepStrictEqual(colPageAddresses, [BOOKING, PHONE].sort());
+assert.ok(page.indexOf('href="tel:+13019196726"') > 0);
+
+const moverPage = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const moverLow = sliceFn(moverPage, 'lowInfoCopy', 'result');
+const moverResults = sliceFn(moverPage, 'result', 'sendEmail');
+[moverLow, moverResults].forEach(function (html) {
+  const found = Array.from(new Set(addresses(html)));
+  assert.deepStrictEqual(found, [BOOKING]);
+});
+assert.deepStrictEqual(Array.from(new Set(addresses(moverPage))).sort(), [BOOKING]);
 
 console.log('cost-of-living formula checks passed');

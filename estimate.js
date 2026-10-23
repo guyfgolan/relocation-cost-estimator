@@ -188,7 +188,8 @@
       if (typeof timing.elapsedMs === 'number' && timing.elapsedMs < 10000) reasons.push('rush-total');
     }
     const picks = (meta && meta.choiceIndexes) || [];
-    if (picks.length >= 5 && picks.every(i => i === picks[0] && i >= 0)) reasons.push('defaults');
+    // Off unless the config flag is passed in. The same button position is not, by itself, a thin answer.
+    if (meta && meta.samePosition === true && picks.length >= 5 && picks.every(i => i === picks[0] && i >= 0)) reasons.push('defaults');
     if (A.veh === '0' && (A.vehHow === 'Drive them' || A.vehHow === 'Ship them')) reasons.push('zero-vehicles');
     if (A.travel === 'Flying' && A.help === 'DIY rental truck') reasons.push('fly-diy');
     if (A.size === '1 bedroom' && (A.adults === '4' || Number(A.adults) >= 4)) reasons.push('crowded');
