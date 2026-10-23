@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.2-design",
+  "schemaVersion": "0.3-design",
   "status": "DESIGN_PREVIEW",
   "banner": "DESIGN PREVIEW — sample placeholders only. These are not cost-of-living figures.",
   "currency": "USD",
@@ -59,7 +59,7 @@
     "note": "Income is optional and stays in the browser. Tenure null means the figure applies to both rent and own. both is the explicit form of that."
   },
   "nationalTables": {
-    "note": "The reader column is looked up here at runtime. Fallback is ZIP, then county (largest Census ZCTA-to-county share), then metro, then state, then Not available. This preview has no rows, so the level used is Not available. A national-only series, if one is added later, is labelled U.S. average and is not a silent fallback.",
+    "note": "The reader column is looked up here at runtime. Fallback is ZIP, then county (largest Census ZCTA-to-county share), then metro, then state, then Not available. Geography for a ZIP comes from crosswalk.zips. This preview ships one SAMPLE crosswalk row, ZIP 00000, and no cost rows, so a real ZIP still resolves to Not available. A national-only series, if one is added later, is labelled U.S. average and is not a silent fallback.",
     "fallback": [
       "zip",
       "county",
@@ -76,7 +76,7 @@
       "kind": "county",
       "state": "FL",
       "fips": "12081",
-      "cbsa": "45300",
+      "cbsa": "35840",
       "placeFips": null,
       "zips": [],
       "note": "Gulf Coast column. North Port-Bradenton-Sarasota metro."
@@ -87,7 +87,7 @@
       "kind": "county",
       "state": "FL",
       "fips": "12057",
-      "cbsa": "35840",
+      "cbsa": "45300",
       "placeFips": null,
       "zips": [],
       "note": "Gulf Coast column. Tampa-St. Petersburg-Clearwater metro."
@@ -98,7 +98,7 @@
       "kind": "county",
       "state": "FL",
       "fips": "12103",
-      "cbsa": "35840",
+      "cbsa": "45300",
       "placeFips": null,
       "zips": [],
       "note": "Gulf Coast column. Tampa-St. Petersburg-Clearwater metro."
@@ -109,10 +109,10 @@
       "kind": "county",
       "state": "FL",
       "fips": "12115",
-      "cbsa": "45300",
+      "cbsa": "35840",
       "placeFips": null,
       "zips": [],
-      "note": "Gulf Coast column. Venice and North Port are also their own columns."
+      "note": "Gulf Coast column. North Port-Bradenton-Sarasota metro. Venice and North Port are also their own columns."
     },
     {
       "id": "venice",
@@ -121,10 +121,10 @@
       "state": "FL",
       "county": "Sarasota",
       "fips": "12115",
-      "cbsa": "45300",
+      "cbsa": "35840",
       "placeFips": "1273900",
       "zips": [],
-      "note": "Place inside Sarasota County. Place FIPS 1273900 is the Census code. ZIP list is not loaded in this preview."
+      "note": "Place inside Sarasota County. The place FIPS is unverified. ZIP list is not loaded in this preview."
     },
     {
       "id": "north-port",
@@ -133,10 +133,10 @@
       "state": "FL",
       "county": "Sarasota",
       "fips": "12115",
-      "cbsa": "45300",
+      "cbsa": "35840",
       "placeFips": "1249675",
       "zips": [],
-      "note": "Place inside Sarasota County, shown beside Venice. Place FIPS 1249675 is the Census code. ZIP list is not loaded in this preview."
+      "note": "Place inside Sarasota County, shown beside Venice. The place FIPS is unverified. ZIP list is not loaded in this preview."
     }
   ],
   "categories": [
@@ -270,7 +270,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -296,7 +296,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -322,7 +322,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -348,7 +348,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -374,7 +374,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -400,7 +400,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -426,7 +426,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -452,7 +452,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -478,7 +478,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -504,7 +504,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -513,7 +513,8 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote."
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
     },
     {
       "areaId": "manatee",
@@ -530,7 +531,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -556,7 +557,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -582,7 +583,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -608,7 +609,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -634,7 +635,7 @@
       "geoId": "12081",
       "areaCodes": {
         "fips": "12081",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -660,7 +661,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -686,7 +687,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -712,7 +713,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -738,7 +739,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -764,7 +765,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -790,7 +791,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -816,7 +817,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -842,7 +843,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -868,7 +869,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -894,7 +895,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -903,7 +904,8 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote."
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
     },
     {
       "areaId": "hillsborough",
@@ -920,7 +922,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -946,7 +948,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -972,7 +974,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -998,7 +1000,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1024,7 +1026,7 @@
       "geoId": "12057",
       "areaCodes": {
         "fips": "12057",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1050,7 +1052,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1076,7 +1078,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1102,7 +1104,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1128,7 +1130,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1154,7 +1156,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1180,7 +1182,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1206,7 +1208,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1232,7 +1234,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1258,7 +1260,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1284,7 +1286,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1293,7 +1295,8 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote."
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
     },
     {
       "areaId": "pinellas",
@@ -1310,7 +1313,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1336,7 +1339,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1362,7 +1365,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1388,7 +1391,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1414,7 +1417,7 @@
       "geoId": "12103",
       "areaCodes": {
         "fips": "12103",
-        "cbsa": "35840",
+        "cbsa": "45300",
         "placeFips": null,
         "zips": []
       },
@@ -1440,7 +1443,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1466,7 +1469,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1492,7 +1495,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1518,7 +1521,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1544,7 +1547,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1570,7 +1573,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1596,7 +1599,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1622,7 +1625,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1648,7 +1651,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1674,7 +1677,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1683,7 +1686,8 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote."
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote.",
+      "linkLabel": "FEMA Flood Map Service Center"
     },
     {
       "areaId": "sarasota",
@@ -1700,7 +1704,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1726,7 +1730,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1752,7 +1756,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1778,7 +1782,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1804,7 +1808,7 @@
       "geoId": "12115",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": null,
         "zips": []
       },
@@ -1830,7 +1834,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1839,7 +1843,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Headline index only. Do not add it to the monthly sum."
+      "caveat": "Headline index only. Do not add it to the monthly sum. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -1856,7 +1860,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1865,7 +1869,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null."
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -1882,7 +1886,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1891,7 +1895,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters."
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -1908,7 +1912,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1917,7 +1921,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows."
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -1934,7 +1938,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1943,7 +1947,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "One utilities row for buyers. Hidden for renters on gross rent."
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -1960,7 +1964,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1969,7 +1973,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Part of the utilities split. Not chosen yet."
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -1986,7 +1990,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -1995,7 +1999,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Part of the utilities split. Not chosen yet."
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2012,7 +2016,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2021,7 +2025,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "No free national internet price series is loaded."
+      "caveat": "No free national internet price series is loaded. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2038,7 +2042,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2047,7 +2051,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2064,7 +2068,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2073,7 +2077,8 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote."
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote. UNVERIFIED place code 1273900.",
+      "linkLabel": "FEMA Flood Map Service Center"
     },
     {
       "areaId": "venice",
@@ -2090,7 +2095,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2099,7 +2104,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview."
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2116,7 +2121,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2125,7 +2130,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2142,7 +2147,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2151,7 +2156,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2168,7 +2173,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2177,7 +2182,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1273900."
     },
     {
       "areaId": "venice",
@@ -2194,7 +2199,7 @@
       "geoId": "1273900",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1273900",
         "zips": []
       },
@@ -2203,7 +2208,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row."
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row. UNVERIFIED place code 1273900."
     },
     {
       "areaId": "north-port",
@@ -2220,7 +2225,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2229,7 +2234,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Headline index only. Do not add it to the monthly sum."
+      "caveat": "Headline index only. Do not add it to the monthly sum. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2246,7 +2251,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2255,7 +2260,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null."
+      "caveat": "Non-overlapping rows only. The price index and state income tax are outside this sum. Not calculated while values are null. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2272,7 +2277,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2281,7 +2286,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters."
+      "caveat": "Gross rent, including utilities except telephone. The utilities row is hidden for renters. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2298,7 +2303,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2307,7 +2312,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows."
+      "caveat": "Principal and interest only. Example at the median price. Taxes and insurance stay on their own rows. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2324,7 +2329,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2333,7 +2338,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "One utilities row for buyers. Hidden for renters on gross rent."
+      "caveat": "One utilities row for buyers. Hidden for renters on gross rent. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2350,7 +2355,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2359,7 +2364,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Part of the utilities split. Not chosen yet."
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2376,7 +2381,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2385,7 +2390,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Part of the utilities split. Not chosen yet."
+      "caveat": "Part of the utilities split. Not chosen yet. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2402,7 +2407,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2411,7 +2416,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "No free national internet price series is loaded."
+      "caveat": "No free national internet price series is loaded. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2428,7 +2433,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2437,7 +2442,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2454,7 +2459,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2463,7 +2468,8 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote."
+      "caveat": "Depends on the flood zone, elevation, and building. Not a county average and not a quote. UNVERIFIED place code 1249675.",
+      "linkLabel": "FEMA Flood Map Service Center"
     },
     {
       "areaId": "north-port",
@@ -2480,7 +2486,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2489,7 +2495,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview."
+      "caveat": "Owners only. A Florida purchase can reset the assessed value above the median existing-owner bill. This example is not calculated in the preview. UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2506,7 +2512,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2515,7 +2521,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2532,7 +2538,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2541,7 +2547,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2558,7 +2564,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2567,7 +2573,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "CAVEAT NOT CHOSEN"
+      "caveat": "UNVERIFIED place code 1249675."
     },
     {
       "areaId": "north-port",
@@ -2584,7 +2590,7 @@
       "geoId": "1249675",
       "areaCodes": {
         "fips": "12115",
-        "cbsa": "45300",
+        "cbsa": "35840",
         "placeFips": "1249675",
         "zips": []
       },
@@ -2593,7 +2599,7 @@
       "asOf": null,
       "retrieved": null,
       "license": "LICENSE NOT CHOSEN",
-      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row."
+      "caveat": "Florida has no state personal income tax. Local wage taxes are not in this row. UNVERIFIED place code 1249675."
     }
   ],
   "signOff": [
@@ -2606,26 +2612,376 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Cost of living preview bundle",
     "type": "object",
+    "additionalProperties": false,
     "required": [
       "schemaVersion",
       "status",
       "areas",
       "categories",
       "figures",
-      "nationalTables"
+      "nationalTables",
+      "crosswalk"
     ],
     "properties": {
+      "schemaVersion": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "DESIGN_PREVIEW",
+          "SOURCED"
+        ]
+      },
+      "banner": {
+        "type": "string"
+      },
+      "currency": {
+        "type": "string"
+      },
+      "asOfRange": {
+        "type": "object"
+      },
+      "comparison": {
+        "type": "object"
+      },
+      "dimensions": {
+        "type": "object"
+      },
+      "signOff": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "jsonSchema": {
+        "type": "object"
+      },
+      "nationalTables": {
+        "type": "object",
+        "required": [
+          "fallback",
+          "rows"
+        ],
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "fallback": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "zip",
+                "county",
+                "cbsa",
+                "state"
+              ]
+            }
+          },
+          "exhaustedLabel": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array"
+          }
+        }
+      },
+      "crosswalk": {
+        "$ref": "#/$defs/crosswalk"
+      },
+      "areas": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/area"
+        }
+      },
+      "categories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/category"
+        }
+      },
       "figures": {
         "type": "array",
         "items": {
           "$ref": "#/$defs/figure"
         }
-      },
-      "nationalTables": {
-        "type": "object"
       }
     },
     "$defs": {
+      "area": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "state",
+          "fips",
+          "cbsa",
+          "placeFips",
+          "zips"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "county",
+              "place"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "minLength": 2
+          },
+          "county": {
+            "type": "string"
+          },
+          "fips": {
+            "type": "string",
+            "pattern": "^\\d{5}$"
+          },
+          "cbsa": {
+            "type": "string",
+            "pattern": "^\\d{5}$"
+          },
+          "placeFips": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "pattern": "^\\d{7}$"
+              }
+            ]
+          },
+          "zips": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{5}$"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "place"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "placeFips": {
+                  "type": "string",
+                  "pattern": "^\\d{7}$"
+                }
+              },
+              "required": [
+                "placeFips"
+              ]
+            }
+          }
+        ]
+      },
+      "category": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "definition",
+          "inMonthlySum",
+          "unit",
+          "period"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "definition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period": {
+            "enum": [
+              "month",
+              "year"
+            ]
+          },
+          "unit": {
+            "enum": [
+              "USD/month",
+              "USD/year",
+              "index"
+            ]
+          },
+          "inMonthlySum": {
+            "type": "boolean"
+          },
+          "hiddenFor": {
+            "enum": [
+              "rent",
+              "own",
+              null
+            ]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/month"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "month"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/year"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "index"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "crosswalk": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zips"
+        ],
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "zips": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "zip",
+                "label",
+                "countyFips",
+                "cbsa",
+                "state"
+              ],
+              "properties": {
+                "zip": {
+                  "type": "string",
+                  "pattern": "^\\d{5}$"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "countyFips": {
+                  "type": "string",
+                  "pattern": "^\\d{5}$"
+                },
+                "countyName": {
+                  "type": "string"
+                },
+                "cbsa": {
+                  "type": "string",
+                  "pattern": "^\\d{5}$"
+                },
+                "cbsaName": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 2
+                }
+              }
+            }
+          }
+        }
+      },
       "figure": {
         "type": "object",
         "additionalProperties": false,
@@ -2721,6 +3077,7 @@
           },
           "areaCodes": {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "fips",
               "cbsa",
@@ -2732,18 +3089,25 @@
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "pattern": "^\\d{5}$"
               },
               "cbsa": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "pattern": "^\\d{5}$"
               },
               "placeFips": {
-                "type": [
-                  "string",
-                  "null"
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{7}$"
+                  }
                 ]
               },
               "zips": {
@@ -2759,6 +3123,10 @@
           },
           "url": {
             "type": "string"
+          },
+          "linkLabel": {
+            "type": "string",
+            "minLength": 1
           },
           "asOf": {
             "anyOf": [
@@ -2787,9 +3155,194 @@
           },
           "caveat": {
             "type": "string"
+          },
+          "evidence": {
+            "enum": [
+              "MEASURED",
+              "INFERENCE",
+              "UNVERIFIED",
+              null
+            ]
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/month"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "month"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "USD/year"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "unit": {
+                  "const": "index"
+                }
+              },
+              "required": [
+                "unit"
+              ]
+            },
+            "then": {
+              "properties": {
+                "period": {
+                  "const": "year"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "value"
+              ]
+            },
+            "then": {
+              "properties": {
+                "source": {
+                  "not": {
+                    "const": "SOURCE NOT CHOSEN"
+                  }
+                }
+              },
+              "required": [
+                "url",
+                "license",
+                "asOf",
+                "retrieved",
+                "evidence"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "sourced"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "url": {
+                  "type": "string",
+                  "pattern": "^https://"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "SOURCE NOT CHOSEN"
+                  }
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1,
+                  "not": {
+                    "const": "LICENSE NOT CHOSEN"
+                  }
+                },
+                "asOf": {
+                  "type": "string",
+                  "pattern": "^(\\d{4}|\\d{4}-\\d{2}|\\d{4}-\\d{2}-\\d{2}|FY\\d{4})$"
+                },
+                "retrieved": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "evidence": {
+                  "const": "MEASURED"
+                }
+              },
+              "required": [
+                "value",
+                "url",
+                "source",
+                "license",
+                "asOf",
+                "retrieved",
+                "evidence",
+                "geoLevel"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "then": {
+              "required": [
+                "linkLabel"
+              ]
+            }
+          }
+        ]
       }
     }
+  },
+  "crosswalk": {
+    "note": "SAMPLE only. Not a Census ZCTA crosswalk. ZIP 00000 is a labeled stand-in so the ZIP, county, metro, then state lookup can be exercised. It is not a real place.",
+    "zips": [
+      {
+        "zip": "00000",
+        "label": "SAMPLE",
+        "countyFips": "99000",
+        "countyName": "Sample County",
+        "cbsa": "99999",
+        "cbsaName": "Sample Metro",
+        "state": "XX"
+      }
+    ]
   }
 }

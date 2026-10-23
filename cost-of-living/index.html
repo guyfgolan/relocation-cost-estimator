@@ -122,6 +122,7 @@ input:focus-visible{border-color:#c7a25a}
 <p class="footerNote"><a href="../">Moving cost estimator</a>. This page only previews the comparison. It does not call a paid data service.</p>
 </div>
 </div>
+<script src="lookup.js"></script>
 <script>
 const STEPS=['intro','place','household','income','tenure','compare'];
 const QUESTIONS=['place','household','income','tenure'];
@@ -182,7 +183,7 @@ function intro(){
   document.getElementById('startBtn').onclick=()=>go('place');
 }
 function place(){
-  panel.innerHTML='<p class="questionNo">Your comparison · Question 1</p><h2>Where do you live now?</h2><p class="hint">Enter a ZIP or a city. This preview keeps the words you type. It does not look them up.</p><div class="fields"><div><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="00000" value="'+esc(A.zip)+'"></div><div><label for="city">City and state</label><input id="city" autocomplete="address-level2" maxlength="80" placeholder="Sample City, ST" value="'+esc(A.city)+'"></div></div><p class="status" id="placeStatus" role="alert"></p>'+actions('intro','<button type="button" class="primary" id="nextBtn">Continue</button><button type="button" class="secondary" id="skipBtn">Skip</button>');
+  panel.innerHTML='<p class="questionNo">Your comparison · Question 1</p><h2>Where do you live now?</h2><p class="hint">Enter a ZIP or a city. ZIP 00000 is a labeled sample in the crosswalk. Cost rows are not loaded yet, so the comparison still says Not available unless a row matches.</p><div class="fields"><div><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="00000" value="'+esc(A.zip)+'"></div><div><label for="city">City and state</label><input id="city" autocomplete="address-level2" maxlength="80" placeholder="Sample City, ST" value="'+esc(A.city)+'"></div></div><p class="status" id="placeStatus" role="alert"></p>'+actions('intro','<button type="button" class="primary" id="nextBtn">Continue</button><button type="button" class="secondary" id="skipBtn">Skip</button>');
   bindBack('intro');
   const zip=document.getElementById('zip'),city=document.getElementById('city');
   zip.addEventListener('keydown',e=>{if(e.key==='Enter')savePlace(false)});
@@ -247,7 +248,7 @@ function income(){
 function tenure(){
   choiceStep({
     n:4,title:'Renting or buying?',
-    hint:'Optional. Renting uses gross rent and hides utilities. Buying uses principal and interest, and shows property tax.',
+    hint:'Optional. Renting uses gross rent and hides utilities. Buying uses principal and interest, and shows property tax. Not sure shows both housing lines and marks owner-only rows.',
     back:'income',current:A.tenure,
     choices:[{id:'rent',label:'Renting'},{id:'own',label:'Buying'},{id:'skip',label:'Not sure'}],
     save:id=>{A.tenure=id;go('compare')}
@@ -275,27 +276,20 @@ function categoryShown(c){
   if(c.hiddenFor==='rent'&&renting())return false;
   return true;
 }
-function housingLabel(){
-  if(renting())return 'Gross rent';
-  if(owning())return 'Principal and interest';
-  return 'Housing';
+function activeTenure(){
+  if(A.tenure==='rent'||A.tenure==='own')return A.tenure;
+  return '';
 }
-function figureFor(areaId,categoryId,componentId){
-  const want=owning()?'own':renting()?'rent':null;
+function figureFor(areaId,categoryId,componentId,tenure){
   const rows=bundle.figures.filter(f=>f.areaId===areaId&&f.categoryId===categoryId&&(f.componentId||null)===(componentId||null));
-  return rows.find(f=>f.tenure===want)||rows.find(f=>f.tenure==='both'||f.tenure==null)||rows[0]||null;
+  return CostLookup.figureMatch(rows,tenure==null?activeTenure():tenure);
 }
 function readerLookup(categoryId,componentId){
-  const order=bundle.nationalTables.fallback;
-  const keys={zip:A.zip||'',county:'',cbsa:'',state:''};
-  const rows=bundle.nationalTables.rows||[];
-  for(const level of order){
-    const geoId=keys[level];
-    if(!geoId)continue;
-    const hit=rows.find(r=>r.geoLevel===level&&r.geoId===geoId&&r.categoryId===categoryId&&(r.componentId||null)===(componentId||null)&&r.value!=null);
-    if(hit)return {figure:hit,level:level==='cbsa'?'metro value':level+' value'};
-  }
-  return {figure:null,level:'Not available'};
+  return CostLookup.lookup(bundle,A.zip,categoryId,componentId);
+}
+function readerContext(){
+  const found=readerLookup('groceries');
+  return {keys:found.keys,level:found.level};
 }
 function dateNote(figure){
   if(!figure)return '';
@@ -305,63 +299,91 @@ function dateNote(figure){
 }
 function cellBody(figure,level){
   if(!figure)return '<strong>Not available</strong>'+(level?'<span class="level">Level used: '+esc(level)+'</span>':'');
-  const link=figure.url?'<a href="'+esc(figure.url)+'">FEMA flood map</a>':'';
+  const label=CostLookup.linkText(figure);
+  const link=label?'<a href="'+esc(figure.url)+'">'+esc(label)+'</a>':'';
   const levelNote=level?'<span class="level">Level used: '+esc(level)+'</span>':'';
   return '<strong>'+esc(figure.display)+'</strong>'+levelNote+dateNote(figure)+(link?'<span class="cellNote">'+link+'</span>':'');
 }
 function readerCell(categoryId,componentId){
+  const found=readerLookup(categoryId,componentId);
   if(categoryId==='insurance-flood'){
     const sample=bundle.figures.find(f=>f.categoryId==='insurance-flood');
-    return '<td class="readerCol">'+cellBody(sample)+'</td>';
+    return '<td class="readerCol">'+cellBody(sample,found.level)+'</td>';
   }
-  if(componentId==='internet')return '<td class="readerCol"><strong>not estimated</strong></td>';
+  if(componentId==='internet')return '<td class="readerCol"><strong>not estimated</strong><span class="level">Level used: '+esc(found.level)+'</span></td>';
   if(categoryId==='state-income-tax'){
     const text=A.incomeKind&&A.incomeKind!=='skip'?'PLACEHOLDER':'Rate structure not loaded';
-    return '<td class="readerCol"><strong>'+text+'</strong><span class="level">Level used: Not available</span><span class="cellNote">Stays in this browser. Not saved.</span></td>';
+    return '<td class="readerCol"><strong>'+text+'</strong><span class="level">Level used: '+esc(found.level)+'</span><span class="cellNote">Stays in this browser. Not saved.</span></td>';
   }
-  const found=readerLookup(categoryId,componentId);
   return '<td class="readerCol">'+cellBody(found.figure,found.level)+'</td>';
 }
-function gulfCell(area,categoryId,componentId){
-  return '<td>'+cellBody(figureFor(area.id,categoryId,componentId))+'</td>';
+function gulfCell(area,categoryId,componentId,tenure){
+  return '<td>'+cellBody(figureFor(area.id,categoryId,componentId,tenure))+'</td>';
 }
-function rowLabel(c){
-  if(c.id==='housing')return housingLabel();
-  if(c.id==='utilities')return 'Utilities';
-  return c.label;
+function tableRows(){
+  const tenure=activeTenure();
+  const rows=[];
+  bundle.categories.filter(categoryShown).forEach(c=>{
+    if(c.id==='housing')CostLookup.housingTenures(tenure).forEach(t=>rows.push({category:c,tenure:t}));
+    else rows.push({category:c,tenure});
+  });
+  return rows;
 }
 function componentRows(columns){
   const util=bundle.categories.find(c=>c.id==='utilities');
-  return (util.components||[]).map(component=>'<tr class="utilChild"><th class="row" scope="row">'+esc(component.label)+'</th>'+columns.map(area=>area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id)).join('')+'</tr>').join('');
+  return (util.components||[]).map(component=>'<tr class="utilChild"><th class="row" scope="row">'+esc(component.label)+'</th>'+columns.map(area=>area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id,activeTenure())).join('')+'</tr>').join('');
+}
+function sumParts(){
+  const tenure=activeTenure();
+  if(tenure!=='rent'&&tenure!=='own')return null;
+  const parts=[];
+  bundle.categories.forEach(c=>{
+    if(!c.inMonthlySum)return;
+    if(c.hiddenFor==='rent'&&tenure==='rent')return;
+    parts.push(figureFor('manatee',c.id,null,c.id==='housing'?tenure:tenure));
+  });
+  return CostLookup.sumMonthly(parts);
 }
 function compare(){
   const columns=[{id:'reader',name:'Your current area'}].concat(bundle.areas);
-  const cats=bundle.categories.filter(categoryShown);
+  const lines=tableRows();
+  const ctx=readerContext();
   const range=(bundle.asOfRange&&bundle.asOfRange.label)||'As-of range: not chosen yet';
   const incomeLine=A.incomeKind&&A.incomeKind!=='skip'?'PLACEHOLDER':'Not shown. Income was not entered.';
-  const sumNames=cats.filter(c=>c.inMonthlySum&&c.id!=='insurance-flood').map(rowLabel);
-  const head='<tr><th scope="col">Category</th>'+columns.map(a=>'<th scope="col">'+esc(a.name)+(a.id==='reader'?'<span class="level">Level used: Not available</span>':'')+'</th>').join('')+'</tr>';
+  const sumNames=lines.filter(line=>line.category.inMonthlySum).map(line=>CostLookup.rowLabel(line.category,line.tenure));
+  const summed=sumParts();
+  const sumText=bundle.status==='DESIGN_PREVIEW'||summed==null?'PLACEHOLDER':String(summed);
+  const bothHousing=activeTenure()!=='rent'&&activeTenure()!=='own';
+  const sumNote='Sum of non-overlapping rows only: '+sumNames.join(', ')+'. Annual amounts, such as home insurance and property tax, are divided by 12 before they are added. Flood insurance is not in the sum. State income tax is below it.'+(bothHousing?' Both rent and own housing are shown, so they are not added together.':'');
+  let caption='Placeholder comparison. Your area is looked up ZIP, then county, then metro, then state.';
+  if(ctx.keys&&ctx.keys.sample)caption+=' Sample chain: ZIP '+ctx.keys.zip+', county '+ctx.keys.county+', metro '+ctx.keys.cbsa+', state '+ctx.keys.state+'.';
+  caption+=' Level used: '+ctx.level+'. North Port is its own column. Nothing here is a cost figure.';
+  const levelSpan='<span class="level">Level used: '+esc(ctx.level)+'</span>';
+  const head='<tr><th scope="col">Category</th>'+columns.map(a=>'<th scope="col">'+esc(a.name)+(a.id==='reader'?levelSpan:'')+'</th>').join('')+'</tr>';
   let rows='';
-  cats.forEach(c=>{
+  lines.forEach(line=>{
+    const c=line.category;
     const tax=c.id==='state-income-tax'?' class="totalRow"':'';
     const toggle=c.id==='utilities'?' <button type="button" class="back" id="utilToggle" aria-expanded="true">Hide the split</button>':'';
-    rows+='<tr'+tax+'><th class="row" scope="row">'+esc(rowLabel(c))+toggle+'</th>'+columns.map(a=>a.id==='reader'?readerCell(c.id):gulfCell(a,c.id)).join('')+'</tr>';
+    const label=CostLookup.rowLabel(c,line.tenure);
+    rows+='<tr'+tax+'><th class="row" scope="row">'+esc(label)+toggle+'</th>'+columns.map(a=>a.id==='reader'?readerCell(c.id):gulfCell(a,c.id,null,line.tenure)).join('')+'</tr>';
     if(c.id==='utilities')rows+=componentRows(columns);
   });
   const cards=columns.map(area=>{
-    const bits=cats.map(c=>{
-      const body=area.id==='reader'?readerCell(c.id):gulfCell(area,c.id);
+    const bits=lines.map(line=>{
+      const c=line.category;
+      const body=area.id==='reader'?readerCell(c.id):gulfCell(area,c.id,null,line.tenure);
       let extra='';
       if(c.id==='utilities')extra='<details open><summary>Electricity, water, and internet</summary>'+(bundle.categories.find(x=>x.id==='utilities').components||[]).map(component=>{
-        const inner=area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id);
+        const inner=area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id,line.tenure);
         return '<div><dt>'+esc(component.label)+'</dt><dd>'+inner.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>';
       }).join('')+'</details>';
-      return '<div><dt>'+esc(rowLabel(c))+'</dt><dd>'+body.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>'+extra;
+      return '<div><dt>'+esc(CostLookup.rowLabel(c,line.tenure))+'</dt><dd>'+body.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>'+extra;
     }).join('');
-    return '<article class="areaCard'+(area.id==='reader'?' reader':'')+'"><h3>'+esc(area.name)+(area.id==='reader'?'<span class="level">Level used: Not available</span>':'')+'</h3><dl>'+bits+'</dl></article>';
+    return '<article class="areaCard'+(area.id==='reader'?' reader':'')+'"><h3>'+esc(area.name)+(area.id==='reader'?levelSpan:'')+'</h3><dl>'+bits+'</dl></article>';
   }).join('');
   const steps=(bundle.signOff||[]).map(s=>'<li>'+esc(s)+'</li>').join('');
-  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">Design preview</p><h2>Side by side</h2><p class="asOfRange">'+esc(range)+'</p><p class="answers">'+esc(answerLine())+'</p><div class="headlines"><div class="headline"><span>Price index</span><strong>PLACEHOLDER</strong></div><div class="headline"><span>Equivalent income</span><strong>'+esc(incomeLine)+'</strong></div></div><p class="separate">The price index and the equivalent income stay together. They are not added to the monthly sum.</p><div class="sumBox"><span>Your monthly costs</span><strong>PLACEHOLDER</strong><p class="separate">Sum of non-overlapping rows only: '+esc(sumNames.join(', '))+'. Flood insurance is not in the sum. State income tax is below it.</p></div></div><div class="tableWrap" id="compareTable"><table><caption>Placeholder comparison. Your area is looked up ZIP, then county, then metro, then state. None of those tables are loaded, so the level used is Not available. North Port is its own column. Nothing here is a cost figure.</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>How a placeholder becomes a figure</summary><ol>'+steps+'</ol></details>';
+  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">Design preview</p><h2>Side by side</h2><p class="asOfRange">'+esc(range)+'</p><p class="answers">'+esc(answerLine())+'</p><div class="headlines"><div class="headline"><span>Price index</span><strong>PLACEHOLDER</strong></div><div class="headline"><span>Equivalent income</span><strong>'+esc(incomeLine)+'</strong></div></div><p class="separate">The price index and the equivalent income stay together. They are not added to the monthly sum.</p><div class="sumBox"><span>Your monthly costs</span><strong>'+esc(sumText)+'</strong><p class="separate">'+esc(sumNote)+'</p></div></div><div class="tableWrap" id="compareTable"><table><caption>'+esc(caption)+'</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>How a placeholder becomes a figure</summary><ol>'+steps+'</ol></details>';
   bindBack('tenure');
   document.getElementById('againBtn').onclick=()=>{A.zip=A.city=A.household=A.incomeKind=A.amount=A.tenure='';go('intro')};
   const utilBtn=document.getElementById('utilToggle');
