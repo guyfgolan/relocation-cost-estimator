@@ -59,8 +59,9 @@ p,li{font-size:clamp(16px,2vw,18px);line-height:1.5}
 .sumBox{margin:0 0 16px}
 .headline span,.sumBox span{display:block;color:#f1d79f;font-family:Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
 .headline strong,.sumBox strong{display:block;font-family:Cinzel,Georgia,serif;font-size:clamp(18px,2.4vw,28px);font-weight:600;margin-top:6px}
+.headline strong.indexLine{font-size:clamp(15px,1.7vw,20px);line-height:1.35}
 .separate{margin:8px 0 0;font-size:15px}
-.utilChild th,.utilChild td{background:rgba(13,34,53,.28)}
+.utilChild th,.utilChild td,.splitChild th,.splitChild td{background:rgba(13,34,53,.28)}
 .level{display:block;margin-top:4px;color:#f1d79f;font-size:12px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
 .tableWrap{overflow-x:auto;margin-top:8px}
 table{width:100%;border-collapse:collapse;font-size:15px;min-width:760px}
@@ -112,7 +113,7 @@ input:focus-visible{border-color:#c7a25a}
 <img class="logo" src="../assets/fgcg-logo-white.svg" alt="Florida Gulf Coast Guide">
 <img class="topExp" src="https://expknowledgebase.exprealty.com/hs-fs/hubfs/eXp%20Realty%20-%20White.png?height=48&amp;name=eXp+Realty+-+White.png" alt="eXp Realty">
 </header>
-<p class="previewBanner" role="status">Design preview. Sample placeholders only. These are not cost-of-living figures.</p>
+<p class="previewBanner" role="status">Price index: BEA Regional Price Parities, 2024. Other categories are still placeholders.</p>
 <div class="progressWrap" id="progressWrap" hidden>
 <p class="progressText" id="progressText"></p>
 <div class="progress" id="progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Question progress"><div id="progressBar"></div></div>
@@ -179,7 +180,7 @@ function bindBack(step){
 }
 function intro(){
   const areas=(bundle?bundle.areas.filter(a=>a.id!=='reader'):[]).map(a=>'<li>'+esc(a.name)+'</li>').join('');
-  panel.innerHTML='<div class="hero"><p class="eyebrow">Cost of living estimator</p><h1>How does the Gulf Coast compare with home?</h1><p>A design for comparing your current area with Manatee, Hillsborough, Pinellas, Sarasota County, Venice, and North Port. Housing, utilities, home and flood insurance, property tax, groceries, transportation, healthcare, and state income tax. Florida has no state income tax.</p><ul class="areaList">'+areas+'</ul><div class="actions"><button type="button" class="primary" id="startBtn">Start the preview</button></div></div>';
+  panel.innerHTML='<div class="hero"><p class="eyebrow">Cost of living estimator</p><h1>How does the Gulf Coast compare with home?</h1><p>Compare your current area with Manatee, Hillsborough, Pinellas, Sarasota County, Venice, and North Port. The price index is BEA Regional Price Parities for 2024. Housing, utilities, insurance, property tax, groceries, transportation, healthcare, and state income tax are still placeholders. Florida has no state income tax.</p><ul class="areaList">'+areas+'</ul><div class="actions"><button type="button" class="primary" id="startBtn">Start the comparison</button></div></div>';
   document.getElementById('startBtn').onclick=()=>go('place');
 }
 function place(){
@@ -272,7 +273,7 @@ function answerLine(){
 function owning(){return A.tenure==='own'}
 function renting(){return A.tenure==='rent'}
 function categoryShown(c){
-  if(c.id==='price-index'||c.id==='monthly-sum')return false;
+  if(c.id==='monthly-sum')return false;
   if(c.hiddenFor==='rent'&&renting())return false;
   return true;
 }
@@ -329,9 +330,16 @@ function tableRows(){
   });
   return rows;
 }
-function componentRows(columns){
-  const util=bundle.categories.find(c=>c.id==='utilities');
-  return (util.components||[]).map(component=>'<tr class="utilChild"><th class="row" scope="row">'+esc(component.label)+'</th>'+columns.map(area=>area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id,activeTenure())).join('')+'</tr>').join('');
+function splitRows(columns, category){
+  return (category.components||[]).map(component=>'<tr class="splitChild" data-split="'+esc(category.id)+'"><th class="row" scope="row">'+esc(component.label)+'</th>'+columns.map(area=>area.id==='reader'?readerCell(category.id,component.id):gulfCell(area,category.id,component.id,activeTenure())).join('')+'</tr>').join('');
+}
+function indexHeadline(){
+  const names={35840:'North Port-Bradenton-Sarasota',45300:'Tampa-St. Petersburg-Clearwater'};
+  const bits=['35840','45300'].map(id=>{
+    const fig=bundle.figures.find(f=>f.categoryId==='price-index'&&(f.componentId||null)===null&&f.geoId===id&&typeof f.value==='number');
+    return fig?names[id]+' '+fig.display:'';
+  }).filter(Boolean);
+  return bits.join(' · ')||'PLACEHOLDER';
 }
 function sumParts(){
   const tenure=activeTenure();
@@ -355,27 +363,27 @@ function compare(){
   const sumText=bundle.status==='DESIGN_PREVIEW'||summed==null?'PLACEHOLDER':String(summed);
   const bothHousing=activeTenure()!=='rent'&&activeTenure()!=='own';
   const sumNote='Sum of non-overlapping rows only: '+sumNames.join(', ')+'. Annual amounts, such as home insurance and property tax, are divided by 12 before they are added. Flood insurance is not in the sum. State income tax is below it.'+(bothHousing?' Both rent and own housing are shown, so they are not added together.':'');
-  let caption='Placeholder comparison. Your area is looked up ZIP, then county, then metro, then state.';
+  let caption='Your area is looked up ZIP, then county, then metro, then state.';
   if(ctx.keys&&ctx.keys.sample)caption+=' Sample chain: ZIP '+ctx.keys.zip+', county '+ctx.keys.county+', metro '+ctx.keys.cbsa+', state '+ctx.keys.state+'.';
-  caption+=' Level used: '+ctx.level+'. North Port is its own column. Nothing here is a cost figure.';
+  caption+=' Level used: '+ctx.level+'. The price index is BEA Regional Price Parities for 2024, U.S. = 100. Other categories are still placeholders. North Port is its own column.';
   const levelSpan='<span class="level">Level used: '+esc(ctx.level)+'</span>';
   const head='<tr><th scope="col">Category</th>'+columns.map(a=>'<th scope="col">'+esc(a.name)+(a.id==='reader'?levelSpan:'')+'</th>').join('')+'</tr>';
   let rows='';
   lines.forEach(line=>{
     const c=line.category;
     const tax=c.id==='state-income-tax'?' class="totalRow"':'';
-    const toggle=c.id==='utilities'?' <button type="button" class="back" id="utilToggle" aria-expanded="true">Hide the split</button>':'';
+    const toggle=(c.components&&c.components.length)?' <button type="button" class="back" data-split-toggle="'+esc(c.id)+'" aria-expanded="true">Hide the split</button>':'';
     const label=CostLookup.rowLabel(c,line.tenure);
     rows+='<tr'+tax+'><th class="row" scope="row">'+esc(label)+toggle+'</th>'+columns.map(a=>a.id==='reader'?readerCell(c.id):gulfCell(a,c.id,null,line.tenure)).join('')+'</tr>';
-    if(c.id==='utilities')rows+=componentRows(columns);
+    if(c.components&&c.components.length)rows+=splitRows(columns,c);
   });
   const cards=columns.map(area=>{
     const bits=lines.map(line=>{
       const c=line.category;
       const body=area.id==='reader'?readerCell(c.id):gulfCell(area,c.id,null,line.tenure);
       let extra='';
-      if(c.id==='utilities')extra='<details open><summary>Electricity, water, and internet</summary>'+(bundle.categories.find(x=>x.id==='utilities').components||[]).map(component=>{
-        const inner=area.id==='reader'?readerCell('utilities',component.id):gulfCell(area,'utilities',component.id,line.tenure);
+      if(c.components&&c.components.length)extra='<details open><summary>'+esc(c.components.map(component=>component.label).join(', '))+'</summary>'+c.components.map(component=>{
+        const inner=area.id==='reader'?readerCell(c.id,component.id):gulfCell(area,c.id,component.id,line.tenure);
         return '<div><dt>'+esc(component.label)+'</dt><dd>'+inner.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>';
       }).join('')+'</details>';
       return '<div><dt>'+esc(CostLookup.rowLabel(c,line.tenure))+'</dt><dd>'+body.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>'+extra;
@@ -383,16 +391,19 @@ function compare(){
     return '<article class="areaCard'+(area.id==='reader'?' reader':'')+'"><h3>'+esc(area.name)+(area.id==='reader'?levelSpan:'')+'</h3><dl>'+bits+'</dl></article>';
   }).join('');
   const steps=(bundle.signOff||[]).map(s=>'<li>'+esc(s)+'</li>').join('');
-  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">Design preview</p><h2>Side by side</h2><p class="asOfRange">'+esc(range)+'</p><p class="answers">'+esc(answerLine())+'</p><div class="headlines"><div class="headline"><span>Price index</span><strong>PLACEHOLDER</strong></div><div class="headline"><span>Equivalent income</span><strong>'+esc(incomeLine)+'</strong></div></div><p class="separate">The price index and the equivalent income stay together. They are not added to the monthly sum.</p><div class="sumBox"><span>Your monthly costs</span><strong>'+esc(sumText)+'</strong><p class="separate">'+esc(sumNote)+'</p></div></div><div class="tableWrap" id="compareTable"><table><caption>'+esc(caption)+'</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>How a placeholder becomes a figure</summary><ol>'+steps+'</ol></details>';
+  const eyebrow=bundle.status==='SOURCED'?'BEA price index, 2024':'Design preview';
+  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">'+esc(eyebrow)+'</p><h2>Side by side</h2><p class="asOfRange">'+esc(range)+'</p><p class="answers">'+esc(answerLine())+'</p><div class="headlines"><div class="headline"><span>Price index, U.S. = 100</span><strong class="indexLine">'+esc(indexHeadline())+'</strong></div><div class="headline"><span>Equivalent income</span><strong>'+esc(incomeLine)+'</strong></div></div><p class="separate">The price index and the equivalent income stay together. They are not added to the monthly sum.</p><div class="sumBox"><span>Your monthly costs</span><strong>'+esc(sumText)+'</strong><p class="separate">'+esc(sumNote)+'</p></div></div><div class="tableWrap" id="compareTable"><table><caption>'+esc(caption)+'</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>How a placeholder becomes a figure</summary><ol>'+steps+'</ol></details>';
   bindBack('tenure');
   document.getElementById('againBtn').onclick=()=>{A.zip=A.city=A.household=A.incomeKind=A.amount=A.tenure='';go('intro')};
-  const utilBtn=document.getElementById('utilToggle');
-  if(utilBtn)utilBtn.onclick=()=>{
-    const open=utilBtn.getAttribute('aria-expanded')==='true';
-    utilBtn.setAttribute('aria-expanded',open?'false':'true');
-    utilBtn.textContent=open?'Show the split':'Hide the split';
-    document.querySelectorAll('.utilChild').forEach(row=>{row.hidden=open});
-  };
+  panel.querySelectorAll('[data-split-toggle]').forEach(btn=>{
+    btn.onclick=()=>{
+      const id=btn.getAttribute('data-split-toggle');
+      const open=btn.getAttribute('aria-expanded')==='true';
+      btn.setAttribute('aria-expanded',open?'false':'true');
+      btn.textContent=open?'Show the split':'Hide the split';
+      panel.querySelectorAll('[data-split="'+id+'"]').forEach(row=>{row.hidden=open});
+    };
+  });
   layoutCompare();
 }
 function layoutCompare(){
