@@ -1,6 +1,7 @@
 const assert = require('assert');
+const fs = require('fs');
 const path = require('path');
-const { check, load, CBSA_FOR } = require('./check.js');
+const { check, load, loadShards, CBSA_FOR } = require('./check.js');
 const lookup = require('./lookup.js');
 
 const file = path.join(__dirname, 'cost-of-living.json');
@@ -52,7 +53,11 @@ throws(function () { check(swapped); }, /CBSA for manatee/);
 
 // B2. ZIP, county, metro, state, then Not available. A null value still matches.
 const chain = {
-  crosswalk: doc.crosswalk,
+  crosswalk: {
+    zips: [
+      { zip: '00000', label: 'SAMPLE', countyFips: '99000', countyName: 'Sample County', cbsa: '99999', cbsaName: 'Sample Metro', state: 'XX' }
+    ]
+  },
   nationalTables: {
     fallback: ['zip', 'county', 'cbsa', 'state'],
     rows: [
@@ -79,9 +84,9 @@ assert.strictEqual(lookup.lookup(chain, '00000', 'groceries').level, 'state valu
 chain.nationalTables.rows = [];
 assert.strictEqual(lookup.lookup(chain, '00000', 'groceries').level, 'Not available');
 assert.strictEqual(lookup.lookup(chain, '11111', 'groceries').level, 'Not available');
-assert.strictEqual(lookup.resolveKeys(doc.crosswalk, '00000').sample, true);
-assert.strictEqual(lookup.resolveKeys(doc.crosswalk, '34285').county, '');
-assert.ok(doc.crosswalk.zips.every(function (row) { return row.label === 'SAMPLE'; }));
+assert.strictEqual(lookup.resolveKeys(chain.crosswalk, '00000').sample, true);
+assert.strictEqual(lookup.resolveKeys(chain.crosswalk, '34285').county, '');
+assert.ok(chain.crosswalk.zips.every(function (row) { return row.label === 'SAMPLE'; }));
 
 // B3. DESIGN_PREVIEW keeps its rules. SOURCED accepts a complete measured figure.
 check(doc);
@@ -266,10 +271,10 @@ doc.figures.filter(function (figure) { return figure.categoryId !== 'price-index
   assert.strictEqual(figure.value, null);
   assert.notStrictEqual(figure.status, 'sourced');
 });
-assert.strictEqual(doc.crosswalk.zips.length, 1);
-assert.strictEqual(doc.crosswalk.zips[0].zip, '00000');
-assert.strictEqual(doc.crosswalk.zips[0].label, 'SAMPLE');
-assert.strictEqual(lookup.lookup(doc, '00000', 'price-index', null).level, 'Not available');
+assert.strictEqual(doc.crosswalk.zipCount, 33791);
+assert.strictEqual(doc.crosswalk.shards.length, 896);
+assert.strictEqual(doc.crosswalk.evidence, 'MEASURED');
+assert.ok(!doc.crosswalk.zips);
 const withZips = {
   crosswalk: {
     zips: [
@@ -302,5 +307,68 @@ throws(function () { check(mixed, 'SOURCED'); }, /mixed source or vintage/);
 const bareLookup = clone(doc);
 bareLookup.nationalTables.rows[0].url = 'http://example.com/not-https';
 throws(function () { check(bareLookup, 'SOURCED'); }, /sourced url/);
+
+function lookupZip(zip) {
+  const file = path.join(__dirname, 'zips', zip.slice(0, 3) + '.json');
+  const shard = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : { zips: [] };
+  return lookup.lookup({ crosswalk: shard, nationalTables: doc.nationalTables }, zip, 'price-index', null);
+}
+const tampa = lookupZip('33602');
+assert.strictEqual(tampa.keys.cbsa, '45300');
+assert.strictEqual(tampa.level, 'metro value');
+assert.strictEqual(tampa.figure.value, 100.89);
+['34285', '34293'].forEach(function (zip) {
+  const found = lookupZip(zip);
+  assert.strictEqual(found.keys.cbsa, '35840');
+  assert.strictEqual(found.keys.county, '12115');
+  assert.strictEqual(found.level, 'metro value');
+  assert.strictEqual(found.figure.value, 102.417);
+});
+const columbus = lookupZip('43215');
+assert.strictEqual(columbus.keys.cbsa, '18140');
+assert.strictEqual(columbus.keys.cbsaName, 'Columbus, OH');
+assert.strictEqual(columbus.level, 'metro value');
+assert.strictEqual(columbus.figure.value, 95.469);
+assert.strictEqual(columbus.figure.display, '95.5');
+const newYork = lookupZip('10001');
+assert.strictEqual(newYork.keys.cbsa, '35620');
+assert.strictEqual(newYork.keys.state, 'NY');
+assert.strictEqual(newYork.level, 'metro value');
+assert.strictEqual(newYork.figure.value, 112.563);
+const puertoRico = lookupZip('00601');
+assert.strictEqual(puertoRico.keys.cbsa, '');
+assert.strictEqual(puertoRico.keys.state, 'PR');
+assert.strictEqual(puertoRico.level, 'Not available');
+const missing = lookupZip('12345');
+assert.strictEqual(missing.keys.county, '');
+assert.strictEqual(missing.level, 'Not available');
+const rural = lookupZip('01054');
+assert.strictEqual(rural.keys.cbsa, '');
+assert.strictEqual(rural.keys.state, 'MA');
+assert.strictEqual(rural.level, 'state value');
+assert.strictEqual(rural.figure.value, 105.757);
+
+const shardRows = loadShards(path.join(__dirname, 'zips'), doc.crosswalk.shards);
+let zipTotal = 0;
+let nullMetro = 0;
+shardRows.forEach(function (shard) {
+  shard.zips.forEach(function (row) {
+    zipTotal += 1;
+    if (row.cbsa == null) nullMetro += 1;
+    assert.notStrictEqual(row.cbsa, '47930');
+  });
+});
+assert.strictEqual(zipTotal, 33791);
+assert.strictEqual(nullMetro, 15068);
+const nullOk = clone(doc);
+nullOk.crosswalk.shards = ['010'];
+nullOk.crosswalk.zipCount = 1;
+check(nullOk, 'SOURCED', [{ prefix: '010', zips: [{ zip: '01054', countyFips: '25011', cbsa: null, state: 'MA' }] }]);
+const badMetro = clone(doc);
+badMetro.crosswalk.shards = ['010'];
+badMetro.crosswalk.zipCount = 1;
+throws(function () {
+  check(badMetro, 'SOURCED', [{ prefix: '010', zips: [{ zip: '01054', countyFips: '25011', cbsa: '12', state: 'MA' }] }]);
+}, /crosswalk cbsa/);
 
 console.log('cost-of-living checks passed');

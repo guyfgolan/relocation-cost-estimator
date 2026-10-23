@@ -3,13 +3,18 @@
   else root.CostLookup = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   function resolveKeys(crosswalk, zip) {
-    const code = String(zip || '');
+    const raw = String(zip || '');
+    const code = /^\d{5}(-\d{4})?$/.test(raw) ? raw.slice(0, 5) : raw;
     const hit = ((crosswalk && crosswalk.zips) || []).find(function (row) { return row.zip === code; });
     if (!hit) return { zip: code, county: '', cbsa: '', state: '', sample: false };
+    // cbsa null is outside a metropolitan area, so the metro step is skipped and the state is used.
+    // Connecticut ZIPs use the 2020 OMB delineation, so BEA metro 47930 (Waterbury-Shelton, 2023) cannot be reached.
     return {
       zip: hit.zip,
       county: hit.countyFips || '',
+      countyName: hit.countyName || '',
       cbsa: hit.cbsa || '',
+      cbsaName: hit.cbsaName || '',
       state: hit.state || '',
       sample: hit.label === 'SAMPLE'
     };

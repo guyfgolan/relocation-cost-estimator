@@ -113,7 +113,7 @@ input:focus-visible{border-color:#c7a25a}
 <img class="logo" src="../assets/fgcg-logo-white.svg" alt="Florida Gulf Coast Guide">
 <img class="topExp" src="https://expknowledgebase.exprealty.com/hs-fs/hubfs/eXp%20Realty%20-%20White.png?height=48&amp;name=eXp+Realty+-+White.png" alt="eXp Realty">
 </header>
-<p class="previewBanner" role="status">Price index: BEA Regional Price Parities, 2024. Other categories are still placeholders.</p>
+<p class="previewBanner" role="status">Price index: BEA Regional Price Parities, 2024. ZIP crosswalk: Census 2020. Other categories are still placeholders.</p>
 <div class="progressWrap" id="progressWrap" hidden>
 <p class="progressText" id="progressText"></p>
 <div class="progress" id="progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Question progress"><div id="progressBar"></div></div>
@@ -155,12 +155,32 @@ function setProgress(step){
   bar.setAttribute('aria-valuenow',String(n));
   bar.setAttribute('aria-valuetext',n+' of '+QUESTIONS.length);
 }
+let renderGen=0;
 function go(step){
   if(!STEPS.includes(step))step='intro';
   history.pushState({step},'',step==='intro'?'#':'#'+step);
   render(step);
 }
+function loadZipShard(zip){
+  const raw=String(zip||'');
+  const code=/^\d{5}(-\d{4})?$/.test(raw)?raw.slice(0,5):'';
+  if(!code){
+    bundle.crosswalk.zips=[];
+    bundle.crosswalk.loadedPrefix='';
+    return Promise.resolve();
+  }
+  const prefix=code.slice(0,3);
+  if(bundle.crosswalk.loadedPrefix===prefix&&Array.isArray(bundle.crosswalk.zips))return Promise.resolve();
+  return fetch('zips/'+prefix+'.json').then(function(res){
+    if(!res.ok)throw new Error('missing shard');
+    return res.json();
+  }).then(function(shard){
+    bundle.crosswalk.zips=shard.zips||[];
+    bundle.crosswalk.loadedPrefix=prefix;
+  });
+}
 function render(step){
+  const token=++renderGen;
   bg.style.backgroundImage='url("'+IMG[step]+'")';
   panel.className=step==='compare'?'panel wide':'panel';
   setProgress(step);
@@ -169,7 +189,16 @@ function render(step){
   else if(step==='household')household();
   else if(step==='income')income();
   else if(step==='tenure')tenure();
-  else compare();
+  else {
+    panel.innerHTML='<h2 id="stepTitle">Looking up that ZIP</h2><p class="hint">Loading the Census crosswalk for those three digits.</p>';
+    focusStep();
+    loadZipShard(A.zip).catch(function(){bundle.crosswalk.zips=[];}).then(function(){
+      if(token!==renderGen)return;
+      compare();
+      focusStep();
+    });
+    return;
+  }
   focusStep();
 }
 function actions(backStep,primary){
@@ -184,7 +213,7 @@ function intro(){
   document.getElementById('startBtn').onclick=()=>go('place');
 }
 function place(){
-  panel.innerHTML='<p class="questionNo">Your comparison · Question 1</p><h2>Where do you live now?</h2><p class="hint">Enter a ZIP or a city. ZIP 00000 is a labeled sample in the crosswalk. Cost rows are not loaded yet, so the comparison still says Not available unless a row matches.</p><div class="fields"><div><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="00000" value="'+esc(A.zip)+'"></div><div><label for="city">City and state</label><input id="city" autocomplete="address-level2" maxlength="80" placeholder="Sample City, ST" value="'+esc(A.city)+'"></div></div><p class="status" id="placeStatus" role="alert"></p>'+actions('intro','<button type="button" class="primary" id="nextBtn">Continue</button><button type="button" class="secondary" id="skipBtn">Skip</button>');
+  panel.innerHTML='<p class="questionNo">Your comparison · Question 1</p><h2>Where do you live now?</h2><p class="hint">Enter a ZIP or a city. A ZIP loads its Census crosswalk shard, then the BEA price index. A ZIP that is not a 2020 ZCTA stays Not available.</p><div class="fields"><div><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="00000" value="'+esc(A.zip)+'"></div><div><label for="city">City and state</label><input id="city" autocomplete="address-level2" maxlength="80" placeholder="Sample City, ST" value="'+esc(A.city)+'"></div></div><p class="status" id="placeStatus" role="alert"></p>'+actions('intro','<button type="button" class="primary" id="nextBtn">Continue</button><button type="button" class="secondary" id="skipBtn">Skip</button>');
   bindBack('intro');
   const zip=document.getElementById('zip'),city=document.getElementById('city');
   zip.addEventListener('keydown',e=>{if(e.key==='Enter')savePlace(false)});
@@ -289,8 +318,18 @@ function readerLookup(categoryId,componentId){
   return CostLookup.lookup(bundle,A.zip,categoryId,componentId);
 }
 function readerContext(){
-  const found=readerLookup('groceries');
+  const found=readerLookup('price-index');
   return {keys:found.keys,level:found.level};
+}
+function placeChain(keys){
+  if(!keys||!keys.zip)return '';
+  if(keys.sample)return ' Sample chain: ZIP '+keys.zip+', county '+keys.county+', metro '+keys.cbsa+', state '+keys.state+'.';
+  let text=' ZIP '+keys.zip;
+  if(keys.county)text+=', county '+keys.county+(keys.countyName?' '+keys.countyName:'');
+  if(keys.cbsa)text+=', metro '+keys.cbsa+(keys.cbsaName?' '+keys.cbsaName:'');
+  else if(keys.state)text+=', no metro code, so the state '+keys.state+' is used';
+  if(keys.state&&keys.cbsa)text+=', state '+keys.state;
+  return text+'.';
 }
 function dateNote(figure){
   if(!figure)return '';
@@ -364,7 +403,7 @@ function compare(){
   const bothHousing=activeTenure()!=='rent'&&activeTenure()!=='own';
   const sumNote='Sum of non-overlapping rows only: '+sumNames.join(', ')+'. Annual amounts, such as home insurance and property tax, are divided by 12 before they are added. Flood insurance is not in the sum. State income tax is below it.'+(bothHousing?' Both rent and own housing are shown, so they are not added together.':'');
   let caption='Your area is looked up ZIP, then county, then metro, then state.';
-  if(ctx.keys&&ctx.keys.sample)caption+=' Sample chain: ZIP '+ctx.keys.zip+', county '+ctx.keys.county+', metro '+ctx.keys.cbsa+', state '+ctx.keys.state+'.';
+  caption+=placeChain(ctx.keys);
   caption+=' Level used: '+ctx.level+'. The price index is BEA Regional Price Parities for 2024, U.S. = 100. Other categories are still placeholders. North Port is its own column.';
   const levelSpan='<span class="level">Level used: '+esc(ctx.level)+'</span>';
   const head='<tr><th scope="col">Category</th>'+columns.map(a=>'<th scope="col">'+esc(a.name)+(a.id==='reader'?levelSpan:'')+'</th>').join('')+'</tr>';

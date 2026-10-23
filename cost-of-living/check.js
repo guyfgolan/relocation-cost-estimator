@@ -60,15 +60,69 @@ function checkCategories(doc) {
   });
 }
 
-function checkCrosswalk(doc) {
-  if (!doc.crosswalk || !Array.isArray(doc.crosswalk.zips)) fail('crosswalk');
-  doc.crosswalk.zips.forEach(function (row) {
-    if (!FIPS5.test(row.zip || '')) fail('crosswalk zip');
-    if (!FIPS5.test(row.countyFips || '')) fail('crosswalk county');
-    if (!FIPS5.test(row.cbsa || '')) fail('crosswalk cbsa');
-    if (!row.state) fail('crosswalk state');
-    if (doc.status === 'DESIGN_PREVIEW' && row.label !== 'SAMPLE') fail('crosswalk row is not labeled SAMPLE');
+// cbsa null is a non-metro ZIP (micropolitan or rural). Lookup then uses the state.
+// Connecticut rows use the 2020 OMB delineation, so BEA metro 47930 (Waterbury-Shelton, 2023) is never assigned.
+function checkZipRow(row, status, requireSample) {
+  if (!row || !FIPS5.test(row.zip || '')) fail('crosswalk zip');
+  if (!FIPS5.test(row.countyFips || '')) fail('crosswalk county ' + row.zip);
+  if (row.cbsa != null && !FIPS5.test(String(row.cbsa))) fail('crosswalk cbsa ' + row.zip);
+  if (!row.state) fail('crosswalk state ' + row.zip);
+  if (requireSample && row.label !== 'SAMPLE') fail('crosswalk row is not labeled SAMPLE');
+  if (status === 'SOURCED' && row.label === 'SAMPLE') fail('crosswalk row is labeled SAMPLE');
+}
+
+let shardCache = null;
+let shardCacheKey = '';
+
+function loadShards(dir, prefixes) {
+  const key = dir + '\n' + prefixes.join(',');
+  if (shardCache && shardCacheKey === key) return shardCache;
+  const files = fs.readdirSync(dir).filter(function (name) { return name.endsWith('.json'); }).map(function (name) { return name.slice(0, -5); }).sort();
+  const listed = prefixes.slice().sort();
+  if (files.join(',') !== listed.join(',')) fail('crosswalk shard manifest');
+  shardCache = listed.map(function (prefix) {
+    const shard = JSON.parse(fs.readFileSync(path.join(dir, prefix + '.json'), 'utf8'));
+    if (!shard || shard.prefix !== prefix || !Array.isArray(shard.zips)) fail('crosswalk shard ' + prefix);
+    return shard;
   });
+  shardCacheKey = key;
+  return shardCache;
+}
+
+function checkCrosswalk(doc, shards) {
+  if (!doc.crosswalk) fail('crosswalk');
+  const inline = doc.crosswalk.zips;
+  const listed = doc.crosswalk.shards;
+  if (!Array.isArray(inline) && !Array.isArray(listed)) fail('crosswalk');
+  if (Array.isArray(inline)) {
+    inline.forEach(function (row) { checkZipRow(row, doc.status, doc.status === 'DESIGN_PREVIEW'); });
+  }
+  if (Array.isArray(listed)) {
+    if (!listed.length) fail('crosswalk shards');
+    listed.forEach(function (prefix) {
+      if (!/^\d{3}$/.test(prefix)) fail('crosswalk shard ' + prefix);
+    });
+    const loaded = shards || (listed.length ? loadShards(path.join(__dirname, doc.crosswalk.shardDir || 'zips'), listed) : null);
+    if (!loaded) fail('crosswalk shards');
+    const seen = new Set();
+    let count = 0;
+    const expected = new Set(listed);
+    loaded.forEach(function (shard) {
+      if (!expected.has(shard.prefix)) fail('unexpected shard ' + shard.prefix);
+      if (!shard.zips.length) fail('empty shard ' + shard.prefix);
+      shard.zips.forEach(function (row) {
+        checkZipRow(row, doc.status, false);
+        if (row.zip.slice(0, 3) !== shard.prefix) fail('shard prefix ' + row.zip);
+        if (seen.has(row.zip)) fail('duplicate zip ' + row.zip);
+        seen.add(row.zip);
+        count += 1;
+      });
+    });
+    listed.forEach(function (prefix) {
+      if (!loaded.some(function (shard) { return shard.prefix === prefix; })) fail('missing shard ' + prefix);
+    });
+    if (doc.crosswalk.zipCount != null && doc.crosswalk.zipCount !== count) fail('crosswalk zip count');
+  }
 }
 
 function recordLabel(record) {
@@ -135,7 +189,7 @@ function checkVintage(doc) {
   });
 }
 
-function check(doc, mode) {
+function check(doc, mode, shards) {
   if (!doc || (doc.status !== 'DESIGN_PREVIEW' && doc.status !== 'SOURCED' && !mode)) fail('status');
   const use = mode || doc.status;
   if (!/placeholder/i.test(doc.banner || '') && use === 'DESIGN_PREVIEW') fail('banner');
@@ -144,7 +198,7 @@ function check(doc, mode) {
   if (!doc.nationalTables.fallback || doc.nationalTables.fallback.join(',') !== 'zip,county,cbsa,state') fail('fallback order');
   checkAreas(doc);
   checkCategories(doc);
-  checkCrosswalk(doc);
+  checkCrosswalk(doc, shards);
   const areaIds = new Set(doc.areas.map(function (area) { return area.id; }));
   const categoryIds = new Set(doc.categories.map(function (category) { return category.id; }));
   doc.figures.forEach(function (figure) {
@@ -204,7 +258,7 @@ if (require.main === module) {
   const measured = doc.figures.filter(function (figure) { return figure.evidence === 'MEASURED'; }).length;
   const metro = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'cbsa'; }).length;
   const state = doc.nationalTables.rows.filter(function (row) { return row.geoLevel === 'state'; }).length;
-  console.log('Bundle ok:', measured, 'measured Gulf figures,', metro, 'metro rows,', state, 'state rows,', doc.areas.length, 'Gulf columns');
+  console.log('Bundle ok:', measured, 'measured Gulf figures,', metro, 'metro rows,', state, 'state rows,', doc.crosswalk.zipCount, 'ZIPs,', doc.areas.length, 'Gulf columns');
 }
 
-module.exports = { check: check, load: load, CBSA_FOR: CBSA_FOR };
+module.exports = { check: check, load: load, loadShards: loadShards, CBSA_FOR: CBSA_FOR };
