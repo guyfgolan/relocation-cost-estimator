@@ -4,100 +4,95 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cost of Living Estimator | Florida Gulf Coast Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0d2235;--gold:#c7a25a;--cream:#f6e7c3;--ink:#15202b;--goldtext:#f1d79f}
+@font-face{font-family:Cinzel;src:url("../assets/fonts/Cinzel-VF.ttf") format("truetype");font-weight:100 900;font-style:normal;font-display:swap}
+:root{--navy:#001F3F;--gold:#D4AF37;--paper:#F5F7FA;--slate:#5A7A9A;--line:#808A98;--white:#fff;--gray:#4E5964}
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-html,body{margin:0;min-height:100%;background:#0d2235;color:#fff;font-family:Arial,Helvetica,sans-serif}
-button,input{font:inherit}
-.skip{position:absolute;left:12px;top:-40px;background:#c7a25a;color:#0d2235;padding:8px 12px;z-index:9;font-weight:800}
+html,body{margin:0;min-height:100%;background:var(--paper);color:var(--navy);font-family:Inter,Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5}
+button,input{font:inherit;color:inherit}
+.skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700;border-radius:8px}
 .skip:focus{top:8px}
-.app{min-height:100vh;position:relative}
-.bg{position:fixed;inset:0;background:#0d2235 center/cover no-repeat;z-index:0}
-.bg:after{content:"";position:absolute;inset:0;background:rgba(6,20,32,.78)}
-.shell{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(16px,4vw,48px)}
-.logo{width:min(250px,46vw);max-height:74px;object-fit:contain;object-position:left center}
-.topExp{width:105px;max-height:48px;object-fit:contain}
-.previewBanner{position:sticky;top:0;z-index:4;margin:0;padding:12px 16px;background:#c7a25a;color:#0d2235;text-align:center;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:clamp(13px,2vw,15px);line-height:1.35}
-.progressWrap{padding:14px clamp(16px,4vw,48px) 0;text-align:right}
-.progressText{font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px;color:#f1d79f}
-.progress{height:5px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
-.progress>div{height:100%;background:#c7a25a;width:0}
-.main{flex:1;display:grid;place-items:center;padding:18px clamp(14px,4vw,48px) 36px}
-.panel{width:min(820px,100%);background:rgba(16,40,60,.9);border:2px solid #c7a25a;border-radius:2px;box-shadow:0 0 0 7px rgba(13,34,53,.55),0 0 0 8px #c7a25a;padding:clamp(22px,4vw,48px)}
-.panel.wide{width:min(1180px,100%)}
-.hero{text-align:center;max-width:680px;margin:0 auto}
-.eyebrow{color:#f1d79f;font-family:Cinzel,Georgia,serif;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
-h1,h2,h3{font-family:Cinzel,Georgia,"Times New Roman",serif;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:0 0 14px;line-height:1.15}
-h1{font-size:clamp(32px,5vw,58px);max-width:16ch;margin-left:auto;margin-right:auto}
-h2{font-size:clamp(26px,3.4vw,42px);text-wrap:balance}
-h3{font-size:clamp(18px,2vw,22px);color:#f1d79f;letter-spacing:.08em}
-p,li{font-size:clamp(16px,2vw,18px);line-height:1.5}
-.hint{color:rgba(255,255,255,.86);margin-top:0}
-.questionNo{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#f1d79f;margin:0 0 10px}
-.options{display:grid;gap:12px;margin-top:8px}
-.options.two{grid-template-columns:1fr 1fr}
-.option,.primary,.secondary,.back{border:0;border-radius:14px;cursor:pointer}
-.option{width:100%;padding:16px 18px;text-align:left;background:rgba(255,255,255,.95);color:#15202b;font-weight:700;border:2px solid transparent}
-.option[aria-pressed="true"]{background:#f6e7c3;border-color:#c7a25a}
-.primary{padding:15px 22px;background:#c7a25a;color:#102334;font-weight:800}
-.primary:disabled{opacity:.45;cursor:not-allowed}
-.secondary{padding:14px 18px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}
-.back{background:transparent;color:#fff;padding:8px 0;text-decoration:underline;text-underline-offset:4px}
-.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:22px}
-.fields{display:grid;gap:16px;margin-top:8px}
-.fields label{display:block;font-weight:700;margin-bottom:8px}
-.fields input{width:100%;padding:16px 18px;border-radius:14px;border:2px solid transparent;color:#15202b;font-weight:700}
-.status{min-height:1.4em;color:#f7f3eb;margin:8px 0 0}
-.areaList{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0 0;padding:0;list-style:none}
-.areaList li{border:1px solid #c7a25a;padding:8px 12px;font-size:15px}
-.answers{margin:0 auto 16px;max-width:70ch;text-align:center;color:#f7f3eb}
-.asOfRange{margin:0 0 8px;color:#f1d79f;font-weight:700;text-align:center}
-.headlines{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 14px}
-.headline,.sumBox{border:1px solid #c7a25a;padding:14px;text-align:center;background:rgba(13,34,53,.45)}
-.sumBox{margin:0 0 16px}
-.headline span,.sumBox span{display:block;color:#f1d79f;font-family:Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
-.headline strong,.sumBox strong{display:block;font-family:Cinzel,Georgia,serif;font-size:clamp(18px,2.4vw,28px);font-weight:600;margin-top:6px}
-.headline strong.indexLine{font-size:clamp(15px,1.7vw,20px);line-height:1.35}
-.separate{margin:8px 0 0;font-size:15px}
-.utilChild th,.utilChild td,.splitChild th,.splitChild td{background:rgba(13,34,53,.28)}
-.level{display:block;margin-top:4px;color:#f1d79f;font-size:12px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
-.tableWrap{overflow-x:auto;margin-top:8px}
-table{width:100%;border-collapse:collapse;font-size:15px;min-width:760px}
-caption{caption-side:bottom;text-align:left;padding-top:10px;color:#f7f3eb;font-size:14px}
-th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.18);text-align:left;vertical-align:top}
-th{color:#f1d79f;font-family:Cinzel,Georgia,serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:12px}
-td strong,th.row{font-weight:700;color:#fff}
-.cellNote{display:block;margin-top:4px;color:#f1d79f;font-size:12px;letter-spacing:.02em;text-transform:uppercase}
-.readerCol{box-shadow:inset 3px 0 0 #c7a25a}
-.totalRow td,.totalRow th{border-top:2px solid #c7a25a;background:rgba(13,34,53,.45)}
-.cards{display:grid;gap:14px;margin-top:8px}
-.areaCard{border:1px solid #c7a25a;padding:14px 14px 6px;background:rgba(13,34,53,.45)}
-.areaCard.reader{box-shadow:inset 4px 0 0 #c7a25a}
-.areaCard dl{margin:0}
-.areaCard div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.16)}
-.areaCard dt{font-weight:700}
-.areaCard dd{margin:0}
-details{margin-top:18px;border-top:1px solid rgba(255,255,255,.2);padding-top:12px}
-summary{cursor:pointer;color:#f1d79f;font-weight:700}
-details p,details li{font-size:15px}
-details ol{padding-left:1.2em}
-.footerNote{position:relative;z-index:1;text-align:center;padding:8px 16px 22px;color:#f7f3eb;font-size:14px}
-.footerNote a{color:#f1d79f}
-h1:focus:not(:focus-visible),h2:focus:not(:focus-visible),button:focus:not(:focus-visible),a:focus:not(:focus-visible),input:focus:not(:focus-visible),summary:focus:not(:focus-visible){outline:none}
-h1:focus-visible,h2:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #c7a25a;outline-offset:3px}
-input:focus-visible{border-color:#c7a25a}
+.siteHeader,.siteFooter,.ctaBand,.headlineBand{background:var(--navy);color:var(--white);text-align:center}
+.siteHeader{padding:28px 16px 22px}
+.logo,.ctaLogo{height:auto;display:block;margin:0 auto;background:none;border:0}
+.logo{width:min(480px,88vw)}
+.ctaLogo{width:min(320px,72vw)}
+.siteTitle{margin:8px 0 0;font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15}
+.titleLine{display:block;font-size:clamp(28px,4vw,44px)}
+.titleGold{color:var(--gold)}
+.siteTitle::after{content:"";display:block;width:72px;height:2px;margin:12px auto 0;background:var(--gold)}
+main{padding:20px 16px 36px}
+.sheet{width:min(760px,100%);margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,3vw,28px)}
+.stepLabel{font-weight:700;margin:0 0 8px}
+.progress{height:4px;background:#E4E8ED;border-radius:8px;overflow:hidden;margin:0 0 22px}
+.progress>div{height:100%;background:var(--gold)}
+h2{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;margin:0 0 18px;font-size:clamp(30px,5vw,46px)}
+h2::after{content:"";display:block;width:64px;height:2px;margin-top:12px;background:var(--gold)}
+.quiet{display:block;margin-top:8px;font-family:Inter,Arial,Helvetica,sans-serif;font-size:16px;font-weight:400;letter-spacing:0;text-transform:none}
+p{margin:0 0 12px}
+label{font-weight:700;display:block;margin-bottom:6px}
+.choices{display:grid;gap:8px}
+.choices.two{grid-template-columns:1fr 1fr}
+.choices.wide{grid-template-columns:1fr 1fr}
+.option,.primary,.secondary{border-radius:8px;cursor:pointer;min-height:44px;padding:12px 14px}
+.option{width:100%;text-align:left;background:var(--white);border:1px solid var(--line);font-weight:600}
+.option[aria-pressed="true"]{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.primary{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:var(--navy);border:1px solid var(--gold);font-weight:700;text-decoration:none;text-align:center}
+.secondary{background:var(--white);color:var(--navy);border:1px solid var(--navy);font-weight:700}
+.secondary:disabled{opacity:.45;cursor:not-allowed}
+input{width:100%;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:44px}
+.stepBar{display:flex;gap:12px;margin-top:22px}
+.stepBar>*{flex:1 1 140px}
+.status{min-height:1.4em;margin:8px 0 0;font-weight:600}
+.resultsWrap{width:min(1120px,100%);margin:0 auto}
+.headlineBand{border:1px solid var(--gold);border-radius:8px;padding:22px 18px;margin-bottom:16px}
+.compareHeadline{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;font-size:clamp(28px,4vw,42px);line-height:1.25;color:var(--gold);text-transform:none;letter-spacing:0;margin:0;text-wrap:balance}
+.compareHeadline::after{display:none}
+.tableWrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--white)}
+.compare{width:100%;border-collapse:separate;border-spacing:0;font-size:16px}
+.compare th,.compare td{padding:10px 12px;vertical-align:bottom;background:var(--white)}
+.compare thead th{font-weight:700;text-align:left}
+.compare tbody th{font-weight:700;text-align:left;position:sticky;left:0;z-index:2;min-width:8.5rem}
+.compare td{text-align:right;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.compare tbody tr:nth-child(even) th,.compare tbody tr:nth-child(even) td{background:var(--paper)}
+.compare .yours{position:sticky;left:8.5rem;z-index:3;background:var(--navy);color:var(--white)}
+.compare thead .yours{z-index:4}
+.compare tbody tr:nth-child(even) td.yours,.compare tbody tr:nth-child(odd) td.yours,.compare thead th.yours{background:var(--navy);color:var(--white)}
+.compare th.best,.compare td.best{border-left:1px solid var(--gold);border-right:1px solid var(--gold)}
+.compare thead th.best{border-top:1px solid var(--gold)}
+.compare tbody tr:last-child td.best{border-bottom:1px solid var(--gold)}
+.tag{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:8px;background:var(--gold);color:var(--navy);font-family:Inter,Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:0;text-transform:none;line-height:1.3}
+.cards{display:grid;gap:12px}
+.areaCard{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:14px}
+.areaCard.yours{background:var(--navy);color:var(--white);border-color:var(--navy);position:sticky;top:8px;z-index:3}
+.areaCard.best{border:1px solid var(--gold)}
+.areaCard h3{margin:0 0 8px;font-family:Cinzel,Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.metric{display:flex;justify-content:space-between;gap:12px;padding:8px 0}
+.metric+.metric{border-top:1px solid var(--line)}
+.areaCard.yours .metric+.metric{border-top-color:rgba(255,255,255,.35)}
+.metric b{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.credit{color:var(--gray);font-size:14px;margin:14px 0 0}
+.credit a{color:var(--gray)}
+.ctaBand{margin-top:22px;border-radius:8px;padding:28px 16px}
+.ctaBand .primary{margin-top:16px;min-width:min(100%,280px)}
+.siteFooter{padding:22px 16px 28px}
+.siteFooter p{margin:0 0 6px}
+.siteFooter a{color:var(--white)}
+.expLogo{width:min(148px,46vw);height:auto;display:block;margin:10px auto 12px;background:none;border:0}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(max-width:720px){
- .headlines{grid-template-columns:1fr}
- .logo{width:168px}
- .topExp{width:78px}
- .panel{box-shadow:0 0 0 5px #0d2235,0 0 0 6px #c7a25a}
- .options.two{grid-template-columns:1fr}
- .actions{display:grid}
- .actions button,.actions .primary,.actions .secondary{width:100%}
- h1{font-size:clamp(28px,8vw,40px)}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px;box-shadow:0 0 0 2px var(--gold)}
+.headlineBand :focus-visible,.ctaBand :focus-visible,.siteHeader :focus-visible,.siteFooter :focus-visible,.areaCard.yours :focus-visible,.compare .yours :focus-visible{outline:2px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 2px var(--navy)}
+@media(min-width:800px){
+ .choices.wide{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:799px){
+ .choices.two,.choices.wide{grid-template-columns:1fr}
+ .sheet .stepBar{position:sticky;bottom:0;z-index:5;background:var(--white);padding-top:12px;padding-bottom:4px}
 }
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
@@ -105,324 +100,238 @@ input:focus-visible{border-color:#c7a25a}
 </style>
 </head>
 <body>
-<a class="skip" href="#panel">Skip to the estimator</a>
-<div class="app">
-<div class="bg" id="bg"></div>
-<div class="shell">
-<header class="topbar">
-<img class="logo" src="../assets/fgcg-logo-white.svg" alt="Florida Gulf Coast Guide">
-<img class="topExp" src="https://expknowledgebase.exprealty.com/hs-fs/hubfs/eXp%20Realty%20-%20White.png?height=48&amp;name=eXp+Realty+-+White.png" alt="eXp Realty">
+<a class="skip" href="#main">Skip to content</a>
+<header class="siteHeader">
+<img class="logo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">
+<h1 class="siteTitle"><span class="titleLine">Cost of living</span><span class="titleLine titleGold">Estimator</span></h1>
 </header>
-<p class="previewBanner" role="status">Price index: BEA Regional Price Parities, 2024. Other categories are still placeholders.</p>
-<div class="progressWrap" id="progressWrap" hidden>
-<p class="progressText" id="progressText"></p>
-<div class="progress" id="progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Question progress"><div id="progressBar"></div></div>
-</div>
-<div id="live" class="sr" aria-live="polite" aria-atomic="true"></div>
-<main class="main"><section class="panel" id="panel" aria-labelledby="stepTitle"></section></main>
-<p class="footerNote"><a href="../">Moving cost estimator</a>. This page only previews the comparison. It does not call a paid data service.</p>
-</div>
-</div>
+<main id="main"><div id="panel"></div></main>
+<footer class="siteFooter">
+<p>Guy Golan</p>
+<img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty">
+<p><a href="tel:+13019196726">301-919-6726</a></p>
+<p><a href="../">Moving cost estimator</a></p>
+</footer>
 <script src="lookup.js"></script>
 <script>
-const STEPS=['intro','place','household','income','tenure','compare'];
-const QUESTIONS=['place','household','income','tenure'];
-const IMG={intro:'../assets/intro.jpg',place:'../assets/travel.jpg',household:'../assets/when.jpg',income:'../assets/travel.jpg',tenure:'../assets/when.jpg',compare:'../assets/result.jpg'};
-const A={zip:'',city:'',household:'',incomeKind:'',amount:'',tenure:''};
+const BOOKING_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+const STEPS=['from','household','income','tenure','results'];
+const QUESTIONS=[
+  {id:'from',title:'Where are you moving from?'},
+  {id:'household',title:'How many people are in your household?'},
+  {id:'income',title:"What's your yearly household income?"},
+  {id:'tenure',title:'Will you rent or buy?'}
+];
+const A={zip:'',household:'',amount:'',tenure:''};
 let bundle=null;
+let renderGen=0;
 const panel=document.getElementById('panel');
-const live=document.getElementById('live');
-const bg=document.getElementById('bg');
-
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function focusStep(){
-  const h=panel.querySelector('h1,h2');
+function focusHeading(){
+  const h=panel.querySelector('h2');
   if(!h)return;
   h.tabIndex=-1;
-  h.id='stepTitle';
   h.focus({focusVisible:false});
-  live.textContent=h.textContent;
 }
-function setProgress(step){
-  const wrap=document.getElementById('progressWrap');
-  const i=QUESTIONS.indexOf(step);
-  wrap.hidden=i<0;
-  if(i<0)return;
-  const n=i+1;
-  document.getElementById('progressText').textContent=n+' of '+QUESTIONS.length;
-  document.getElementById('progressBar').style.width=(n/QUESTIONS.length*100)+'%';
-  const bar=document.getElementById('progress');
-  bar.setAttribute('aria-valuenow',String(n));
-  bar.setAttribute('aria-valuetext',n+' of '+QUESTIONS.length);
+function bookingLink(){
+  return '<a class="primary" href="'+esc(BOOKING_URL)+'" target="_blank" rel="noopener noreferrer">Schedule a call with Guy</a>';
+}
+function isSourced(figure){
+  return !!figure && typeof figure.value==='number' && !Number.isNaN(figure.value) && figure.evidence==='MEASURED' && /^[\d.]+$/.test(String(figure.display||''));
 }
 function go(step){
-  if(!STEPS.includes(step))step='intro';
-  history.pushState({step},'',step==='intro'?'#':'#'+step);
-  render(step);
+  const name=STEPS.includes(step)?step:'from';
+  history.pushState({step:name},'','#'+name);
+  render(name);
+}
+function loadZipShard(zip){
+  const raw=String(zip||'');
+  const code=/^\d{5}(-\d{4})?$/.test(raw)?raw.slice(0,5):'';
+  if(!code){
+    bundle.crosswalk.zips=[];
+    bundle.crosswalk.loadedPrefix='';
+    return Promise.resolve();
+  }
+  const prefix=code.slice(0,3);
+  if(bundle.crosswalk.loadedPrefix===prefix && Array.isArray(bundle.crosswalk.zips)) return Promise.resolve();
+  return fetch('zips/'+prefix+'.json').then(function(res){
+    if(!res.ok) throw new Error('missing shard');
+    return res.json();
+  }).then(function(shard){
+    bundle.crosswalk.zips=shard.zips||[];
+    bundle.crosswalk.loadedPrefix=prefix;
+  });
 }
 function render(step){
-  bg.style.backgroundImage='url("'+IMG[step]+'")';
-  panel.className=step==='compare'?'panel wide':'panel';
-  setProgress(step);
-  if(step==='intro')intro();
-  else if(step==='place')place();
-  else if(step==='household')household();
-  else if(step==='income')income();
-  else if(step==='tenure')tenure();
-  else compare();
-  focusStep();
+  if(step==='results') showResults();
+  else showStep(QUESTIONS.some(q=>q.id===step)?step:'from');
 }
-function actions(backStep,primary){
-  return '<div class="actions">'+(primary||'')+'<button type="button" class="back" id="backBtn">Back</button></div>';
+function progress(n){
+  return '<p class="stepLabel" id="stepLabel">Step '+n+' of 4</p><div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="'+n+'" aria-labelledby="stepLabel"><div style="width:'+(n/4*100)+'%"></div></div>';
 }
-function bindBack(step){
-  document.getElementById('backBtn').onclick=()=>go(step);
+function stepBar(n){
+  return '<div class="stepBar"><button type="button" class="secondary" id="backBtn"'+(n===1?' disabled':'')+'>Back</button><button type="button" class="primary" id="nextBtn">Next</button></div>';
 }
-function intro(){
-  const areas=(bundle?bundle.areas.filter(a=>a.id!=='reader'):[]).map(a=>'<li>'+esc(a.name)+'</li>').join('');
-  panel.innerHTML='<div class="hero"><p class="eyebrow">Cost of living estimator</p><h1>How does the Gulf Coast compare with home?</h1><p>Compare your current area with Manatee, Hillsborough, Pinellas, Sarasota County, Venice, and North Port. The price index is BEA Regional Price Parities for 2024. Housing, utilities, insurance, property tax, groceries, transportation, healthcare, and state income tax are still placeholders. Florida has no state income tax.</p><ul class="areaList">'+areas+'</ul><div class="actions"><button type="button" class="primary" id="startBtn">Start the comparison</button></div></div>';
-  document.getElementById('startBtn').onclick=()=>go('place');
+function choices(group, items, current){
+  return '<div class="choices'+(items.length>2?' wide':' two')+'" role="group">'+items.map(item=>'<button type="button" class="option" data-group="'+esc(group)+'" data-id="'+esc(item.id)+'" aria-pressed="'+(current===item.id?'true':'false')+'">'+esc(item.label)+'</button>').join('')+'</div>';
 }
-function place(){
-  panel.innerHTML='<p class="questionNo">Your comparison · Question 1</p><h2>Where do you live now?</h2><p class="hint">Enter a ZIP or a city. ZIP 00000 is a labeled sample in the crosswalk. Cost rows are not loaded yet, so the comparison still says Not available unless a row matches.</p><div class="fields"><div><label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="00000" value="'+esc(A.zip)+'"></div><div><label for="city">City and state</label><input id="city" autocomplete="address-level2" maxlength="80" placeholder="Sample City, ST" value="'+esc(A.city)+'"></div></div><p class="status" id="placeStatus" role="alert"></p>'+actions('intro','<button type="button" class="primary" id="nextBtn">Continue</button><button type="button" class="secondary" id="skipBtn">Skip</button>');
-  bindBack('intro');
-  const zip=document.getElementById('zip'),city=document.getElementById('city');
-  zip.addEventListener('keydown',e=>{if(e.key==='Enter')savePlace(false)});
-  city.addEventListener('keydown',e=>{if(e.key==='Enter')savePlace(false)});
-  document.getElementById('nextBtn').onclick=()=>savePlace(false);
-  document.getElementById('skipBtn').onclick=()=>savePlace(true);
-}
-function savePlace(skip){
-  const zip=document.getElementById('zip').value.trim();
-  const city=document.getElementById('city').value.trim();
-  const status=document.getElementById('placeStatus');
-  if(!skip && !zip && !city){status.textContent='Enter a ZIP or a city, or skip this question.';return}
-  if(zip && !/^\d{5}(-\d{4})?$/.test(zip)){status.textContent='Use five digits, or leave the ZIP blank and enter a city.';return}
-  A.zip=skip?'':zip;
-  A.city=skip?'':city;
-  go('household');
-}
-function choiceStep(opts){
-  panel.innerHTML='<p class="questionNo">Your comparison · Question '+opts.n+'</p><h2>'+esc(opts.title)+'</h2>'+(opts.hint?'<p class="hint">'+esc(opts.hint)+'</p>':'')+'<div class="options'+(opts.wide?'':' two')+'" role="group" aria-label="'+esc(opts.title)+'">'+opts.choices.map(c=>'<button type="button" class="option" aria-pressed="'+(opts.current===c.id?'true':'false')+'" data-id="'+esc(c.id)+'">'+esc(c.label)+'</button>').join('')+'</div>'+(opts.extra||'')+'<p class="status" id="stepStatus" role="alert"></p>'+actions(opts.back,'<button type="button" class="primary" id="nextBtn"'+(opts.require&&!opts.current?' disabled':'')+'>Continue</button>');
-  bindBack(opts.back);
-  let picked=opts.current||'';
+function showStep(id){
+  const q=QUESTIONS.find(item=>item.id===id);
+  const n=QUESTIONS.indexOf(q)+1;
+  let fields='';
+  if(id==='from'){
+    fields='<label for="zip">ZIP code</label><input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" value="'+esc(A.zip)+'"><p class="status" id="zipStatus" role="status"></p>';
+  }else if(id==='household'){
+    fields=choices('household',[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5+',label:'5 or more'}],A.household);
+  }else if(id==='income'){
+    fields='<label for="amount">Yearly household income</label><input id="amount" inputmode="decimal" autocomplete="off" value="'+esc(A.amount)+'"><p>It stays in this browser and is not saved.</p>';
+  }else{
+    fields=choices('tenure',[{id:'rent',label:'Rent'},{id:'buy',label:'Buy'}],A.tenure);
+  }
+  const optional=id==='income'?' <span class="quiet">(optional)</span>':'';
+  panel.innerHTML='<article class="sheet">'+progress(n)+'<h2>'+esc(q.title)+optional+'</h2>'+fields+stepBar(n)+'</article>';
+  const back=document.getElementById('backBtn');
+  back.onclick=()=>{if(n>1){saveStep(id);go(QUESTIONS[n-2].id)}};
+  document.getElementById('nextBtn').onclick=()=>advance(id,n);
   panel.querySelectorAll('.option').forEach(btn=>{
     btn.onclick=()=>{
-      picked=btn.getAttribute('data-id');
-      panel.querySelectorAll('.option').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));
-      const next=document.getElementById('nextBtn');
-      if(next)next.disabled=false;
-      if(opts.onPick)opts.onPick(picked);
+      const group=btn.getAttribute('data-group');
+      const picked=btn.getAttribute('data-id');
+      panel.querySelectorAll('[data-group="'+group+'"]').forEach(other=>other.setAttribute('aria-pressed',other===btn?'true':'false'));
+      if(group==='household') A.household=picked;
+      if(group==='tenure') A.tenure=picked;
     };
   });
-  document.getElementById('nextBtn').onclick=()=>{
-    if(opts.require&&!picked){document.getElementById('stepStatus').textContent='Choose one to continue.';return}
-    opts.save(picked);
-  };
-  if(opts.after)opts.after();
+  const formInput=panel.querySelector('input');
+  if(formInput) formInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();advance(id,n)}});
+  focusHeading();
 }
-function household(){
-  choiceStep({
-    n:2,title:'How many people are in the household?',
-    hint:'Used later to pick a household-size series. It does not change the placeholders.',
-    back:'place',require:true,current:A.household,
-    choices:[{id:'1',label:'1 person'},{id:'2',label:'2 people'},{id:'3',label:'3 people'},{id:'4',label:'4 people'},{id:'5+',label:'5 or more'}],
-    save:id=>{A.household=id;go('income')}
+function saveStep(id){
+  if(id==='from'){
+    const zip=document.getElementById('zip');
+    if(zip) A.zip=zip.value.trim();
+  }
+  if(id==='income'){
+    const amount=document.getElementById('amount');
+    if(amount) A.amount=amount.value.trim();
+  }
+}
+function advance(id,n){
+  saveStep(id);
+  if(id==='from' && A.zip && !/^\d{5}(-\d{4})?$/.test(A.zip)){
+    document.getElementById('zipStatus').textContent='Use a 5-digit ZIP code.';
+    return;
+  }
+  if(n<4) go(QUESTIONS[n].id);
+  else go('results');
+}
+function showResults(){
+  const token=++renderGen;
+  panel.innerHTML='<article class="sheet"><h2>Your comparison</h2><p>One moment.</p></article>';
+  focusHeading();
+  loadZipShard(A.zip).catch(function(){bundle.crosswalk.zips=[]}).then(function(){
+    if(token!==renderGen) return;
+    drawResults();
+    focusHeading();
   });
 }
-function income(){
-  choiceStep({
-    n:3,title:'Income or a monthly budget?',
-    hint:'Optional. An amount stays in this browser only. It is not saved or sent. Skip it and the equivalent income stays blank.',
-    back:'household',current:A.incomeKind,wide:true,
-    choices:[{id:'annual-income',label:'Annual income'},{id:'monthly-budget',label:'Monthly budget'},{id:'skip',label:'Skip'}],
-    extra:'<div class="fields" id="amountWrap" hidden><label for="amount">Amount</label><input id="amount" inputmode="decimal" autocomplete="off" placeholder="Not used in this preview" value="'+esc(A.amount)+'"></div>',
-    onPick:id=>{document.getElementById('amountWrap').hidden=id==='skip'},
-    after:()=>{if(A.incomeKind&&A.incomeKind!=='skip')document.getElementById('amountWrap').hidden=false},
-    save:id=>{
-      A.incomeKind=id;
-      A.amount=id==='skip'?'':document.getElementById('amount').value.trim();
-      go('tenure');
-    }
-  });
+function readerFigure(componentId){
+  if(!/^\d{5}(-\d{4})?$/.test(A.zip)) return {figure:null,level:'',keys:null};
+  return CostLookup.lookup(bundle,A.zip,'price-index',componentId||null);
 }
-function tenure(){
-  choiceStep({
-    n:4,title:'Renting or buying?',
-    hint:'Optional. Renting uses gross rent and hides utilities. Buying uses principal and interest, and shows property tax. Not sure shows both housing lines and marks owner-only rows.',
-    back:'income',current:A.tenure,
-    choices:[{id:'rent',label:'Renting'},{id:'own',label:'Buying'},{id:'skip',label:'Not sure'}],
-    save:id=>{A.tenure=id;go('compare')}
-  });
-}
-function answerLine(){
-  const bits=[];
-  if(A.zip)bits.push('ZIP '+A.zip);
-  if(A.city)bits.push(A.city);
-  if(!A.zip&&!A.city)bits.push('Current area not entered');
-  const house={1:'1 person',2:'2 people',3:'3 people',4:'4 people','5+':'5 or more'}[A.household];
-  if(house)bits.push(house);
-  if(A.incomeKind==='annual-income')bits.push('Annual income');
-  if(A.incomeKind==='monthly-budget')bits.push('Monthly budget');
-  if(A.amount)bits.push('Income is in this browser and is not saved');
-  if(A.tenure==='rent')bits.push('Renting');
-  if(A.tenure==='own')bits.push('Buying');
-  if(A.tenure==='skip')bits.push('Renting or buying not chosen');
-  return bits.join(' · ');
-}
-function owning(){return A.tenure==='own'}
-function renting(){return A.tenure==='rent'}
-function categoryShown(c){
-  if(c.id==='monthly-sum')return false;
-  if(c.hiddenFor==='rent'&&renting())return false;
-  return true;
-}
-function activeTenure(){
-  if(A.tenure==='rent'||A.tenure==='own')return A.tenure;
+function placePhrase(found){
+  if(!found||!isSourced(found.figure)) return '';
+  const keys=found.keys||{};
+  if(found.level==='metro value') return keys.cbsaName||'';
+  if(found.level==='county value') return keys.countyName||'';
+  if(found.level==='state value') return keys.state||'';
+  if(found.level==='ZIP value') return keys.zip?'ZIP '+keys.zip:'';
   return '';
 }
-function figureFor(areaId,categoryId,componentId,tenure){
-  const rows=bundle.figures.filter(f=>f.areaId===areaId&&f.categoryId===categoryId&&(f.componentId||null)===(componentId||null));
-  return CostLookup.figureMatch(rows,tenure==null?activeTenure():tenure);
+function gulfAreas(){
+  return (bundle.areas||[]).map(area=>{
+    const figure=bundle.figures.find(f=>f.areaId===area.id&&f.categoryId==='price-index'&&(f.componentId||null)===null&&isSourced(f));
+    return figure?{id:area.id,name:area.name,value:figure.value,display:figure.display,figure}:null;
+  }).filter(Boolean).sort((a,b)=>a.value-b.value||a.name.localeCompare(b.name));
 }
-function readerLookup(categoryId,componentId){
-  return CostLookup.lookup(bundle,A.zip,categoryId,componentId);
+function areaFigure(areaId, componentId){
+  return bundle.figures.find(f=>f.areaId===areaId&&f.categoryId==='price-index'&&(f.componentId||null)===(componentId||null)&&isSourced(f))||null;
 }
-function readerContext(){
-  const found=readerLookup('groceries');
-  return {keys:found.keys,level:found.level};
+function joinNames(names){
+  if(names.length<=1) return names[0]||'';
+  if(names.length===2) return names[0]+' and '+names[1];
+  return names.slice(0,-1).join(', ')+', and '+names[names.length-1];
 }
-function dateNote(figure){
-  if(!figure)return '';
-  const asOf=figure.asOf?'As of '+figure.asOf:'As-of not chosen';
-  const got=figure.retrieved?'Retrieved '+figure.retrieved:'Retrieved not chosen';
-  return '<span class="cellNote">'+esc(asOf)+'</span><span class="cellNote">'+esc(got)+'</span>';
+function comparisonSentence(reader, areas){
+  if(!reader||!areas.length) return '';
+  const lowest=areas[0].value;
+  const best=areas.filter(area=>area.value===lowest);
+  const gulf=best[0].value;
+  const home=reader.value;
+  if(!home) return '';
+  const pct=Math.round(Math.abs(gulf-home)/home*100);
+  const where=joinNames(best.map(area=>area.name));
+  const homeName=reader.name;
+  if(pct===0) return 'Living in '+where+' costs about the same as '+homeName+'.';
+  const word=gulf>home?'more':'less';
+  return 'Living in '+where+' costs about '+pct+'% '+word+' than '+homeName+'.';
 }
-function cellBody(figure,level){
-  if(!figure)return '<strong>Not available</strong>'+(level?'<span class="level">Level used: '+esc(level)+'</span>':'');
-  const label=CostLookup.linkText(figure);
-  const link=label?'<a href="'+esc(figure.url)+'">'+esc(label)+'</a>':'';
-  const levelNote=level?'<span class="level">Level used: '+esc(level)+'</span>':'';
-  return '<strong>'+esc(figure.display)+'</strong>'+levelNote+dateNote(figure)+(link?'<span class="cellNote">'+link+'</span>':'');
+function cellText(figure){
+  return figure?esc(figure.display):'\u2014';
 }
-function readerCell(categoryId,componentId){
-  const found=readerLookup(categoryId,componentId);
-  if(categoryId==='insurance-flood'){
-    const sample=bundle.figures.find(f=>f.categoryId==='insurance-flood');
-    return '<td class="readerCol">'+cellBody(sample,found.level)+'</td>';
+function censusCredit(){
+  const source=((bundle.crosswalk&&bundle.crosswalk.sources)||[])[0];
+  if(!source) return '';
+  const label=source.url?'<a href="'+esc(source.url)+'">'+esc(source.name)+'</a>':esc(source.name);
+  return '<p class="credit">ZIP lookup: '+label+'.</p>';
+}
+function drawResults(){
+  const readerHit=readerFigure(null);
+  const reader=isSourced(readerHit.figure)?{name:placePhrase(readerHit)||'your area',value:readerHit.figure.value,display:readerHit.figure.display,figure:readerHit.figure}:null;
+  const areas=gulfAreas();
+  const lowest=areas.length?areas[0].value:null;
+  const columns=[{id:'reader',name:'Your area',best:false,reader:true}].concat(areas.map(area=>({id:area.id,name:area.name,best:area.value===lowest,reader:false,value:area.value})));
+  const category=(bundle.categories||[]).find(c=>c.id==='price-index');
+  const parts=[{id:null,label:'Price index'}].concat((category&&category.components)||[]).filter(part=>{
+    const readerPart=part.id?readerFigure(part.id).figure:readerHit.figure;
+    if(isSourced(readerPart)) return true;
+    return areas.some(area=>areaFigure(area.id,part.id));
+  });
+  function figureFor(column, part){
+    if(column.reader) return isSourced(part.id?readerFigure(part.id).figure:readerHit.figure)?(part.id?readerFigure(part.id).figure:readerHit.figure):null;
+    return areaFigure(column.id, part.id);
   }
-  if(componentId==='internet')return '<td class="readerCol"><strong>not estimated</strong><span class="level">Level used: '+esc(found.level)+'</span></td>';
-  if(categoryId==='state-income-tax'){
-    const text=A.incomeKind&&A.incomeKind!=='skip'?'PLACEHOLDER':'Rate structure not loaded';
-    return '<td class="readerCol"><strong>'+text+'</strong><span class="level">Level used: '+esc(found.level)+'</span><span class="cellNote">Stays in this browser. Not saved.</span></td>';
-  }
-  return '<td class="readerCol">'+cellBody(found.figure,found.level)+'</td>';
-}
-function gulfCell(area,categoryId,componentId,tenure){
-  return '<td>'+cellBody(figureFor(area.id,categoryId,componentId,tenure))+'</td>';
-}
-function tableRows(){
-  const tenure=activeTenure();
-  const rows=[];
-  bundle.categories.filter(categoryShown).forEach(c=>{
-    if(c.id==='housing')CostLookup.housingTenures(tenure).forEach(t=>rows.push({category:c,tenure:t}));
-    else rows.push({category:c,tenure});
-  });
-  return rows;
-}
-function splitRows(columns, category){
-  return (category.components||[]).map(component=>'<tr class="splitChild" data-split="'+esc(category.id)+'"><th class="row" scope="row">'+esc(component.label)+'</th>'+columns.map(area=>area.id==='reader'?readerCell(category.id,component.id):gulfCell(area,category.id,component.id,activeTenure())).join('')+'</tr>').join('');
-}
-function indexHeadline(){
-  const names={35840:'North Port-Bradenton-Sarasota',45300:'Tampa-St. Petersburg-Clearwater'};
-  const bits=['35840','45300'].map(id=>{
-    const fig=bundle.figures.find(f=>f.categoryId==='price-index'&&(f.componentId||null)===null&&f.geoId===id&&typeof f.value==='number');
-    return fig?names[id]+' '+fig.display:'';
-  }).filter(Boolean);
-  return bits.join(' · ')||'PLACEHOLDER';
-}
-function sumParts(){
-  const tenure=activeTenure();
-  if(tenure!=='rent'&&tenure!=='own')return null;
-  const parts=[];
-  bundle.categories.forEach(c=>{
-    if(!c.inMonthlySum)return;
-    if(c.hiddenFor==='rent'&&tenure==='rent')return;
-    parts.push(figureFor('manatee',c.id,null,c.id==='housing'?tenure:tenure));
-  });
-  return CostLookup.sumMonthly(parts);
-}
-function compare(){
-  const columns=[{id:'reader',name:'Your current area'}].concat(bundle.areas);
-  const lines=tableRows();
-  const ctx=readerContext();
-  const range=(bundle.asOfRange&&bundle.asOfRange.label)||'As-of range: not chosen yet';
-  const incomeLine=A.incomeKind&&A.incomeKind!=='skip'?'PLACEHOLDER':'Not shown. Income was not entered.';
-  const sumNames=lines.filter(line=>line.category.inMonthlySum).map(line=>CostLookup.rowLabel(line.category,line.tenure));
-  const summed=sumParts();
-  const sumText=bundle.status==='DESIGN_PREVIEW'||summed==null?'PLACEHOLDER':String(summed);
-  const bothHousing=activeTenure()!=='rent'&&activeTenure()!=='own';
-  const sumNote='Sum of non-overlapping rows only: '+sumNames.join(', ')+'. Annual amounts, such as home insurance and property tax, are divided by 12 before they are added. Flood insurance is not in the sum. State income tax is below it.'+(bothHousing?' Both rent and own housing are shown, so they are not added together.':'');
-  let caption='Your area is looked up ZIP, then county, then metro, then state.';
-  if(ctx.keys&&ctx.keys.sample)caption+=' Sample chain: ZIP '+ctx.keys.zip+', county '+ctx.keys.county+', metro '+ctx.keys.cbsa+', state '+ctx.keys.state+'.';
-  caption+=' Level used: '+ctx.level+'. The price index is BEA Regional Price Parities for 2024, U.S. = 100. Other categories are still placeholders. North Port is its own column.';
-  const levelSpan='<span class="level">Level used: '+esc(ctx.level)+'</span>';
-  const head='<tr><th scope="col">Category</th>'+columns.map(a=>'<th scope="col">'+esc(a.name)+(a.id==='reader'?levelSpan:'')+'</th>').join('')+'</tr>';
-  let rows='';
-  lines.forEach(line=>{
-    const c=line.category;
-    const tax=c.id==='state-income-tax'?' class="totalRow"':'';
-    const toggle=(c.components&&c.components.length)?' <button type="button" class="back" data-split-toggle="'+esc(c.id)+'" aria-expanded="true">Hide the split</button>':'';
-    const label=CostLookup.rowLabel(c,line.tenure);
-    rows+='<tr'+tax+'><th class="row" scope="row">'+esc(label)+toggle+'</th>'+columns.map(a=>a.id==='reader'?readerCell(c.id):gulfCell(a,c.id,null,line.tenure)).join('')+'</tr>';
-    if(c.components&&c.components.length)rows+=splitRows(columns,c);
-  });
-  const cards=columns.map(area=>{
-    const bits=lines.map(line=>{
-      const c=line.category;
-      const body=area.id==='reader'?readerCell(c.id):gulfCell(area,c.id,null,line.tenure);
-      let extra='';
-      if(c.components&&c.components.length)extra='<details open><summary>'+esc(c.components.map(component=>component.label).join(', '))+'</summary>'+c.components.map(component=>{
-        const inner=area.id==='reader'?readerCell(c.id,component.id):gulfCell(area,c.id,component.id,line.tenure);
-        return '<div><dt>'+esc(component.label)+'</dt><dd>'+inner.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>';
-      }).join('')+'</details>';
-      return '<div><dt>'+esc(CostLookup.rowLabel(c,line.tenure))+'</dt><dd>'+body.replace(/^<td[^>]*>|<\/td>$/g,'')+'</dd></div>'+extra;
-    }).join('');
-    return '<article class="areaCard'+(area.id==='reader'?' reader':'')+'"><h3>'+esc(area.name)+(area.id==='reader'?levelSpan:'')+'</h3><dl>'+bits+'</dl></article>';
+  const head='<tr><th scope="col"><span class="sr">Category</span></th>'+columns.map(column=>'<th scope="col" class="'+(column.reader?'yours':column.best?'best':'')+'">'+esc(column.name)+(column.best?'<span class="tag">Best value</span>':'')+'</th>').join('')+'</tr>';
+  const body=parts.map(part=>'<tr><th scope="row">'+esc(part.label)+'</th>'+columns.map(column=>'<td class="'+(column.reader?'yours':column.best?'best':'')+'">'+cellText(figureFor(column,part))+'</td>').join('')+'</tr>').join('');
+  const cards=columns.map(column=>{
+    const metrics=parts.map(part=>'<div class="metric"><span>'+esc(part.label)+'</span><b>'+cellText(figureFor(column,part))+'</b></div>').join('');
+    return '<article class="areaCard'+(column.reader?' yours':column.best?' best':'')+'"><h3>'+esc(column.name)+(column.best?' <span class="tag">Best value</span>':'')+'</h3>'+metrics+'</article>';
   }).join('');
-  const steps=(bundle.signOff||[]).map(s=>'<li>'+esc(s)+'</li>').join('');
-  const eyebrow=bundle.status==='SOURCED'?'BEA price index, 2024':'Design preview';
-  panel.innerHTML='<div class="hero" style="max-width:none"><p class="eyebrow">'+esc(eyebrow)+'</p><h2>Side by side</h2><p class="asOfRange">'+esc(range)+'</p><p class="answers">'+esc(answerLine())+'</p><div class="headlines"><div class="headline"><span>Price index, U.S. = 100</span><strong class="indexLine">'+esc(indexHeadline())+'</strong></div><div class="headline"><span>Equivalent income</span><strong>'+esc(incomeLine)+'</strong></div></div><p class="separate">The price index and the equivalent income stay together. They are not added to the monthly sum.</p><div class="sumBox"><span>Your monthly costs</span><strong>'+esc(sumText)+'</strong><p class="separate">'+esc(sumNote)+'</p></div></div><div class="tableWrap" id="compareTable"><table><caption>'+esc(caption)+'</caption><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div>'+actions('tenure','<button type="button" class="secondary" id="againBtn">Start over</button>')+'<details><summary>How a placeholder becomes a figure</summary><ol>'+steps+'</ol></details>';
-  bindBack('tenure');
-  document.getElementById('againBtn').onclick=()=>{A.zip=A.city=A.household=A.incomeKind=A.amount=A.tenure='';go('intro')};
-  panel.querySelectorAll('[data-split-toggle]').forEach(btn=>{
-    btn.onclick=()=>{
-      const id=btn.getAttribute('data-split-toggle');
-      const open=btn.getAttribute('aria-expanded')==='true';
-      btn.setAttribute('aria-expanded',open?'false':'true');
-      btn.textContent=open?'Show the split':'Hide the split';
-      panel.querySelectorAll('[data-split="'+id+'"]').forEach(row=>{row.hidden=open});
-    };
-  });
-  layoutCompare();
+  const sentence=reader?comparisonSentence(reader,areas):'';
+  const headline=sentence?'<h2 class="compareHeadline">'+esc(sentence)+'</h2>':'<h2 class="compareHeadline">Your Gulf Coast comparison</h2>';
+  panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'</div><div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Price index comparison. U.S. average is 100.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div><section class="ctaBand"><img class="ctaLogo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">'+bookingLink()+'</section></div>';
+  document.getElementById('backBtn').onclick=()=>go('tenure');
+  layoutResults();
 }
-function layoutCompare(){
+function layoutResults(){
+  const mobile=window.matchMedia('(max-width: 799px)').matches;
   const table=document.getElementById('compareTable');
   const cards=document.getElementById('compareCards');
-  if(!table||!cards)return;
-  const narrow=window.matchMedia('(max-width: 800px)').matches;
-  table.hidden=narrow;
-  cards.hidden=!narrow;
+  if(table) table.hidden=mobile;
+  if(cards) cards.hidden=!mobile;
 }
-window.addEventListener('resize',layoutCompare);
-window.addEventListener('popstate',()=>render(location.hash.replace('#','')||'intro'));
-
-fetch('cost-of-living.json').then(r=>{if(!r.ok)throw new Error('bundle');return r.json()}).then(data=>{
+window.addEventListener('resize',layoutResults);
+window.addEventListener('popstate',()=>{
+  const step=(location.hash||'#from').replace('#','');
+  render(STEPS.includes(step)?step:'from');
+});
+fetch('cost-of-living.json').then(r=>{if(!r.ok) throw new Error('bundle');return r.json()}).then(data=>{
   bundle=data;
-  const step=location.hash.replace('#','');
-  render(STEPS.includes(step)?step:'intro');
+  if(!bundle.crosswalk.zips) bundle.crosswalk.zips=[];
+  const step=(location.hash||'#from').replace('#','');
+  render(STEPS.includes(step)?step:'from');
 }).catch(()=>{
-  panel.innerHTML='<h2>The preview could not load its placeholder file.</h2><p>cost-of-living.json needs to sit next to this page.</p>';
+  panel.innerHTML='<article class="sheet"><h2>The comparison could not load</h2><p>Refresh the page.</p></article>';
 });
 </script>
 </body>
