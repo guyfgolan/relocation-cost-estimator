@@ -203,7 +203,9 @@ throws(function () { checkFactors(nameless); }, 'factor missing source health');
 
 const page = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 assert.strictEqual(page.indexOf('8GQc'), -1);
-assert.strictEqual(page.indexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'), page.lastIndexOf('https://calendar.app.google/5xtMmGSY9kCY5NRk7'));
-assert.ok(page.indexOf("const BOOKING_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7'") > 0);
+const booking = 'https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+assert.strictEqual(page.split(booking).length - 1, 2);
+assert.ok(page.indexOf("const BOOKING_URL='" + booking + "'") > 0);
+assert.ok(page.indexOf('href="' + booking + '"') > 0);
 
 console.log('cost-of-living formula checks passed');
