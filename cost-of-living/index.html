@@ -113,6 +113,17 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
 </style>
+<!-- Google tag (gtag.js), GA4 G-CF6TKV3NLK. Not loaded on localhost or file:// so local tests never reach Guy's analytics. -->
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+(function(){
+  if(/^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname))return;
+  var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-CF6TKV3NLK';document.head.appendChild(s);
+  gtag('js',new Date());
+  gtag('config','G-CF6TKV3NLK',{linker:{domains:['guyfgolan.github.io','floridagulfcoastguide.com']}});
+})();
+</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -130,6 +141,8 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 <script src="estimate.js"></script>
 <script>
 const BOOKING_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+function track(n,p={}){if(typeof window.gtag==='function')window.gtag('event',n,Object.assign({page_location:location.href,transport_type:'beacon'},p))}
+document.addEventListener('click',function(e){const a=e.target&&e.target.closest?e.target.closest('a[href*="calendar.app.google/"]'):null;if(a)track('book_call',{link_url:a.href,link_text:(a.textContent||'').trim(),tool:'cost_of_living'})});
 const STEPS=['from','to','household','income','now','plan','drive','other','results'];
 const QUESTIONS=[
   {id:'from',title:'Where are you moving from?'},
@@ -551,6 +564,7 @@ function drawResults(){
   panel.innerHTML='<div class="resultsWrap"><div class="headlineBand">'+headline+'</div><article class="sheet"><p class="route">'+esc(originPlace(keys))+' \u2192 '+esc(floridaPlace(area))+'</p><p>Household: '+esc(householdLabel())+'.</p><p>Income: '+esc(band?band.label:'')+'. '+esc(midpointCopy(band))+'</p><p>'+esc(filing)+'</p>'+evNote+'<div class="tableWrap" id="compareTable"><table class="compare"><caption class="sr">Monthly cost comparison. A positive difference costs more in Florida.</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div><div class="cards" id="compareCards">'+cards+'</div><p class="note">A positive difference means that line costs more in Florida.</p>'+total+notes+(sourceList?'<p class="sources">Sources: '+sourceList+'.</p>':'')+'<p class="credit">Source: U.S. Bureau of Economic Analysis, Regional Price Parities 2024.</p>'+censusCredit()+'<div class="stepBar"><button type="button" class="secondary" id="backBtn">Back</button></div></article><section class="ctaBand"><p>'+esc(REPORT)+'</p>'+bookingLink()+'</section></div>';
   document.getElementById('backBtn').onclick=()=>go('other');
   layoutResults();
+  track('cost_of_living_complete',{area:A.to});
 }
 function layoutResults(){
   const mobile=window.matchMedia('(max-width: 799px)').matches;

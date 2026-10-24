@@ -1,5 +1,16 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Moving Cost Estimator | Florida Gulf Coast Guide</title>
+<!-- Google tag (gtag.js), GA4 G-CF6TKV3NLK. Not loaded on localhost or file:// so local tests never reach Guy's analytics. -->
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+(function(){
+  if(/^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname))return;
+  var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-CF6TKV3NLK';document.head.appendChild(s);
+  gtag('js',new Date());
+  gtag('config','G-CF6TKV3NLK',{linker:{domains:['guyfgolan.github.io','floridagulfcoastguide.com']}});
+})();
+</script>
 <style>
 :root{--navy:#0d2235;--navy2:#16364e;--gold:#c7a25a;--cream:#f7f3eb;--white:#fff;--ink:#15202b;--muted:#64707a;--card:rgba(10,28,43,.78)}
 *{box-sizing:border-box}
@@ -82,7 +93,7 @@ const IMG={intro:'assets/intro.jpg',from:'assets/from.jpg',to:'assets/to.jpg',wh
 const STEP_IMG={fromMethod:'from',fromState:'from',fromCity:'from',fromZip:'from',to:'to',when:'when',type:'type',size:'bedrooms',help:'help',packing:'packing',veh:'vehicle',vehHow:'vehicle',travel:'travel',adults:'travel',licenses:'travel',storage:'packing'};
 let D=null,P=null,Z=null,A={},stack=[],pendingAnnounce='';
 const panel=document.getElementById('panel'),bg=document.getElementById('bg'),pw=document.getElementById('progressWrap'),pt=document.getElementById('progressText'),pb=document.getElementById('progressBar'),progress=document.getElementById('progress');
-function track(n,p={}){if(typeof window.gtag==='function')window.gtag('event',n,p)}
+function track(n,p={}){if(n==='booking_button_click'){n='book_call';p=Object.assign({link_url:BOOK_URL,tool:'moving_estimator'},p)}if(typeof window.gtag==='function')window.gtag('event',n,Object.assign({page_location:location.href,transport_type:'beacon'},p))}
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function setBg(k){bg.style.backgroundImage=`url("${IMG[k]||IMG.intro}")`}
 function toggleCredits(){const panel=document.getElementById('creditsPanel'),btn=document.getElementById('creditsBtn');panel.hidden=!panel.hidden;btn.setAttribute('aria-expanded',panel.hidden?'false':'true')}
