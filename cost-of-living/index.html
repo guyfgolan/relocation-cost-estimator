@@ -92,7 +92,9 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .siteFooter{padding:22px 16px 28px}
 .siteFooter p{margin:0 0 6px}
 .siteFooter a{color:var(--white)}
-.expLogo{width:min(148px,46vw);height:auto;display:block;margin:10px auto 12px;background:none;border:0}
+.siteFooter .broker{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:1.05rem;letter-spacing:.08em;margin:0 0 8px}
+.siteFooter .contact{white-space:nowrap;font-size:clamp(.78rem,3.6vw,1rem)}
+.expLogo{height:20px;width:auto;display:inline-block;margin:0;background:none;border:0}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 :focus:not(:focus-visible){outline:none}
 :focus-visible{outline:2px solid var(--navy);outline-offset:2px;box-shadow:0 0 0 2px var(--gold)}
@@ -118,9 +120,8 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 </header>
 <main id="main"><div id="panel"></div></main>
 <footer class="siteFooter">
-<p>Guy Golan</p>
-<img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty">
-<p><a href="tel:+13019196726">301-919-6726</a></p>
+<p class="broker"><span>Guy Golan · REALTOR<sup>®</sup></span> <img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty"></p>
+<p class="contact"><a href="tel:+13019196726">301-919-6726</a> &nbsp;|&nbsp; <a href="mailto:guy@floridagulfcoastguide.com">guy@floridagulfcoastguide.com</a></p>
 <p><a href="../">Moving cost estimator</a></p>
 </footer>
 <script src="lookup.js"></script>
