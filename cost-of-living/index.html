@@ -291,7 +291,7 @@ function showStep(id){
     if(floodReady) fields+='<label class="check"><input id="floodToggle" type="checkbox"'+(floodOn?' checked':'')+'>Include flood insurance estimate</label><p class="help">Flood coverage may be required by your lender depending on the property\'s flood zone.</p>';
   }
   const optional=id==='other'?' <span class="quiet">(optional)</span>':'';
-  panel.innerHTML='<article class="sheet">'+progress(n)+'<h2>'+esc(q.title)+optional+'</h2><p>'+esc(FRAMING)+'</p>'+fields+'<p class="status" id="formStatus" role="status"></p>'+stepBar(n)+'</article>';
+  panel.innerHTML='<article class="sheet">'+progress(n)+'<h2>'+esc(q.title)+optional+'</h2>'+fields+'<p class="status" id="formStatus" role="status"></p>'+stepBar(n)+'</article>';
   document.getElementById('backBtn').onclick=()=>{if(n>1){saveStep(id);go(QUESTIONS[n-2].id)}};
   document.getElementById('nextBtn').onclick=()=>advance(id,n);
   panel.querySelectorAll('.option').forEach(btn=>{
