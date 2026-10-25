@@ -791,12 +791,9 @@
     return nights + 0.5;
   }
 
+  // The only copy of the static not-included line. Results and the email both use it.
   function staticNotIncluded() {
-    return [
-      'Utility and rental deposits',
-      'Closing costs',
-      'Tips'
-    ];
+    return 'Does not include tips, refundable deposits, or home closing costs.';
   }
 
   function packKey(spec) {
@@ -1100,7 +1097,8 @@
         dist: null,
         lines: [],
         included: [],
-        notIncluded: ['Ocean shipping is not modeled, so no drive price is shown.'].concat(staticNotIncluded()),
+        notIncluded: ['Ocean shipping is not modeled, so no drive price is shown.'],
+        notIncludedNote: staticNotIncluded(),
         subtotals: { moving: null, fees: null },
         total: null,
         inFL: false,
@@ -1529,7 +1527,7 @@
     const mode = coreOk ? 'estimate' : 'insufficient';
     const total = mode === 'estimate' ? sumCents(lines) : null;
     const included = lines.filter(l => l.display === 'money').map(l => l.label);
-    const notIncluded = lines.filter(l => l.display === 'not-included').map(l => l.label).concat(staticNotIncluded());
+    const notIncluded = lines.filter(l => l.display === 'not-included').map(l => l.label);
     return {
       mode,
       quoteReason: '',
@@ -1538,6 +1536,7 @@
       lines,
       included,
       notIncluded,
+      notIncludedNote: staticNotIncluded(),
       subtotals: { moving: mode === 'estimate' ? movingSub : null, fees: feeSub },
       total,
       inFL,

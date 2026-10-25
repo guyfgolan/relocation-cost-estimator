@@ -303,6 +303,8 @@ const shipped = estimateMove(Object.assign({}, base, {
 const shipLine = shipped.lines.find(l => l.id === 'ship');
 assert(shipLine.display === 'money' && shipLine.typ > 0, 'shipping is priced per vehicle');
 assert(shipped.notIncluded.includes('Full-value protection'), 'full-value protection listed');
+assert(shipped.notIncludedNote === 'Does not include tips, refundable deposits, or home closing costs.', 'static not-included line');
+assert(!shipped.notIncluded.includes(shipped.notIncludedNote), 'the static line is not a bullet');
 assert(!shipped.lines.some(l => /60¢|60 cents/.test(l.label)), 'no $0 valuation line');
 
 // GSA lodging and meals are on a real drive
