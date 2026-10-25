@@ -1318,7 +1318,11 @@
       lines.push(Object.assign(missing('Meals on the road', 'moving', D.meals, 'Meals are priced only when lodging is. Not sure is not treated as a drive.'), { id: 'meals' }));
     }
 
-    if (A.travel === 'Driving') lines.push(Object.assign(chosen(D, 'Airfare', 'You chose to drive, so airfare is not included.'), { id: 'airfare' }));
+    if (A.travel === 'Driving') {
+      const autoFlorida = origin && origin.state === 'Florida' && (A.travelAuto === true || A.travelAuto === 'true');
+      const driveNote = autoFlorida ? 'Florida starts are priced as driving.' : 'You chose to drive, so airfare is not included.';
+      lines.push(Object.assign(chosen(D, 'Airfare', driveNote), { id: 'airfare' }));
+    }
     else if (flying && origin && origin.state === 'Florida') {
       lines.push(line({
         id: 'airfare',
