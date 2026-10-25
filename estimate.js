@@ -94,7 +94,7 @@
     if (house) {
       if (type === 'Single-story house' || type === 'Multi-story house') notes.push('Number of stories is not priced separately in the cited table.');
       if (beds <= 1) {
-        notes.push('A 1-bedroom house is not its own HireAHelper row. The 1-bedroom apartment row is used, the same size class as the full-service Studio/1BR cell.');
+        notes.push('A 1-bedroom house is not its own HireAHelper row. The 1-bedroom apartment row is used, the same size class as the full-service Studio/1BR cell. No cited table prices a 1-bedroom house separately from a 1-bedroom apartment.');
         return { idx: 0, notes };
       }
       if (beds === 2) return { idx: 2, notes };
@@ -191,9 +191,11 @@
       if (hi < typ) hi = typ;
       if (prev) {
         if (typ <= prev.typ) typ = prev.typ + 1;
-        if (lo < prev.lo) lo = prev.lo;
+        if (lo <= prev.lo) lo = prev.lo + 1;
         if (hi <= prev.hi) hi = prev.hi + 1;
-        if (lo > typ) lo = typ;
+        if (lo > typ) typ = lo;
+        if (hi < typ) hi = typ;
+        if (typ <= prev.typ) typ = prev.typ + 1;
         if (hi < typ) hi = typ;
       }
       prev = { lo, typ, hi };
@@ -363,6 +365,13 @@
     if (season.factor !== 1) {
       lo *= season.factor;
       typ *= season.factor;
+    }
+    if (key === '5br') {
+      const four = cmrAt(D, '4br', type, road, when);
+      const ratio = model(D).ratios;
+      if (!(lo > four.lo)) lo = four.lo * ratio.fiveLoR;
+      if (!(typ > four.typ)) typ = four.typ * ratio.fiveTypR;
+      if (!(hi > four.hi)) hi = four.hi * ratio.fiveHiR;
     }
     const priced = order3({ lo, typ, hi });
     priced.period = col.period;
@@ -592,7 +601,8 @@
       text = `Long-distance price interpolated between the published band midpoints at 300, 750, 1,250, 1,750, and 2,250 miles. ${milesLabel(road)}.`;
     }
     if (cell && cell.limited) text += ' A limited-sample cell on this span is widened (low × 0.75, high × 1.25) and then held so a longer move is not cheaper. That width is this estimator\'s allowance.';
-    if (cell && cell.period && cell.period !== D.movers.asOf) text += ` A cell on this span still covers ${cell.period}; a newer figure was not in the CMR table when it was checked.`;
+    if (cell && cell.period && String(cell.period).indexOf('2022') >= 0) text += ` Dated cell: ${cell.period}. A newer figure for that band was not in the CMR table when it was checked.`;
+    else if (cell && cell.period && cell.period !== D.movers.asOf) text += ` A cell on this span still covers ${cell.period}; a newer figure was not in the CMR table when it was checked.`;
     if (cell && cell.highRatio > 1) text += ' High is scaled so the 949-mile anchor matches the higher published route high.';
     if (cell && cell.season) text += ' ' + seasonText(D, cell.season, true);
     return text;
@@ -765,34 +775,113 @@
     };
   }
 
-  function shipOpen(D, miles) {
-    const pairs = D.ship.pairs;
-    let rr;
-    if (miles <= pairs[0].miles) {
-      const s = pairs[0].miles ? miles / pairs[0].miles : 0;
-      rr = { lo: pairs[0].lo * s, hi: pairs[0].hi * s };
-    } else if (miles >= pairs[pairs.length - 1].miles) {
-      const last = pairs[pairs.length - 1];
-      const s = miles / last.miles;
-      rr = { lo: last.lo * s, hi: last.hi * s };
-    } else {
-      rr = { lo: pairs[0].lo, hi: pairs[0].hi };
-      for (let i = 0; i < pairs.length - 1; i++) {
-        if (miles <= pairs[i + 1].miles) {
-          const t = (miles - pairs[i].miles) / (pairs[i + 1].miles - pairs[i].miles);
-          rr = { lo: lerp(pairs[i].lo, pairs[i + 1].lo, t), hi: lerp(pairs[i].hi, pairs[i + 1].hi, t) };
-          break;
-        }
+  function monoKnots(pairs, key) {
+    const knots = [];
+    let water = -Infinity;
+    pairs.forEach((pair, i) => {
+      const m = pair.miles;
+      const v = pair[key];
+      if (!i) {
+        water = v;
+        knots.push({ m, v: water });
+        return;
+      }
+      const prev = pairs[i - 1];
+      const v0 = prev[key];
+      if (v0 < water && v > water) {
+        const t = (water - v0) / (v - v0);
+        knots.push({ m: prev.miles + t * (m - prev.miles), v: water });
+        water = v;
+        knots.push({ m, v: water });
+        return;
+      }
+      water = Math.max(water, v);
+      knots.push({ m, v: water });
+    });
+    return knots;
+  }
+
+  function interpKnots(knots, miles) {
+    if (miles <= knots[0].m) return knots[0].v;
+    const last = knots[knots.length - 1];
+    if (miles >= last.m) return last.v;
+    for (let i = 0; i < knots.length - 1; i++) {
+      if (miles <= knots[i + 1].m) {
+        const span = knots[i + 1].m - knots[i].m;
+        const t = span ? (miles - knots[i].m) / span : 0;
+        return lerp(knots[i].v, knots[i + 1].v, t);
       }
     }
+    return last.v;
+  }
+
+  function shipCurve(D) {
+    const cached = model(D);
+    if (cached.ship) return cached.ship;
+    const pairs = D.ship.pairs.slice().sort((a, b) => a.miles - b.miles);
+    const loK = monoKnots(pairs, 'lo');
+    const hiK = monoKnots(pairs, 'hi');
+    const floorM = pairs[0].miles;
+    const ceilM = pairs[pairs.length - 1].miles;
+    const long = D.ship.longHaul;
     const fw = D.ship.freightwaves;
-    const scale = fw.miles ? miles / fw.miles : 0;
-    const lo = Math.min(rr.lo, fw.lo * scale);
-    const hi = Math.max(rr.hi, fw.hi * scale);
-    let typ = D.ship.corridor.average * (miles / D.ship.corridor.miles);
-    if (typ < lo) typ = lo;
-    if (typ > hi) typ = hi;
-    return order3({ lo, typ, hi });
+    function at(miles) {
+      const clamped = Math.max(floorM, Math.min(miles, ceilM));
+      const scale = fw.miles ? clamped / fw.miles : 0;
+      let lo = Math.min(interpKnots(loK, clamped), fw.lo * scale);
+      let hi = Math.max(interpKnots(hiK, clamped), fw.hi * scale);
+      let typ = D.ship.corridor.average * (clamped / D.ship.corridor.miles);
+      if (miles > ceilM && long) {
+        const destLo = Math.max(lo, long.lo);
+        const destTyp = Math.max(typ, long.typ);
+        const destHi = Math.max(hi, long.hi);
+        if (miles >= long.miles) {
+          lo = destLo;
+          typ = destTyp;
+          hi = destHi;
+        } else {
+          const t = (miles - ceilM) / (long.miles - ceilM);
+          lo = lerp(lo, destLo, t);
+          typ = lerp(typ, destTyp, t);
+          hi = lerp(hi, destHi, t);
+        }
+      }
+      if (lo > typ) typ = lo;
+      if (hi < typ) hi = typ;
+      return { lo, typ, hi };
+    }
+    const N = 4001;
+    const lo = new Float64Array(N);
+    const typ = new Float64Array(N);
+    const hi = new Float64Array(N);
+    let prev = null;
+    for (let m = 0; m < N; m++) {
+      const v = at(m);
+      if (prev) {
+        v.lo = Math.max(v.lo, prev.lo);
+        v.typ = Math.max(v.typ, prev.typ, v.lo);
+        v.hi = Math.max(v.hi, prev.hi, v.typ);
+      }
+      lo[m] = v.lo;
+      typ[m] = v.typ;
+      hi[m] = v.hi;
+      prev = v;
+    }
+    cached.ship = { lo, typ, hi, max: N - 1, floorM, ceilM };
+    return cached.ship;
+  }
+
+  function shipOpen(D, miles) {
+    const curve = shipCurve(D);
+    const m = Math.max(0, Number(miles) || 0);
+    if (m >= curve.max) return { lo: curve.lo[curve.max], typ: curve.typ[curve.max], hi: curve.hi[curve.max] };
+    const i = Math.floor(m);
+    const t = m - i;
+    return order3({
+      lo: lerp(curve.lo[i], curve.lo[i + 1], t),
+      typ: lerp(curve.typ[i], curve.typ[i + 1], t),
+      hi: lerp(curve.hi[i], curve.hi[i + 1], t)
+    });
   }
 
   function applyShipOptions(D, base, answers) {
@@ -1004,8 +1093,8 @@
         id: 'ship',
         label: `Vehicle shipping × ${vehicles}`,
         lo: priced.lo, typ: priced.typ, hi: priced.hi,
-        note: `Open-carrier price follows the RoadRunner Maryland-to-Florida city pairs by distance, and the high also includes the Freightwaves range scaled by miles. Typical follows the $737 corridor average over ${D.ship.corridor.miles} miles. 7 or more vehicles are priced as 7.${body}${carrier}${snow}`,
-        sources: [source(D.ship), source({ source: 'Freightwaves Checkpoint, Maryland to Florida car shipping', url: D.ship.freightwavesUrl, asOf: '2026-10-18', checked: D.ship.checked, status: 'SOURCED' })]
+        note: `Open-carrier sedan. Low and high do not fall as miles rise. Under ${D.ship.pairs[0].miles} miles, the shortest published pair is used instead of scaling toward $0. From there to ${D.ship.pairs[D.ship.pairs.length - 1].miles} miles, the Maryland-to-Florida city pairs are used and a cheaper later pair is held. Past that, the price moves to RoadRunner's 2,000-mile-and-over open band ($${D.ship.longHaul.lo.toLocaleString('en-US')}–$${D.ship.longHaul.hi.toLocaleString('en-US')}) and the $${D.ship.longHaul.typ.toLocaleString('en-US')} national average, then holds. Freightwaves $${D.ship.freightwaves.lo}–$${D.ship.freightwaves.hi} is applied only inside the city-pair span. Typical inside that span follows the $${D.ship.corridor.average} corridor average over ${D.ship.corridor.miles} miles. 7 or more vehicles are priced as 7.${body}${carrier}${snow}`,
+        sources: [source(D.ship), source({ source: 'Freightwaves Checkpoint, Maryland to Florida car shipping', url: D.ship.freightwavesUrl, asOf: '2026-10-18', checked: D.ship.checked, status: 'SOURCED' })].concat(Math.max(roadOf('lo'), roadOf('typ'), roadOf('hi')) > D.ship.pairs[D.ship.pairs.length - 1].miles ? [source(D.ship.longHaul)] : [])
       }));
     } else {
       lines.push(Object.assign(missing('Vehicle shipping', 'moving', D.unsourced.ship, vehicles == null ? 'The vehicle count or the shipping choice is not set, so shipping is not priced and is not shown as $0.' : 'Shipping needs a distance, so it is not shown as $0.'), { id: 'ship' }));
@@ -1073,16 +1162,28 @@
 
     if (A.travel === 'Driving') lines.push(Object.assign(chosen(D, 'Airfare', 'You chose to drive, so airfare is not included.'), { id: 'airfare' }));
     else if (flying) {
-      const adults = adultSpread(A, D);
       const fare = D.airfare;
-      const typ = (fare.lo + fare.hi) / 2;
+      const chosen = A.adults && A.adults !== 'Not sure' ? countOf(A.adults, 12) : null;
+      const licenses = countOf(A.licenses, 4);
+      let adults;
+      let who;
+      if (chosen != null) {
+        adults = Math.max(1, chosen);
+        who = `${adults} adult${adults === 1 ? '' : 's'} chosen on this trip.`;
+      } else if (licenses != null && licenses >= 1) {
+        adults = licenses;
+        who = `Adults were not asked on a flying trip. The price uses the ${licenses} new Florida license${licenses === 1 ? '' : 's'}.`;
+      } else {
+        adults = 1;
+        who = 'Adults were not asked on a flying trip. The price uses 1 adult.';
+      }
       lines.push(moneyLine({
         id: 'airfare',
-        label: adults.assumed ? 'Airfare (adults not chosen)' : `Airfare × ${adults.typ}`,
-        lo: fare.lo * adults.lo,
-        typ: typ * adults.typ,
-        hi: fare.hi * adults.hi,
-        note: `Estimate per adult for a one-way ticket, $${fare.lo}–$${fare.hi}, midpoint on typical. Not a quoted fare. ${adults.assumed ? 'Adults were not asked on a flying trip: low uses 1, typical 2, and high 4.' : ''}`,
+        label: `Airfare × ${adults}`,
+        lo: fare.lo * adults,
+        typ: fare.typ * adults,
+        hi: fare.hi * adults,
+        note: `Each-way fare, 2026 Q1, Washington-area airports to Tampa and Sarasota. Low $${fare.lo} is the BWI–Tampa lowest-carrier average. Typical $${fare.typ} is the passenger-weighted average of the six airport pairs. High $${fare.hi} is the BWI–Sarasota average. ${who} Not a quoted fare.`,
         sources: [source(fare)]
       }));
     } else lines.push(Object.assign(missing('Airfare', 'moving', D.unsourced.airfare, 'Airfare is priced only when you choose Flying. Not sure is not treated as a flight.'), { id: 'airfare' }));
@@ -1125,7 +1226,9 @@
         id: 'materials',
         label: 'Packing materials',
         lo: materials.lo, typ: materials.typ, hi: materials.hi,
-        note: 'Materials use the published range for this home size. Partial and full use the same materials range.',
+        note: A.packing === 'Partial'
+          ? 'No partial-packing materials price is published, so this line uses the full-pack materials range for this home size.'
+          : 'Materials use the published full-pack range for this home size.',
         sources: [source(D.packing)]
       }));
     } else {

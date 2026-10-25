@@ -154,7 +154,7 @@
  ],
  "distance": {
   "factor": 1.14,
-  "label": "Estimated road miles = great-circle miles × 1.14",
+  "label": "Estimated road miles = great-circle miles \u00d7 1.14",
   "source": "OSRM driving route divided by the great-circle distance, mean of six routes",
   "url": "https://router.project-osrm.org/",
   "asOf": "2026-10-25",
@@ -313,7 +313,7 @@
   "asOf": "Jan 2025-Sep 2026",
   "checked": "2026-10-22",
   "status": "SOURCED",
-  "caveat": "Cells marked limited sample are widened in the estimator (low × 0.75, high × 1.25) and then held so a longer move is not cheaper. The 1,500-1,999 miles / 4+ bedroom cell still covers Dec 2022-Sep 2026; the CMR CSV was not republished with a newer figure for that cell when checked 2026-10-25. Where a published longer-distance cell was below the previous band, the stored cell is held at the previous band. The published figures are in movers.published.",
+  "caveat": "Cells marked limited sample are widened in the estimator (low \u00d7 0.75, high \u00d7 1.25) and then held so a longer move is not cheaper. The 1,500-1,999 miles / 4+ bedroom cell still covers Dec 2022-Sep 2026; the CMR CSV was not republished with a newer figure for that cell when checked 2026-10-25. Where a published longer-distance cell was below the previous band, the stored cell is held at the previous band. The published figures are in movers.published.",
   "published": {
    "low": [
     [
@@ -963,9 +963,22 @@
   "asOf": "2026-10",
   "checked": "2026-10-25",
   "status": "SOURCED",
-  "measured": "Read the October 2026 RoadRunner page: corridor average $737, open range $450–$1,200, city-pair open rates listed above, SUVs and trucks add $100–$200, enclosed estimated at about 1.5× open. Freightwaves Checkpoint car-shipping page dated October 18, 2026, read the same day: $855–$1,223 for 949 miles (the September 9, 2026 page had $835–$1,375; that range was not on the page when reopened).",
+  "measured": "Read the October 2026 RoadRunner page: corridor average $737, open range $450\u2013$1,200, city-pair open rates listed above, SUVs and trucks add $100\u2013$200, enclosed estimated at about 1.5\u00d7 open. Freightwaves Checkpoint car-shipping page dated October 18, 2026, read the same day: $855\u2013$1,223 for 949 miles (the September 9, 2026 page had $835\u2013$1,375; that range was not on the page when reopened).",
   "freightwavesUrl": "https://www.freightwaves.com/checkpoint/car-shipping/maryland/florida/",
-  "caveat": "Open-carrier sedan. Low and high follow the RoadRunner city pairs by distance. The high also includes the Freightwaves Maryland-to-Florida range. Typical follows the $737 corridor average. Distances outside 751–1,097 miles are scaled from the nearest published pair. The $150 SUV typical is the midpoint of the published $100–$200 adder."
+  "caveat": "Open-carrier sedan. Low and high do not fall as miles rise. Under 751 miles the Baltimore\u2013Jacksonville pair is held, because scaling that pair down to zero is not a published short-haul rate. Inside 751\u20131,097 miles a later city pair that is cheaper is held at the earlier price. Past 1,097 miles the price moves to the 2,000+ mile open band and the $1,215 national average, then holds. Freightwaves $855\u2013$1,223 is applied only inside the city-pair span. The $150 SUV typical is the midpoint of the published $100\u2013$200 adder.",
+  "longHaul": {
+   "miles": 2000,
+   "lo": 1100,
+   "typ": 1215,
+   "hi": 1600,
+   "source": "RoadRunner car shipping calculator, 2026 national average and open-transport distance bands",
+   "url": "https://www.roadrunnerautotransport.com/car-shipping-calculator",
+   "asOf": "2026-10",
+   "checked": "2026-10-25",
+   "status": "SOURCED",
+   "measured": "Calculator page read 2026-10-25, updated October 2026: nationwide average $1,215 across thousands of shipments, median distance 987 miles, median $1.23 per mile. Open-transport bands: under 500 miles $300\u2013$500, 500\u20131,000 $500\u2013$800, 1,000\u20131,500 $700\u2013$1,000, 1,500\u20132,000 $900\u2013$1,200, 2,000+ miles $1,100\u2013$1,600. The 2,000+ band is one published bucket, so the estimator moves from the last Maryland\u2013Florida pair to that band by 2,000 miles and then holds. Typical uses the $1,215 national average, which sits inside the 2,000+ band. A separate cross-country typical was not published.",
+   "caveat": "Used only past the longest Maryland-to-Florida city pair. The $1,215 figure is the national average at a 987-mile median, not a quote for a 2,000-mile trip."
+  }
  },
  "packing": {
   "partial": {
@@ -1051,7 +1064,7 @@
   "asOf": "2026",
   "checked": "2026-10-25",
   "status": "SOURCED",
-  "measured": "Element table read 2026-10-25: studio/1-bedroom partial $150–$400, full $350–$800, materials $80–$220; 2-bedroom partial $250–$700, full $700–$1,400, materials $150–$350; 3-bedroom partial $500–$1,200, full $1,300–$2,600, materials $250–$550; 4+ partial $900–$2,000, full $2,400–$5,500, materials $400–$900. AmeriSafe partial packing $200–$500 (not split by size). moveBuddha Maryland-to-Florida full packing $520–$1,350 and materials $150–$430. The 2-bedroom row uses the lowest and highest of those published ends. Studio and 1-bedroom stay on Element's combined row. Typical is the midpoint of the published ends.",
+  "measured": "Element table read 2026-10-25: studio/1-bedroom partial $150\u2013$400, full $350\u2013$800, materials $80\u2013$220; 2-bedroom partial $250\u2013$700, full $700\u2013$1,400, materials $150\u2013$350; 3-bedroom partial $500\u2013$1,200, full $1,300\u2013$2,600, materials $250\u2013$550; 4+ partial $900\u2013$2,000, full $2,400\u2013$5,500, materials $400\u2013$900. AmeriSafe partial packing $200\u2013$500 (not split by size). moveBuddha Maryland-to-Florida full packing $520\u2013$1,350 and materials $150\u2013$430. The 2-bedroom row uses the lowest and highest of those published ends. Studio and 1-bedroom stay on Element's combined row. Typical is the midpoint of the published ends.",
   "urls": [
    "https://elementmoving.com/blog/full-vs-partial-packing-services-dallas-costs-by-home-size/",
    "https://amerisafemoving.com/packing-services-costs-liability-terms-guide/",
@@ -1068,26 +1081,31 @@
   "asOf": "2026-10",
   "checked": "2026-10-25",
   "status": "SOURCED",
-  "measured": "Add-on table: Storage-in-transit (per month) $180–$430. Typical is the midpoint.",
+  "measured": "Add-on table: Storage-in-transit (per month) $180\u2013$430. Typical is the midpoint.",
   "caveat": "Price is the monthly rate times the number of months. One month is used only when storage is selected and no month count was given."
  },
  "airfare": {
-  "lo": 80,
-  "hi": 250,
+  "lo": 139.45,
+  "typ": 256.02,
+  "hi": 310.06,
   "per": "adult",
-  "source": "Planning range for a one-way Washington-area to Tampa or Sarasota ticket. Not confirmed on a BTS or airline fare table.",
-  "url": null,
-  "asOf": "2026-10-25",
+  "source": "US DOT Consumer Airfare Report, Table 1a, 2026 Q1 each-way fares, Washington-area airports to Tampa and Sarasota",
+  "url": "https://data.transportation.gov/Aviation/Consumer-Airfare-Report-Table-1a-All-U-S-Airport-P/tfrh-tu9e",
+  "urls": [
+   "https://data.transportation.gov/resource/tfrh-tu9e.json",
+   "https://www.transportation.gov/policy/aviation-policy/air-fare-information-consumers"
+  ],
+  "asOf": "2026 Q1",
   "checked": "2026-10-25",
-  "status": "ESTIMATE",
-  "measured": "No measured fare was found for this city pair in the sources opened on 2026-10-25. BTS publishes average fares, but a Washington-to-Tampa or Sarasota one-way figure was not retrieved. The $80–$250 per adult range is shown only so a flying trip is not left blank, and it is labeled an estimate.",
-  "caveat": "Estimate per adult for a one-way ticket. Not a quoted fare. Check a current fare before you book."
+  "status": "SOURCED",
+  "measured": "Dataset tfrh-tu9e, rows updated September 3, 2026, queried 2026-10-25 for year 2026 quarter 1. DOT says these averages are each-way prices, including taxes and airport fees, excluding free tickets and bag or seat fees. Airport pairs and passengers per day: DCA\u2013TPA 1,020.26 fare $254.79 lowest-carrier $225.84; BWI\u2013TPA 959.69 fare $243.74 lowest-carrier $139.45; IAD\u2013TPA 634.72 fare $252.27 lowest-carrier $143.83; BWI\u2013SRQ 354.19 fare $310.06 lowest-carrier $208.71; DCA\u2013SRQ 221.12 fare $279.91 lowest-carrier $208.01; IAD\u2013SRQ 83.49 fare $148.28 lowest-carrier $114.80. Passenger-weighted average of those six fares is $256.02. Low is the BWI\u2013Tampa lowest-carrier average, $139.45, not rounded up to $140. High is the BWI\u2013Sarasota average, $310.06. The thinner IAD\u2013Sarasota lowest-carrier fare of $114.80 is not used as the low.",
+  "caveat": "Quarterly each-way average, not a quoted fare. On a flying trip the adult count is the number of new Florida licenses when that count is at least 1, otherwise 1. The same count is used on low, typical, and high."
  },
  "access": {
   "stairs": {
    "lo": 80,
    "hi": 400,
-   "source": "moveBuddha stair or elevator carry $80–$260; Coastal Moving Services elevator $100–$400",
+   "source": "moveBuddha stair or elevator carry $80\u2013$260; Coastal Moving Services elevator $100\u2013$400",
    "url": "https://www.movebuddha.com/popular-routes/md/fl/",
    "urls": [
     "https://www.movebuddha.com/popular-routes/md/fl/",
@@ -1096,7 +1114,7 @@
    "asOf": "2026-10",
    "checked": "2026-10-25",
    "status": "SOURCED",
-   "measured": "moveBuddha add-on table and Coastal hidden-cost table, read 2026-10-25. Low is moveBuddha's $80. High is Coastal's elevator high of $400. Typical is the midpoint of moveBuddha's $80–$260, which is $170.",
+   "measured": "moveBuddha add-on table and Coastal hidden-cost table, read 2026-10-25. Low is moveBuddha's $80. High is Coastal's elevator high of $400. Typical is the midpoint of moveBuddha's $80\u2013$260, which is $170.",
    "typ": 170
   },
   "longCarry": {
@@ -1113,14 +1131,14 @@
   "shuttle": {
    "lo": 200,
    "hi": 590,
-   "source": "moveBuddha, Maryland to Florida, shuttle service $200–$590",
+   "source": "moveBuddha, Maryland to Florida, shuttle service $200\u2013$590",
    "url": "https://www.movebuddha.com/popular-routes/md/fl/",
    "asOf": "2026-10",
    "checked": "2026-10-25",
    "status": "SOURCED",
-   "measured": "moveBuddha add-on table. Coastal publishes $200–$600. This line uses the moveBuddha route range. Typical is the midpoint, $395.",
+   "measured": "moveBuddha add-on table. Coastal publishes $200\u2013$600. This line uses the moveBuddha route range. Typical is the midpoint, $395.",
    "typ": 395,
-   "caveat": "Coastal Moving Services also publishes a shuttle of $200–$600."
+   "caveat": "Coastal Moving Services also publishes a shuttle of $200\u2013$600."
   }
  },
  "valuation": {
@@ -1129,7 +1147,7 @@
   "pctLow": 0.01,
   "pctHigh": 0.02,
   "releasedPerLb": 0.6,
-  "source": "Coastal Moving Services valuation upgrade $100–$500+; moveBuddha full-value protection 1%–2% of declared value; released value 60¢ per pound",
+  "source": "Coastal Moving Services valuation upgrade $100\u2013$500+; moveBuddha full-value protection 1%\u20132% of declared value; released value 60\u00a2 per pound",
   "url": "https://coastalmovingservices.com/budget-tips/hidden-moving-costs-how-to-save-1000-on-your-move/",
   "urls": [
    "https://coastalmovingservices.com/budget-tips/hidden-moving-costs-how-to-save-1000-on-your-move/",
@@ -1139,8 +1157,8 @@
   "asOf": "2026",
   "checked": "2026-10-25",
   "status": "SOURCED",
-  "measured": "Coastal table: Valuation Upgrade $100 to $500+. moveBuddha add-on: Full-value protection 1%–2% of declared shipment value. No declared-value table by home size was published, so the dollar line uses Coastal's range and the note states the 1%–2% rule. Typical is the midpoint, $300. Released value at 60¢ per pound is included at no charge.",
-  "caveat": "Optional. Basic released-value protection at 60¢ per pound is included at no charge. Coastal says the upgrade can be $500 or more. A $300–$800 2-bedroom inference was not used because no declared value was published."
+  "measured": "Coastal table: Valuation Upgrade $100 to $500+. moveBuddha add-on: Full-value protection 1%\u20132% of declared shipment value. No declared-value table by home size was published, so the dollar line uses Coastal's range and the note states the 1%\u20132% rule. Typical is the midpoint, $300. Released value at 60\u00a2 per pound is included at no charge.",
+  "caveat": "Optional. Basic released-value protection at 60\u00a2 per pound is included at no charge. Coastal says the upgrade can be $500 or more. A $300\u2013$800 2-bedroom inference was not used because no declared value was published."
  },
  "lodgingTax": {
   "counties": {
