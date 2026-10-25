@@ -347,6 +347,66 @@ assert(/July/.test(summer.line.note) && /\$3,412/.test(summer.line.note) && /\$2
 const oldCell = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '4 bedrooms', when: 'March 2027' }, 1600);
 assert(oldCell.line.sources.some(s => s.asOf === 'Dec 2022-Sep 2026'), '1500-1999 / 4+BR period');
 
+function shippedMove(zip, destId, extra) {
+  return estimateMove(Object.assign({
+    origin: originZip(zip), dest: area(destId), when: 'November 2026',
+    type: 'Apartment', size: '2 bedrooms', help: 'Full-service movers', packing: 'Partial',
+    veh: '1', vehHow: 'Ship them', travel: 'Flying', licenses: '2', storage: 'No'
+  }, extra || {}), D);
+}
+const rock = shippedMove('20850', 'parrish');
+const rockShip = rock.lines.find(l => l.id === 'ship');
+const rockAir = rock.lines.find(l => l.id === 'airfare');
+near(rock.total.lo, 4209.18, 0.001, 'Rockville partial low');
+near(rock.total.typ, 5593.71, 0.001, 'Rockville partial typical');
+near(rock.total.hi, 8610.89, 0.001, 'Rockville partial high');
+near(rockShip.lo, 545, 0.001, 'Rockville shipping low is the smoothed fit');
+near(rockShip.typ, 757.30, 0.001, 'Rockville shipping typical');
+near(rockShip.hi, 1248.74, 0.001, 'Rockville shipping high');
+assert(rockShip.note.includes('28%') && rockShip.note.includes('not added') && !rockShip.note.includes('publishes no percent'), 'November quotes the 28% spike and does not apply it');
+near(rockAir.lo, 278.90, 0.001, 'Rockville airfare low');
+near(rockAir.typ, 512.04, 0.001, 'Rockville airfare typical');
+near(rockAir.hi, 620.12, 0.001, 'Rockville airfare high');
+assert(rockAir.sources[0].status === 'SOURCED' && /IAD/.test(rockAir.note), 'Rockville uses the Washington blend because IAD is nearest');
+const marchShip = shippedMove('20850', 'parrish', { when: 'March 2027' }).lines.find(l => l.id === 'ship');
+near(marchShip.lo, rockShip.lo, 0.001, 'March shipping low matches November');
+near(marchShip.typ, rockShip.typ, 0.001, 'March shipping typical matches November');
+near(marchShip.hi, rockShip.hi, 0.001, 'March shipping high matches November');
+assert(!marchShip.note.includes('28%'), 'March does not quote the October-November spike');
+const decShip = shippedMove('20850', 'parrish', { when: 'December 2026' }).lines.find(l => l.id === 'ship');
+near(decShip.typ, rockShip.typ, 0.001, 'December does not multiply shipping by 1.28');
+assert(decShip.note.includes('September through December') && !decShip.note.includes('publishes no percent'), 'December quotes the season without a fake missing percent');
+
+const sea = shippedMove('98101', 'tampa');
+const seaShip = sea.lines.find(l => l.id === 'ship');
+const seaAir = sea.lines.find(l => l.id === 'airfare');
+near(seaShip.lo, 1100, 0.001, 'Seattle shipping low');
+near(seaShip.typ, 1215, 0.001, 'Seattle shipping typical');
+near(seaShip.hi, 1600, 0.001, 'Seattle shipping high');
+near(seaAir.typ, 640.50, 0.001, 'Seattle airfare is Sea-Tac times 2');
+assert(seaAir.sources[0].status === 'ESTIMATE' && /SEA/.test(seaAir.note) && /BFI/.test(seaAir.note), 'Seattle is marked Estimate because Boeing Field has no Tampa row');
+
+const localShip = shippedMove('33602', 'sarasota');
+const localAir = localShip.lines.find(l => l.id === 'airfare');
+const localCar = localShip.lines.find(l => l.id === 'ship');
+assert(localAir.display === 'not-applicable' && localAir.lo == null, 'Florida origin skips airfare');
+near(localCar.lo, 300, 0.001, 'short-haul shipping low');
+near(localCar.typ, 400, 0.001, 'short-haul shipping typical');
+near(localCar.hi, 500, 0.001, 'short-haul shipping high');
+assert(!/28%/.test(localCar.note), 'an in-Florida move is not given the southbound spike note');
+
+const oneTruck = priceCore(D, { help: 'DIY rental truck', type: 'Apartment', size: '1 bedroom' }, 2000).line;
+const twoTruck = priceCore(D, { help: 'DIY rental truck', type: 'Apartment', size: '2 bedrooms' }, 2000).line;
+near(twoTruck.typ, oneTruck.typ, 1e-6, '2-bedroom truck is not a dollar above the 1-bedroom');
+near(twoTruck.lo, oneTruck.lo, 1e-6, '2-bedroom truck low matches');
+near(twoTruck.hi, oneTruck.hi, 1e-6, '2-bedroom truck high matches');
+assert(/held equal/.test(twoTruck.note) && /No extra dollar/.test(twoTruck.note), 'truck note says the source prices those sizes the same');
+for (const miles of [0, 200, 750, 969, 2000]) {
+  const smaller = priceCore(D, { help: 'DIY rental truck', type: 'Apartment', size: '1 bedroom' }, miles).line;
+  const bigger = priceCore(D, { help: 'DIY rental truck', type: 'Apartment', size: '2 bedrooms' }, miles).line;
+  assert(bigger.lo + 1e-6 >= smaller.lo && bigger.typ + 1e-6 >= smaller.typ && bigger.hi + 1e-6 >= smaller.hi, `2-bedroom truck is not cheaper at ${miles} miles`);
+}
+
 function show(label, est) {
   const m = est.lines.find(l => l.id === 'moving');
   const tot = est.total;
