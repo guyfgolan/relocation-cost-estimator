@@ -73,9 +73,11 @@ for (const [id, [lat, lon]] of Object.entries(gaz)) {
 assert(area('pebblecreek').county === 'Hillsborough', 'Pebble Creek county');
 assert(area('pebblecreek').point.includes('Pasco'), 'Pebble Creek note names Pasco');
 assert(area('northport').county === 'Sarasota' && area('wellenpark').county === 'Sarasota', 'North Port and Wellen Park counties');
-near(area('wellenpark').lat, area('northport').lat, 1e-9, 'Wellen Park uses North Port latitude');
-near(area('wellenpark').lon, area('northport').lon, 1e-9, 'Wellen Park uses North Port longitude');
+assert(Math.abs(area('wellenpark').lat - area('northport').lat) > 0.01, 'Wellen Park is not the North Port point');
+near(area('wellenpark').lat, 27.0450289, 1e-6, 'Wellen Park latitude');
+near(area('wellenpark').lon, -82.3241085, 1e-6, 'Wellen Park longitude');
 assert(/North Port/.test(area('wellenpark').point), 'Wellen Park point names North Port');
+assert(/Nominatim/.test(area('wellenpark').point), 'Wellen Park point names Nominatim');
 
 // ZIP classification
 const zipCases = [
@@ -100,7 +102,14 @@ for (const [raw, code, snippet] of zipCases) {
 }
 const plus4 = classifyZip('30303-1234', Z);
 assert(plus4.ok && plus4.zip === '30303' && plus4.state === 'Georgia', 'ZIP+4 uses the first five');
-assert(classifyZip('99501', Z).overseas && classifyZip('96813', Z).overseas, 'AK and HI zips are overseas');
+assert(!classifyZip('99501', Z).overseas && classifyZip('99501', Z).state === 'Alaska', 'Alaska zip is drivable');
+assert(classifyZip('96813', Z).overseas, 'Hawaii zip is ocean-only');
+const spaced = classifyZip('20850 1234', Z);
+assert(spaced.ok && spaced.zip === '20850', 'ZIP+4 with a space uses the first five');
+const dashed = classifyZip('20850-1234', Z);
+assert(dashed.ok && dashed.zip === '20850', 'ZIP+4 with a dash uses the first five');
+const typo = classifyZip('2085O', Z);
+assert(!typo.ok && typo.code === 'typo' && typo.message === 'Check your ZIP. US ZIP codes are 5 digits.', 'one-letter ZIP typo');
 assert(!classifyZip('30303', Z).overseas && classifyZip('30303', Z).state === 'Georgia', 'Atlanta zip');
 
 // Distance scaling for truck and container
@@ -115,14 +124,14 @@ const anc = rental('DIY rental truck', '99501', 'venice');
 const hon = rental('DIY rental truck', '96813', 'venice');
 assert(atl.mode === 'estimate' && nyc.mode === 'estimate', 'CONUS truck moves estimate');
 assert(atl.lines.find(l => l.id === 'moving').typ < nyc.lines.find(l => l.id === 'moving').typ, 'Atlanta truck typical is below New York');
-assert(anc.mode === 'quote' && hon.mode === 'quote', 'AK and HI truck moves are quotes');
-assert(!anc.lines.some(l => l.display === 'money') && anc.total == null, 'Anchorage quote has no dollars');
-assert(!hon.lines.some(l => l.display === 'money') && hon.total == null, 'Honolulu quote has no dollars');
+assert(anc.mode === 'estimate' && anc.total, 'Anchorage truck move is a long-distance estimate');
+assert(/Alaska Highway/.test(anc.lines.find(l => l.id === 'moving').note), 'Anchorage estimate names the unmeasured highway');
+assert(hon.mode === 'quote' && !hon.lines.some(l => l.display === 'money') && hon.total == null, 'Honolulu quote has no dollars');
 const atlC = rental('Moving container', '30303', 'venice');
 const nycC = rental('Moving container', '10001', 'venice');
 assert(atlC.lines.find(l => l.id === 'moving').typ < nycC.lines.find(l => l.id === 'moving').typ, 'Atlanta container typical is below New York');
-assert(rental('Moving container', '99501', 'venice').mode === 'quote', 'Anchorage container is a quote');
-assert(rental('Full-service movers', '99501', 'venice').mode === 'quote', 'Anchorage full-service is a quote');
+assert(rental('Moving container', '99501', 'venice').mode === 'estimate', 'Anchorage container is an estimate');
+assert(rental('Full-service movers', '99501', 'venice').mode === 'estimate', 'Anchorage full-service is an estimate');
 
 // Full-service distance: local, bridge, CMR, no cliff
 function fullAt(road) {
@@ -132,28 +141,23 @@ near(fullAt(30).typ, 1625, 1e-6, '30 mile typical is the local table');
 near(fullAt(30).lo, 1625 * 0.75, 1e-6, '30 mile low');
 near(fullAt(49).typ, 1625, 1e-6, '49 mile typical stays on the local table');
 near(fullAt(50).typ, 1625, 1e-6, '50 mile typical matches local');
-assert(Math.abs(fullAt(75).typ - 1625) > 100, '75 miles is not the under-50 price');
-assert(fullAt(75).typ > 1625 && fullAt(75).typ < 4920, '75 mile typical sits between local and CMR');
-near(fullAt(100).lo, 4330, 1e-6, '100 mile low is CMR');
-near(fullAt(100).typ, 4920, 1e-6, '100 mile typical is CMR median');
-near(fullAt(100).hi, 5540, 1e-6, '100 mile high is CMR');
+assert(fullAt(75).typ > 1625 && fullAt(75).typ < fullAt(300).typ, '75 mile typical sits between local and the 300-mile knot');
 assert(Math.abs(fullAt(100).typ - fullAt(99).typ) < 80, 'no cliff between 99 and 100 miles');
-assert(Math.abs(fullAt(100).typ - fullAt(50).typ) > 2000, 'price still rises from 50 to 100');
-near(fullAt(120).typ, 4920, 1e-6, '120 miles stays on the CMR 100-499 band');
+const rise50 = fullAt(100).typ - fullAt(50).typ;
+assert(rise50 > 400 && rise50 < 1200, `50 to 100 mile rise is a ramp, not the old band cliff (${rise50})`);
+assert(fullAt(120).typ > fullAt(100).typ && fullAt(120).typ < fullAt(300).typ, '120 miles is still on the ramp');
 
 // Truck scale anchors
 function truckAt(road) {
   return priceCore(D, { help: 'DIY rental truck', type: 'Single-story house', size: '3 bedrooms' }, road).line;
 }
 near(truckAt(0).typ, 589.6, 1e-6, 'truck at 0 miles is the local price');
-near(truckAt(1200).typ, 2279.75, 1e-4, 'truck at 1,200 miles is the long-distance price');
-near(truckAt(2400).typ, 2279.75, 1e-2, 'truck past 1,200 miles stays at the 1,200-mile price');
 assert(truckAt(200).typ < truckAt(600).typ && truckAt(600).typ < truckAt(1200).typ, 'truck typical rises up to 1,200 miles');
-assert(truckAt(2000).typ <= truckAt(1200).typ, 'truck typical does not rise past 1,200 miles');
+assert(truckAt(2000).typ > truckAt(1200).typ, 'truck typical keeps rising past 1,200 miles');
 const boxAt = road => priceCore(D, { help: 'Moving container', type: 'Single-story house', size: '3 bedrooms' }, road).line;
 const fullHouse = road => priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '3 bedrooms', when: 'March 2027' }, road).line;
 assert(boxAt(200).typ < boxAt(600).typ && boxAt(600).typ < boxAt(1200).typ, 'container typical rises up to 1,200 miles');
-assert(boxAt(1600).typ <= boxAt(1200).typ && boxAt(1600).typ <= fullHouse(1600).typ, 'container past 1,200 miles does not exceed full-service');
+assert(boxAt(1600).typ > boxAt(1200).typ && boxAt(1600).typ <= fullHouse(1600).typ + 1e-6, 'container past 1,200 miles rises and stays under full-service');
 for (const road of [1300, 1872, 3082]) {
   for (const help of ['DIY rental truck', 'Moving container']) {
     const diy = priceCore(D, { help, type: 'Single-story house', size: '3 bedrooms' }, road).line;
@@ -161,7 +165,7 @@ for (const road of [1300, 1872, 3082]) {
     assert(diy.lo <= full.lo + 1e-6 && diy.typ <= full.typ + 1e-6 && diy.hi <= full.hi + 1e-6, `${help} at ${road} miles stays at or under full-service`);
   }
 }
-assert(/held flat/.test(boxAt(1872).note) && /cap/.test(boxAt(1872).sources.map(s => s.caveat).join(' ')), 'long DIY source note explains the flat cap');
+assert(/949/.test(boxAt(1872).note) && /full-service/.test(boxAt(1872).note), 'long DIY note explains the 949-mile guide and the cap');
 const oneBed = priceCore(D, { help: 'Moving container', type: 'Single-story house', size: '1 bedroom' }, 1200).line;
 const oneBedFull = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '1 bedroom', when: 'March 2027' }, 1200).line;
 assert(oneBed.typ <= oneBedFull.typ + 1e-6 && oneBed.hi <= oneBedFull.hi + 1e-6, '1-bedroom house container at 1,200 miles does not exceed full-service');
@@ -204,22 +208,23 @@ for (const road of [0, 10, 25, 40, 49]) {
 const unsureDest = estimateMove(Object.assign({}, base, {
   origin: originZip('30303'), dest: null, help: 'Full-service movers', veh: '6'
 }), D);
-assert(unsureDest.mode === 'insufficient' && unsureDest.total == null, 'destination Not sure has no total');
-assert(unsureDest.headline === 'Not enough info to estimate', 'destination Not sure headline');
+assert(unsureDest.mode === 'estimate' && unsureDest.total, 'destination Not sure still returns an estimate');
+assert(unsureDest.destSpread && unsureDest.destSpread.minName && unsureDest.destSpread.maxName, 'destination Not sure names the closest and farthest areas');
+assert(/average point/.test(unsureDest.lines.find(l => l.id === 'moving').note), 'destination Not sure explains the average point');
 const noOrigin = estimateMove(Object.assign({}, base, { origin: null, dest: area('tampa'), help: 'DIY rental truck' }), D);
-assert(noOrigin.total == null, 'missing origin has no total');
+assert(noOrigin.total == null && /starting state/.test(noOrigin.lines.find(l => l.id === 'moving').note), 'missing origin has no total and asks for a state');
 
 // Help Not sure is not full-service alone
 const fullLine = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '3 bedrooms', when: 'January 2027' }, 800).line;
 const mixLine = priceCore(D, { help: 'Not sure', type: 'Single-story house', size: '3 bedrooms', when: 'January 2027' }, 800).line;
-assert(!(fullLine.lo === mixLine.lo && fullLine.typ === mixLine.typ && fullLine.hi === mixLine.hi), 'Not sure help matches full-service exactly');
-assert(mixLine.lo < fullLine.lo && mixLine.hi >= fullLine.hi, 'Not sure help spans below full-service');
-assert(/not the full-service price alone/.test(mixLine.note), 'Not sure note');
+near(mixLine.typ, fullLine.typ, 1e-6, 'Not sure help typical is the full-service price');
+assert(mixLine.lo < fullLine.lo && mixLine.hi >= fullLine.hi - 1e-6, 'Not sure help spans below full-service');
+assert(/Typical is the full-service price/.test(mixLine.note), 'Not sure note');
 
 // Studio contradiction
 const studio = priceCore(D, { help: 'DIY rental truck', type: 'Studio apartment', size: '5+ bedrooms' }, 500);
-assert(!studio.ok && studio.line.display !== 'money', 'studio plus 5 bedrooms is not priced');
-assert(!/2719/.test(JSON.stringify(studio.line)), 'studio contradiction does not use the 4-bed row');
+assert(studio.ok && studio.line.display === 'money', 'studio plus 5 bedrooms is still priced as a studio');
+assert(/priced as a studio/.test(studio.line.note), 'studio contradiction says the bedroom count was not used');
 const studioOk = priceCore(D, { help: 'DIY rental truck', type: 'Studio apartment', size: '1 bedroom' }, 0);
 near(studioOk.line.typ, 402.5, 1e-6, 'studio uses the smallest row');
 
@@ -279,21 +284,24 @@ assert(flMove.lines.find(l => l.id === 'dl').display === 'not-applicable', 'Flor
 function showsZero(line) { return line.lo === 0 || line.typ === 0 || line.hi === 0; }
 for (const packing of ['None', 'Partial', 'Full', 'Not sure']) {
   const est = estimateMove(Object.assign({}, base, { origin: originZip('30303'), dest: area('venice'), help: 'Full-service movers', packing }), D);
-  const line = est.lines.find(l => l.label.startsWith('Packing'));
-  assert(!showsZero(line), `packing ${packing} is $0`);
-  assert(line.display === (packing === 'None' ? 'not-selected' : 'not-included'), `packing ${packing} display ${line.display}`);
+  const line = est.lines.find(l => l.id === 'packing');
+  if (packing === 'None') assert(line.display === 'not-selected' && !showsZero(line), 'packing None is not a $0 line');
+  else assert(line.display === 'money' && line.typ > 0, `packing ${packing} is priced`);
 }
+const partialPack = estimateMove(Object.assign({}, base, { origin: originZip('30303'), dest: area('venice'), help: 'Full-service movers', packing: 'Partial' }), D);
+const fullPack = estimateMove(Object.assign({}, base, { origin: originZip('30303'), dest: area('venice'), help: 'Full-service movers', packing: 'Full' }), D);
+assert(fullPack.lines.find(l => l.id === 'packing').typ > partialPack.lines.find(l => l.id === 'packing').typ, 'full packing labor is above partial');
 for (const storage of ['No', 'Yes', 'Not sure']) {
   const est = estimateMove(Object.assign({}, base, { origin: originZip('30303'), dest: area('venice'), help: 'Full-service movers', storage }), D);
-  const line = est.lines.find(l => l.label === 'Temporary storage');
-  assert(!showsZero(line), `storage ${storage} is $0`);
-  assert(line.display === (storage === 'No' ? 'not-selected' : 'not-included'), `storage ${storage} display`);
+  const line = est.lines.find(l => l.id === 'storage');
+  if (storage === 'Yes') assert(line.display === 'money' && line.typ > 0 && /1 month/.test(line.label), 'storage Yes without months uses 1 month');
+  else assert(line.display === (storage === 'No' ? 'not-selected' : 'not-included') && !showsZero(line), `storage ${storage} display`);
 }
 const shipped = estimateMove(Object.assign({}, base, {
   origin: originZip('30303'), dest: area('venice'), help: 'Full-service movers', vehHow: 'Ship them'
 }), D);
-const shipLine = shipped.lines.find(l => l.label === 'Vehicle shipping');
-assert(shipLine.display === 'not-included' && !showsZero(shipLine), 'shipping is not $0');
+const shipLine = shipped.lines.find(l => l.id === 'ship');
+assert(shipLine.display === 'money' && shipLine.typ > 0, 'shipping is priced per vehicle');
 assert(shipped.notIncluded.includes('Full-value protection'), 'full-value protection listed');
 assert(!shipped.lines.some(l => /60¢|60 cents/.test(l.label)), 'no $0 valuation line');
 
@@ -312,7 +320,7 @@ const samePlace = estimateMove(Object.assign({}, base, {
 const sameMeals = samePlace.lines.find(l => l.id === 'meals');
 assert(samePlace.dist.road < 50, `Venice ZIP to Venice should be a short drive (${samePlace.dist.road})`);
 assert(sameMeals.display === 'money' && sameMeals.lo === 0 && sameMeals.typ === 0 && sameMeals.hi === 0, 'a same-day local drive does not add meals');
-assert(drive.lines.find(l => l.id === 'carFuel').note.includes('4.057'), 'Florida gas price cited');
+assert(drive.lines.find(l => l.id === 'carFuel').note.includes('4.1084'), 'Florida gas price cited');
 assert(lodging.sources.some(s => s.asOf && s.asOf.includes('FY2027')), 'lodging source date');
 
 // Travel Not sure does not invent a drive
@@ -332,8 +340,8 @@ near(parrish.lines.find(l => l.id === 'moving').typ, 1625, 1e-6, 'Tampa to Parri
 // Summer note does not change dollars
 const summer = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '3 bedrooms', when: 'July 2027' }, 120);
 const winter = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '3 bedrooms', when: 'January 2027' }, 120);
-near(summer.line.typ, winter.line.typ, 1e-6, 'July does not change the price');
-assert(/not applied/.test(summer.line.note), 'July note');
+assert(summer.line.typ > winter.line.typ, 'July prices low and typical above January');
+assert(/July/.test(summer.line.note) && /\$3,412/.test(summer.line.note) && /\$2,728/.test(summer.line.note), 'July note cites the CMR medians');
 
 // 4+ bedroom long cell keeps the longer period
 const oldCell = priceCore(D, { help: 'Full-service movers', type: 'Single-story house', size: '4 bedrooms', when: 'March 2027' }, 1600);
