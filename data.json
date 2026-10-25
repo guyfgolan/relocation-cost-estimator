@@ -758,6 +758,15 @@
    "asOf": "2026-10-22",
    "status": "ASSUMPTION"
   },
+  "adultsOmitted": {
+   "count": 1,
+   "label": "Adults on an old Florida flying link",
+   "source": "This estimator's default when a Florida share link chose flying and named no adult count. One adult is used on low, typical, and high.",
+   "url": null,
+   "asOf": "2026-10-25",
+   "status": "ASSUMPTION",
+   "caveat": "An explicit Not sure answer still uses 1, 2, and 4. A new estimate still asks how many adults are traveling."
+  },
   "limitedSample": {
    "lowFactor": 0.75,
    "highFactor": 1.25,

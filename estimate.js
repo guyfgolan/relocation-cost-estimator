@@ -764,6 +764,9 @@
   }
 
   function adultSpread(answers, D) {
+    if ((answers.adultsAuto === true || answers.adultsAuto === 'true') && String(answers.adults) === '1') {
+      return { lo: 1, typ: 1, hi: 1, omitted: true };
+    }
     if (!answers.adults || answers.adults === 'Not sure') {
       const a = D.assumptions.adultsUnsure;
       return { lo: a.low, typ: a.typical, hi: a.high, assumed: true };
@@ -1281,7 +1284,7 @@
         hi: knownTax == null ? 0.13 : knownTax
       };
       const meal = D.meals.value;
-      const who = adults.clamped ? 'Adult count was below 1, so 1 adult is used.' : (adults.assumed ? 'Adults were not chosen: low uses 1, typical 2, and high 4.' : `${adults.typ} adult${adults.typ === 1 ? '' : 's'}.`);
+      const who = adults.clamped ? 'Adult count was below 1, so 1 adult is used.' : (adults.omitted ? 'Adults were not chosen, so 1 adult is assumed.' : (adults.assumed ? 'Adults were not chosen: low uses 1, typical 2, and high 4.' : `${adults.typ} adult${adults.typ === 1 ? '' : 's'}.`));
       const why = someoneDriving && flying ? ' Lodging is included because a car is being driven, even though the other travelers fly.' : (truckOnRoad && A.travel !== 'Driving' ? ' Lodging is included because someone drives the rental truck.' : '');
       const taxNote = knownTax == null ? 'Hotel tax uses 12% on low and 13% on typical and high, covering the listed counties.' : `Hotel tax of ${Math.round(knownTax * 100)}% is added for ${dest.county} County.`;
       lines.push(moneyLine({
@@ -1291,7 +1294,7 @@
         typ: nTyp * rate * (1 + tax.typ) * rooms.typ,
         hi: nHi * rate * (1 + tax.hi) * rooms.hi,
         note: `${who} Nights are ${nLo} / ${nTyp} / ${nHi} at ${mpd.lowCost} / ${mpd.typical} / ${mpd.highCost} miles a day (an assumption). Rooms are one per two adults: ${rooms.lo} / ${rooms.typ} / ${rooms.hi}. The $${rate} rate is the FY2027 standard lodging cap. ${taxNote}${why}`,
-        sources: [source(D.lodging), source(D.lodgingTax), source(mpd), source(D.assumptions.rooms)].concat(adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
+        sources: [source(D.lodging), source(D.lodgingTax), source(mpd), source(D.assumptions.rooms)].concat(adults.omitted ? [source(D.assumptions.adultsOmitted)] : adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
       }));
       lines.push(moneyLine({
         id: 'meals',
@@ -1300,7 +1303,7 @@
         typ: mealDays(nTyp) * meal * adults.typ,
         hi: mealDays(nHi) * meal * adults.hi,
         note: `${who} A drive that fits in one day, at that column's miles-per-day pace, does not add M&IE. A trip with nights uses 75% on the first and last day and 100% on the days between, which is nights + 0.5. The $${meal} rate is the FY2027 standard M&IE.`,
-        sources: [source(D.meals), source(mpd)].concat(adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
+        sources: [source(D.meals), source(mpd)].concat(adults.omitted ? [source(D.assumptions.adultsOmitted)] : adults.assumed ? [source(D.assumptions.adultsUnsure)] : [])
       }));
     } else if (flying) {
       lines.push(line({
