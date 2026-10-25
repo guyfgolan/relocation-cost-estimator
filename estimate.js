@@ -994,17 +994,16 @@
     if (hit) return hit;
     const airports = (D.airfare && D.airfare.airports) || [];
     const by = (D.airfare && D.airfare.byAirport) || {};
-    let nearest = null;
     let withFare = null;
     for (let i = 0; i < airports.length; i++) {
       const row = airports[i];
+      if (!by[row[0]]) continue;
       const hop = roadBetween(origin, { lat: row[1], lon: row[2] }, 1);
       if (!hop) continue;
       const spot = { code: row[0], d: hop.gc, name: row[3] || row[0] };
-      if (!nearest || spot.d < nearest.d) nearest = spot;
-      if (by[spot.code] && (!withFare || spot.d < withFare.d)) withFare = spot;
+      if (!withFare || spot.d < withFare.d) withFare = spot;
     }
-    const result = { nearest, withFare };
+    const result = { withFare };
     cached.fareCache.set(key, result);
     return result;
   }
@@ -1012,36 +1011,22 @@
   function pickAirfare(D, origin) {
     const table = D.airfare;
     const found = nearestAirports(D, origin);
-    const nearest = found.nearest;
-    const withFare = found.withFare;
-    if (!nearest) return null;
+    const used = found.withFare;
+    if (!used || !table.byAirport || !table.byAirport[used.code]) return null;
     const dc = new Set(table.dcAirports || ['BWI', 'DCA', 'IAD']);
     const far = table.farMiles || 150;
-    const minPax = table.minPassengers || 10;
     const about = miles => `about ${Math.round(miles).toLocaleString('en-US')} miles`;
-    let used = nearest;
-    let fare = null;
-    let blend = false;
+    const blend = dc.has(used.code);
+    const fare = blend ? { lo: table.lo, typ: table.typ, hi: table.hi } : table.byAirport[used.code];
     let estimate = false;
     const reasons = [];
-    if (dc.has(nearest.code)) {
-      blend = true;
-      fare = { lo: table.lo, typ: table.typ, hi: table.hi };
-    } else if (table.byAirport && table.byAirport[nearest.code]) {
-      fare = table.byAirport[nearest.code];
-    } else if (withFare && table.byAirport[withFare.code]) {
-      used = withFare;
-      fare = table.byAirport[withFare.code];
-      estimate = true;
-      reasons.push(`The nearest Table 1a airport is ${nearest.code} (${nearest.name}), ${about(nearest.d)} away, and it has no 2026 Q1 Tampa or Sarasota fare with at least ${minPax} passengers a day.`);
-    } else return null;
     if (used.d > far) {
       estimate = true;
       reasons.push(`${used.code} is ${about(used.d)} from the start, past this estimator's ${far}-mile labeling line, so the line is marked as an estimate.`);
     }
     let head;
     if (blend) {
-      head = `Each-way fare, 2026 Q1. The nearest airport is ${nearest.code} (${nearest.name}), ${about(nearest.d)} away, so this uses the Washington-area blend of DCA, IAD, and BWI to Tampa and Sarasota. Low $${table.lo} is the BWI–Tampa lowest-carrier average. Typical $${table.typ} is the passenger-weighted average of those six pairs. High $${table.hi} is the BWI–Sarasota average.`;
+      head = `Each-way fare, 2026 Q1. The nearest airport with a Tampa or Sarasota fare is ${used.code} (${used.name}), ${about(used.d)} away, so this uses the Washington-area blend of DCA, IAD, and BWI to Tampa and Sarasota. Low $${table.lo} is the BWI–Tampa lowest-carrier average. Typical $${table.typ} is the passenger-weighted average of those six pairs. High $${table.hi} is the BWI–Sarasota average.`;
     } else {
       head = `Each-way fare, 2026 Q1, ${used.code} (${fare.city}), ${about(used.d)} from the start. ${fare.blurb}`;
     }
@@ -1333,7 +1318,11 @@
       lines.push(Object.assign(missing('Meals on the road', 'moving', D.meals, 'Meals are priced only when lodging is. Not sure is not treated as a drive.'), { id: 'meals' }));
     }
 
-    if (A.travel === 'Driving') lines.push(Object.assign(chosen(D, 'Airfare', 'You chose to drive, so airfare is not included.'), { id: 'airfare' }));
+    if (A.travel === 'Driving') {
+      const autoFlorida = origin && origin.state === 'Florida' && (A.travelAuto === true || A.travelAuto === 'true');
+      const driveNote = autoFlorida ? 'Florida starts are priced as driving.' : 'You chose to drive, so airfare is not included.';
+      lines.push(Object.assign(chosen(D, 'Airfare', driveNote), { id: 'airfare' }));
+    }
     else if (flying && origin && origin.state === 'Florida') {
       lines.push(line({
         id: 'airfare',
