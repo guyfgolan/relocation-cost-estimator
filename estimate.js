@@ -793,7 +793,7 @@
 
   // The only copy of the static not-included line. Results and the email both use it.
   function staticNotIncluded() {
-    return 'Does not include tips, refundable deposits, or home closing costs.';
+    return 'The estimate does not include tips.';
   }
 
   function packKey(spec) {
