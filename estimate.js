@@ -793,7 +793,7 @@
 
   // The only copy of the static not-included line. Results and the email both use it.
   function staticNotIncluded() {
-    return 'The estimate does not include tips.';
+    return 'Estimate does not include tips.';
   }
 
   function packKey(spec) {
