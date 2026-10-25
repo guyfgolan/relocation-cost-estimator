@@ -1215,7 +1215,7 @@
   "typ": 256.02,
   "hi": 310.06,
   "per": "adult",
-  "source": "US DOT Consumer Airfare Report, Table 1a, 2026 Q1 each-way fares, Washington-area airports to Tampa and Sarasota",
+  "source": "US DOT Consumer Airfare Report, Table 1a, 2026 Q1 each-way fares, nearest origin airport to Tampa, Sarasota, or St. Pete-Clearwater",
   "url": "https://data.transportation.gov/Aviation/Consumer-Airfare-Report-Table-1a-All-U-S-Airport-P/tfrh-tu9e",
   "urls": [
    "https://data.transportation.gov/resource/tfrh-tu9e.json",
@@ -1224,8 +1224,8 @@
   "asOf": "2026 Q1",
   "checked": "2026-10-25",
   "status": "SOURCED",
-  "measured": "Dataset tfrh-tu9e, rows updated September 3, 2026, queried 2026-10-25 for year 2026 quarter 1. DOT says these averages are each-way prices, including taxes and airport fees, excluding free tickets and bag or seat fees. Airport pairs and passengers per day: DCA\u2013TPA 1,020.26 fare $254.79 lowest-carrier $225.84; BWI\u2013TPA 959.69 fare $243.74 lowest-carrier $139.45; IAD\u2013TPA 634.72 fare $252.27 lowest-carrier $143.83; BWI\u2013SRQ 354.19 fare $310.06 lowest-carrier $208.71; DCA\u2013SRQ 221.12 fare $279.91 lowest-carrier $208.01; IAD\u2013SRQ 83.49 fare $148.28 lowest-carrier $114.80. Passenger-weighted average of those six fares is $256.02. Low is the BWI\u2013Tampa lowest-carrier average, $139.45, not rounded up to $140. High is the BWI\u2013Sarasota average, $310.06. The thinner IAD\u2013Sarasota lowest-carrier fare of $114.80 is not used as the low. The six-pair blend is used only when the nearest of these Table 1a airports is DCA, IAD, or BWI. Other origins use the nearest airport's own 2026 Q1 Tampa and Sarasota rows. 73 origin airports have at least one such row with 10 or more passengers a day (90 markets). Three thinner rows were left out: SWF\u2013TPA 0.11 passengers/day; FNT\u2013TPA 6.11 passengers/day; PHF\u2013TPA 6.39 passengers/day.",
-  "caveat": "Quarterly each-way average, not a quoted fare. The Washington-area blend is used only when the nearest Table 1a airport is DCA, IAD, or BWI. Any other origin uses that airport's own Tampa and Sarasota fares when a 2026 Q1 row has at least 10 passengers a day. If the nearest airport has no such row, the line is marked Estimate and uses the nearest airport that does. If the airport used is more than 150 miles from the start, the line is marked Estimate. The 150-mile line is this estimator's labeling rule, not a DOT rule. Origins in Florida are not given an airfare. On a flying trip the adult count is the number of new Florida licenses when that count is at least 1, otherwise 1, unless adults were chosen. The same count is used on low, typical, and high.",
+  "measured": "Dataset tfrh-tu9e, rows updated September 3, 2026, queried 2026-10-25 for year 2026 quarter 1. DOT says these averages are each-way prices, including taxes and airport fees, excluding free tickets and bag or seat fees. Airport pairs and passengers per day: DCA\u2013TPA 1,020.26 fare $254.79 lowest-carrier $225.84; BWI\u2013TPA 959.69 fare $243.74 lowest-carrier $139.45; IAD\u2013TPA 634.72 fare $252.27 lowest-carrier $143.83; BWI\u2013SRQ 354.19 fare $310.06 lowest-carrier $208.71; DCA\u2013SRQ 221.12 fare $279.91 lowest-carrier $208.01; IAD\u2013SRQ 83.49 fare $148.28 lowest-carrier $114.80. Passenger-weighted average of those six fares is $256.02. Low is the BWI\u2013Tampa lowest-carrier average, $139.45, not rounded up to $140. High is the BWI\u2013Sarasota average, $310.06. The thinner IAD\u2013Sarasota lowest-carrier fare of $114.80 is not used as the low. The six-pair blend is used only when the nearest of these Table 1a airports is DCA, IAD, or BWI. Other origins use the nearest airport's own 2026 Q1 Tampa and Sarasota rows. 73 origin airports have at least one such row with 10 or more passengers a day (90 markets). Three thinner rows were left out: SWF\u2013TPA 0.11 passengers/day; FNT\u2013TPA 6.11 passengers/day; PHF\u2013TPA 6.39 passengers/day. St. Pete-Clearwater (PIE) was queried the same day. 22 origin airports have a PIE market with at least 10 passengers a day, and those rows are included in that airport's fare. Five thinner PIE rows were left out: AZA\u2013PIE 0.06 passengers/day; BOS\u2013PIE 0.02 passengers/day; EWR\u2013PIE 0.02 passengers/day; LAS\u2013PIE 0.08 passengers/day; IAD\u2013PIE 0.06 passengers/day. SEA, DEN, DCA, and BWI have no qualifying PIE row, so their fares are unchanged. The nearest airport is the closest one with a qualifying Tampa, Sarasota, or St. Pete-Clearwater row. Estimate is used only when that airport is more than 150 miles from the start.",
+  "caveat": "Quarterly each-way average, not a quoted fare. The price uses the nearest airport that has a 2026 Q1 Table 1a row to Tampa, Sarasota, or St. Pete-Clearwater with at least 10 passengers a day. A closer field with no such row is not used. When that airport is DCA, IAD, or BWI, the line uses the six-pair Washington-area blend. If the airport used is more than 150 miles from the start, the line is marked Estimate. The 150-mile line is this estimator's labeling rule, not a DOT rule. Origins in Florida are not given an airfare. On a flying trip the adult count is the number of new Florida licenses when that count is at least 1, otherwise 1, unless adults were chosen. The same count is used on low, typical, and high.",
   "dcAirports": [
    "BWI",
    "DCA",
@@ -2120,10 +2120,17 @@
   "byAirport": {
    "ABE": {
     "city": "Allentown/Bethlehem/Easton, PA",
-    "lo": 248.19,
-    "typ": 284.25,
+    "lo": 121.83,
+    "typ": 136.27,
     "hi": 284.25,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 208.89,
+      "fare": 121.83,
+      "fareLow": 121.83,
+      "miles": 970
+     },
      {
       "to": "TPA",
       "passengers": 20.38,
@@ -2132,14 +2139,21 @@
       "miles": 970
      }
     ],
-    "blurb": "TPA average $284.25, lowest-carrier $248.19, 20.38 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $121.83, lowest-carrier $121.83, 208.89 passengers a day; TPA average $284.25, lowest-carrier $248.19, 20.38 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "ACY": {
     "city": "Atlantic City, NJ",
-    "lo": 105.92,
-    "typ": 108.15,
+    "lo": 90.42,
+    "typ": 106.79,
     "hi": 108.15,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 16.41,
+      "fare": 90.42,
+      "fareLow": 90.42,
+      "miles": 922
+     },
      {
       "to": "TPA",
       "passengers": 197.49,
@@ -2148,14 +2162,21 @@
       "miles": 922
      }
     ],
-    "blurb": "TPA average $108.15, lowest-carrier $105.92, 197.49 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $90.42, lowest-carrier $90.42, 16.41 passengers a day; TPA average $108.15, lowest-carrier $105.92, 197.49 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "ALB": {
     "city": "Albany, NY",
-    "lo": 264.36,
-    "typ": 268.59,
+    "lo": 132.68,
+    "typ": 232.4,
     "hi": 268.59,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 92.44,
+      "fare": 132.68,
+      "fareLow": 132.68,
+      "miles": 1138
+     },
      {
       "to": "TPA",
       "passengers": 254.7,
@@ -2164,7 +2185,7 @@
       "miles": 1138
      }
     ],
-    "blurb": "TPA average $268.59, lowest-carrier $264.36, 254.70 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $132.68, lowest-carrier $132.68, 92.44 passengers a day; TPA average $268.59, lowest-carrier $264.36, 254.70 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "ATL": {
     "city": "Atlanta, GA (Metropolitan Area)",
@@ -2217,9 +2238,16 @@
    "BGR": {
     "city": "Bangor, ME",
     "lo": 106.09,
-    "typ": 150.21,
+    "typ": 131.08,
     "hi": 150.21,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 141.33,
+      "fare": 121.45,
+      "fareLow": 121.45,
+      "miles": 1394
+     },
      {
       "to": "TPA",
       "passengers": 71.19,
@@ -2228,7 +2256,7 @@
       "miles": 1394
      }
     ],
-    "blurb": "TPA average $150.21, lowest-carrier $106.09, 71.19 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $121.45, lowest-carrier $121.45, 141.33 passengers a day; TPA average $150.21, lowest-carrier $106.09, 71.19 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "BHM": {
     "city": "Birmingham, AL",
@@ -2248,10 +2276,17 @@
    },
    "BNA": {
     "city": "Nashville, TN",
-    "lo": 212.98,
-    "typ": 217.38,
+    "lo": 93.77,
+    "typ": 210.32,
     "hi": 217.38,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 58.89,
+      "fare": 93.77,
+      "fareLow": 93.77,
+      "miles": 623
+     },
      {
       "to": "TPA",
       "passengers": 971.56,
@@ -2260,7 +2295,7 @@
       "miles": 623
      }
     ],
-    "blurb": "TPA average $217.38, lowest-carrier $212.98, 971.56 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $93.77, lowest-carrier $93.77, 58.89 passengers a day; TPA average $217.38, lowest-carrier $212.98, 971.56 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "BOS": {
     "city": "Boston, MA (Metropolitan Area)",
@@ -2342,10 +2377,17 @@
    },
    "CAK": {
     "city": "Cleveland, OH (Metropolitan Area)",
-    "lo": 118.42,
-    "typ": 135.42,
+    "lo": 102.47,
+    "typ": 131.6,
     "hi": 149.87,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 44.41,
+      "fare": 102.47,
+      "fareLow": 102.47,
+      "miles": 927
+     },
      {
       "to": "SRQ",
       "passengers": 222.58,
@@ -2361,7 +2403,7 @@
       "miles": 927
      }
     ],
-    "blurb": "SRQ average $127.89, lowest-carrier $118.42, 222.58 passengers a day; TPA average $149.87, lowest-carrier $130.58, 116.04 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
+    "blurb": "PIE average $102.47, lowest-carrier $102.47, 44.41 passengers a day; SRQ average $127.89, lowest-carrier $118.42, 222.58 passengers a day; TPA average $149.87, lowest-carrier $130.58, 116.04 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "CHS": {
     "city": "Charleston, SC",
@@ -2443,10 +2485,17 @@
    },
    "CVG": {
     "city": "Cincinnati, OH",
-    "lo": 119.68,
-    "typ": 200.7,
+    "lo": 111.5,
+    "typ": 176.92,
     "hi": 200.7,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 219.72,
+      "fare": 111.5,
+      "fareLow": 111.5,
+      "miles": 776
+     },
      {
       "to": "TPA",
       "passengers": 604.62,
@@ -2455,7 +2504,7 @@
       "miles": 776
      }
     ],
-    "blurb": "TPA average $200.70, lowest-carrier $119.68, 604.62 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $111.50, lowest-carrier $111.50, 219.72 passengers a day; TPA average $200.70, lowest-carrier $119.68, 604.62 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "DAL": {
     "city": "Dallas/Fort Worth, TX",
@@ -2537,10 +2586,17 @@
    },
    "DSM": {
     "city": "Des Moines, IA",
-    "lo": 284.39,
-    "typ": 318.74,
+    "lo": 140.7,
+    "typ": 202.1,
     "hi": 318.74,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 144.83,
+      "fare": 140.7,
+      "fareLow": 140.7,
+      "miles": 1127
+     },
      {
       "to": "TPA",
       "passengers": 76.23,
@@ -2549,7 +2605,7 @@
       "miles": 1127
      }
     ],
-    "blurb": "TPA average $318.74, lowest-carrier $284.39, 76.23 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $140.70, lowest-carrier $140.70, 144.83 passengers a day; TPA average $318.74, lowest-carrier $284.39, 76.23 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "DTW": {
     "city": "Detroit, MI",
@@ -2608,10 +2664,17 @@
    },
    "GRR": {
     "city": "Grand Rapids, MI",
-    "lo": 228.9,
-    "typ": 262.87,
+    "lo": 125.91,
+    "typ": 165.47,
     "hi": 262.87,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 396.94,
+      "fare": 125.91,
+      "fareLow": 125.91,
+      "miles": 1045
+     },
      {
       "to": "TPA",
       "passengers": 161.2,
@@ -2620,7 +2683,7 @@
       "miles": 1045
      }
     ],
-    "blurb": "TPA average $262.87, lowest-carrier $228.90, 161.20 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $125.91, lowest-carrier $125.91, 396.94 passengers a day; TPA average $262.87, lowest-carrier $228.90, 161.20 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "HOU": {
     "city": "Houston, TX",
@@ -2719,9 +2782,16 @@
    "IND": {
     "city": "Indianapolis, IN",
     "lo": 125.75,
-    "typ": 248.22,
+    "typ": 223.62,
     "hi": 248.22,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 178.69,
+      "fare": 128.81,
+      "fareLow": 128.81,
+      "miles": 840
+     },
      {
       "to": "TPA",
       "passengers": 688.81,
@@ -2730,7 +2800,7 @@
       "miles": 840
      }
     ],
-    "blurb": "TPA average $248.22, lowest-carrier $125.75, 688.81 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $128.81, lowest-carrier $128.81, 178.69 passengers a day; TPA average $248.22, lowest-carrier $125.75, 688.81 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "ISP": {
     "city": "New York City, NY (Metropolitan Area)",
@@ -2812,10 +2882,17 @@
    },
    "LCK": {
     "city": "Columbus, OH",
-    "lo": 121.14,
-    "typ": 121.14,
+    "lo": 111.77,
+    "typ": 116.56,
     "hi": 121.14,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 91.67,
+      "fare": 111.77,
+      "fareLow": 111.77,
+      "miles": 829
+     },
      {
       "to": "SRQ",
       "passengers": 95.97,
@@ -2824,7 +2901,7 @@
       "miles": 869
      }
     ],
-    "blurb": "SRQ average $121.14, lowest-carrier $121.14, 95.97 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Tampa is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $111.77, lowest-carrier $111.77, 91.67 passengers a day; SRQ average $121.14, lowest-carrier $121.14, 95.97 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "LGA": {
     "city": "New York City, NY (Metropolitan Area)",
@@ -2867,10 +2944,17 @@
    },
    "MCI": {
     "city": "Kansas City, MO",
-    "lo": 142.57,
-    "typ": 259.69,
+    "lo": 99.53,
+    "typ": 243.0,
     "hi": 259.69,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 54.61,
+      "fare": 99.53,
+      "fareLow": 99.53,
+      "miles": 1048
+     },
      {
       "to": "TPA",
       "passengers": 469.31,
@@ -2879,7 +2963,7 @@
       "miles": 1048
      }
     ],
-    "blurb": "TPA average $259.69, lowest-carrier $142.57, 469.31 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $99.53, lowest-carrier $99.53, 54.61 passengers a day; TPA average $259.69, lowest-carrier $142.57, 469.31 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "MDW": {
     "city": "Chicago, IL",
@@ -2906,10 +2990,17 @@
    },
    "MEM": {
     "city": "Memphis, TN",
-    "lo": 130.5,
-    "typ": 231.87,
+    "lo": 86.62,
+    "typ": 214.33,
     "hi": 231.87,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 25.94,
+      "fare": 86.62,
+      "fareLow": 86.62,
+      "miles": 655
+     },
      {
       "to": "TPA",
       "passengers": 188.93,
@@ -2918,7 +3009,7 @@
       "miles": 655
      }
     ],
-    "blurb": "TPA average $231.87, lowest-carrier $130.50, 188.93 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $86.62, lowest-carrier $86.62, 25.94 passengers a day; TPA average $231.87, lowest-carrier $130.50, 188.93 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "MHT": {
     "city": "Boston, MA (Metropolitan Area)",
@@ -2977,10 +3068,17 @@
    },
    "MSP": {
     "city": "Minneapolis/St. Paul, MN",
-    "lo": 179.11,
-    "typ": 253.26,
+    "lo": 176.86,
+    "typ": 247.51,
     "hi": 253.26,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 117.22,
+      "fare": 176.86,
+      "fareLow": 176.86,
+      "miles": 1307
+     },
      {
       "to": "TPA",
       "passengers": 1439.59,
@@ -2989,7 +3087,7 @@
       "miles": 1307
      }
     ],
-    "blurb": "TPA average $253.26, lowest-carrier $179.11, 1439.59 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $176.86, lowest-carrier $176.86, 117.22 passengers a day; TPA average $253.26, lowest-carrier $179.11, 1439.59 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "MSY": {
     "city": "New Orleans, LA",
@@ -3025,10 +3123,17 @@
    },
    "OMA": {
     "city": "Omaha, NE",
-    "lo": 277.74,
-    "typ": 300.94,
+    "lo": 115.24,
+    "typ": 230.27,
     "hi": 300.94,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 84.78,
+      "fare": 115.24,
+      "fareLow": 115.24,
+      "miles": 1190
+     },
      {
       "to": "TPA",
       "passengers": 138.01,
@@ -3037,7 +3142,7 @@
       "miles": 1190
      }
     ],
-    "blurb": "TPA average $300.94, lowest-carrier $277.74, 138.01 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $115.24, lowest-carrier $115.24, 84.78 passengers a day; TPA average $300.94, lowest-carrier $277.74, 138.01 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "ONT": {
     "city": "Los Angeles, CA (Metropolitan Area)",
@@ -3144,10 +3249,17 @@
    },
    "PIT": {
     "city": "Pittsburgh, PA",
-    "lo": 158.72,
-    "typ": 238.94,
+    "lo": 120.32,
+    "typ": 224.3,
     "hi": 238.94,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 87.36,
+      "fare": 120.32,
+      "fareLow": 120.32,
+      "miles": 878
+     },
      {
       "to": "TPA",
       "passengers": 620.47,
@@ -3156,7 +3268,7 @@
       "miles": 878
      }
     ],
-    "blurb": "TPA average $238.94, lowest-carrier $158.72, 620.47 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $120.32, lowest-carrier $120.32, 87.36 passengers a day; TPA average $238.94, lowest-carrier $158.72, 620.47 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "PVD": {
     "city": "Boston, MA (Metropolitan Area)",
@@ -3199,10 +3311,17 @@
    },
    "RIC": {
     "city": "Richmond, VA",
-    "lo": 127.39,
-    "typ": 190.79,
+    "lo": 92.3,
+    "typ": 181.15,
     "hi": 190.79,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 34.13,
+      "fare": 92.3,
+      "fareLow": 92.3,
+      "miles": 732
+     },
      {
       "to": "TPA",
       "passengers": 314.54,
@@ -3211,7 +3330,7 @@
       "miles": 732
      }
     ],
-    "blurb": "TPA average $190.79, lowest-carrier $127.39, 314.54 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $92.30, lowest-carrier $92.30, 34.13 passengers a day; TPA average $190.79, lowest-carrier $127.39, 314.54 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "ROC": {
     "city": "Rochester, NY",
@@ -3263,10 +3382,17 @@
    },
    "SDF": {
     "city": "Louisville, KY",
-    "lo": 217.2,
-    "typ": 239.77,
+    "lo": 103.95,
+    "typ": 218.27,
     "hi": 239.77,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 53.06,
+      "fare": 103.95,
+      "fareLow": 103.95,
+      "miles": 729
+     },
      {
       "to": "TPA",
       "passengers": 282.07,
@@ -3275,7 +3401,7 @@
       "miles": 729
      }
     ],
-    "blurb": "TPA average $239.77, lowest-carrier $217.20, 282.07 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $103.95, lowest-carrier $103.95, 53.06 passengers a day; TPA average $239.77, lowest-carrier $217.20, 282.07 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "SEA": {
     "city": "Seattle, WA",
@@ -3375,10 +3501,17 @@
    },
    "SYR": {
     "city": "Syracuse, NY",
-    "lo": 153.35,
-    "typ": 206.19,
+    "lo": 148.25,
+    "typ": 184.14,
     "hi": 206.19,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 133.39,
+      "fare": 148.25,
+      "fareLow": 148.25,
+      "miles": 1111
+     },
      {
       "to": "TPA",
       "passengers": 217.13,
@@ -3387,14 +3520,21 @@
       "miles": 1111
      }
     ],
-    "blurb": "TPA average $206.19, lowest-carrier $153.35, 217.13 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $148.25, lowest-carrier $148.25, 133.39 passengers a day; TPA average $206.19, lowest-carrier $153.35, 217.13 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
    },
    "TYS": {
     "city": "Knoxville, TN",
-    "lo": 255.47,
-    "typ": 305.62,
+    "lo": 86.59,
+    "typ": 135.73,
     "hi": 305.62,
     "markets": [
+     {
+      "to": "PIE",
+      "passengers": 217.94,
+      "fare": 86.59,
+      "fareLow": 86.59,
+      "miles": 550
+     },
      {
       "to": "TPA",
       "passengers": 63.04,
@@ -3403,7 +3543,39 @@
       "miles": 550
      }
     ],
-    "blurb": "TPA average $305.62, lowest-carrier $255.47, 63.04 passengers a day. Low is the lowest-carrier average. Typical and high are the market average. Sarasota is not published for this airport at 10 or more passengers a day."
+    "blurb": "PIE average $86.59, lowest-carrier $86.59, 217.94 passengers a day; TPA average $305.62, lowest-carrier $255.47, 63.04 passengers a day. Low is the lower lowest-carrier average. Typical is the passenger-weighted average of these markets. High is the higher market average."
+   },
+   "FNT": {
+    "city": "Flint, MI",
+    "markets": [
+     {
+      "to": "PIE",
+      "passengers": 263.24,
+      "fare": 125.59,
+      "fareLow": 125.59,
+      "miles": 1040
+     }
+    ],
+    "lo": 125.59,
+    "typ": 125.59,
+    "hi": 125.59,
+    "blurb": "PIE average $125.59, lowest-carrier $125.59, 263.24 passengers a day. Only one market is published and its lowest-carrier average equals the market average, so low, typical, and high are the same figure."
+   },
+   "SWF": {
+    "city": "New York City, NY (Metropolitan Area)",
+    "markets": [
+     {
+      "to": "PIE",
+      "passengers": 84.72,
+      "fare": 116.23,
+      "fareLow": 116.23,
+      "miles": 1055
+     }
+    ],
+    "lo": 116.23,
+    "typ": 116.23,
+    "hi": 116.23,
+    "blurb": "PIE average $116.23, lowest-carrier $116.23, 84.72 passengers a day. Only one market is published and its lowest-carrier average equals the market average, so low, typical, and high are the same figure."
    }
   },
   "airportsSource": {

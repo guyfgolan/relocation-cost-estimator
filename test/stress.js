@@ -384,7 +384,14 @@ near(seaShip.lo, 1100, 0.001, 'Seattle shipping low');
 near(seaShip.typ, 1215, 0.001, 'Seattle shipping typical');
 near(seaShip.hi, 1600, 0.001, 'Seattle shipping high');
 near(seaAir.typ, 640.50, 0.001, 'Seattle airfare is Sea-Tac times 2');
-assert(seaAir.sources[0].status === 'ESTIMATE' && /SEA/.test(seaAir.note) && /BFI/.test(seaAir.note), 'Seattle is marked Estimate because Boeing Field has no Tampa row');
+assert(seaAir.sources[0].status === 'SOURCED' && /SEA/.test(seaAir.note) && !/BFI/.test(seaAir.note), 'Seattle uses Sea-Tac without an Estimate label');
+assert(/same figure|market average/.test(seaAir.note), 'Seattle notes the flat single-market fare');
+const den = shippedMove('80202', 'tampa');
+const denAir = den.lines.find(l => l.id === 'airfare');
+assert(denAir.sources[0].status === 'SOURCED' && /DEN/.test(denAir.note) && !/APA|Centennial/.test(denAir.note), 'Denver uses DEN, not Centennial');
+near(denAir.lo, 314.90, 0.001, 'Denver airfare low');
+near(denAir.typ, 510.60, 0.001, 'Denver airfare typical');
+near(denAir.hi, 683.32, 0.001, 'Denver airfare high');
 
 const localShip = shippedMove('33602', 'sarasota');
 const localAir = localShip.lines.find(l => l.id === 'airfare');
