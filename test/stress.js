@@ -303,6 +303,8 @@ const shipped = estimateMove(Object.assign({}, base, {
 const shipLine = shipped.lines.find(l => l.id === 'ship');
 assert(shipLine.display === 'money' && shipLine.typ > 0, 'shipping is priced per vehicle');
 assert(shipped.notIncluded.includes('Full-value protection'), 'full-value protection listed');
+assert(shipped.notIncludedNote === 'Estimate does not include tips.', 'static not-included line');
+assert(!shipped.notIncluded.includes(shipped.notIncludedNote), 'the static line is not a bullet');
 assert(!shipped.lines.some(l => /60¢|60 cents/.test(l.label)), 'no $0 valuation line');
 
 // GSA lodging and meals are on a real drive
@@ -410,6 +412,28 @@ near(localCar.lo, 300, 0.001, 'short-haul shipping low');
 near(localCar.typ, 400, 0.001, 'short-haul shipping typical');
 near(localCar.hi, 500, 0.001, 'short-haul shipping high');
 assert(!/28%/.test(localCar.note), 'an in-Florida move is not given the southbound spike note');
+
+function pensacola(extra) {
+  return estimateMove(Object.assign({
+    origin: originZip('32501'), dest: area('sarasota'), when: 'November 2026',
+    type: 'Apartment', size: '2 bedrooms', help: 'Full-service movers', packing: 'Partial',
+    veh: '1', vehHow: 'Ship them', travel: 'Driving', travelAuto: true, storage: 'No'
+  }, extra || {}), D);
+}
+const penUnsure = pensacola({ adults: 'Not sure' });
+const penOne = pensacola({ adults: '1', adultsAuto: true });
+const penChosen = pensacola({ adults: '1' });
+near(penUnsure.total.lo, 3063.21, 0.001, 'Pensacola Not sure low');
+near(penUnsure.total.typ, 4050.16, 0.001, 'Pensacola Not sure typical');
+near(penUnsure.total.hi, 7009.23, 0.001, 'Pensacola Not sure high');
+near(penOne.total.lo, 3063.21, 0.001, 'Pensacola omitted-adult low matches');
+near(penOne.total.typ, 4050.16, 0.001, 'Pensacola omitted-adult typical matches');
+near(penOne.total.hi, 6575.54, 0.001, 'Pensacola omitted-adult high');
+near(penChosen.total.hi, penOne.total.hi, 0.001, 'an explicit 1 adult matches the omitted high');
+assert(/not chosen: low uses 1, typical 2, and high 4/.test(penUnsure.lines.find(l => l.id === 'lodging').note), 'Not sure still states the 1/2/4 spread');
+assert(penOne.lines.find(l => l.id === 'lodging').note.startsWith('Adults were not chosen, so 1 adult is assumed.'), 'lodging says 1 adult is assumed');
+assert(penOne.lines.find(l => l.id === 'meals').note.startsWith('Adults were not chosen, so 1 adult is assumed.'), 'meals say 1 adult is assumed');
+assert(/^1 adult\./.test(penChosen.lines.find(l => l.id === 'lodging').note), 'an explicit 1 adult is stated as a choice');
 
 const oneTruck = priceCore(D, { help: 'DIY rental truck', type: 'Apartment', size: '1 bedroom' }, 2000).line;
 const twoTruck = priceCore(D, { help: 'DIY rental truck', type: 'Apartment', size: '2 bedrooms' }, 2000).line;
