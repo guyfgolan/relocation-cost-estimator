@@ -189,16 +189,21 @@
       let lo = raw.lo, typ = raw.typ, hi = raw.hi;
       if (lo > typ) lo = typ;
       if (hi < typ) hi = typ;
+      let heldTo = null;
+      let heldEqual = false;
       if (prev) {
-        if (typ <= prev.typ) typ = prev.typ + 1;
-        if (lo <= prev.lo) lo = prev.lo + 1;
-        if (hi <= prev.hi) hi = prev.hi + 1;
+        const below = lo < prev.lo || typ < prev.typ || hi < prev.hi;
+        if (lo < prev.lo) lo = prev.lo;
+        if (typ < prev.typ) typ = prev.typ;
+        if (hi < prev.hi) hi = prev.hi;
         if (lo > typ) typ = lo;
         if (hi < typ) hi = typ;
-        if (typ <= prev.typ) typ = prev.typ + 1;
-        if (hi < typ) hi = typ;
+        if (below) {
+          heldTo = prev.key;
+          heldEqual = lo === prev.lo && typ === prev.typ && hi === prev.hi;
+        }
       }
-      prev = { lo, typ, hi };
+      prev = { key: raw.key, lo, typ, hi, heldTo, heldEqual };
       return prev;
     });
   }
@@ -275,7 +280,7 @@
         const pair = table[key];
         let typ = (pair[0] + pair[1]) / 2;
         if (mode === 'truck' && key === '2br') typ = D.routeGuide.truck.typical2br.value;
-        return { lo: pair[0], typ, hi: pair[1] };
+        return { key, lo: pair[0], typ, hi: pair[1] };
       });
       return monoChain(raw);
     }
@@ -485,7 +490,30 @@
     const diy = row.rise(Math.max(0, road));
     const full = priceFullSpec(D, spec, road, when);
     const priced = capDiyToFull(diy, full);
-    return { lo: priced.lo, typ: priced.typ, hi: priced.hi, capped: priced.capped, row: D.hah.value.rows[spec.hah.idx], method: 'guide' };
+    const guide = model(D).guides[key][SIZE_KEYS.indexOf(spec.key)] || {};
+    return {
+      lo: priced.lo, typ: priced.typ, hi: priced.hi, capped: priced.capped,
+      row: D.hah.value.rows[spec.hah.idx], method: 'guide',
+      heldTo: guide.heldTo || null, heldEqual: !!guide.heldEqual
+    };
+  }
+
+  function sizeWord(key) {
+    return { studio: 'studio', '1br': '1-bedroom', '2br': '2-bedroom', '3br': '3-bedroom', '4br': '4-bedroom', '5br': '5-bedroom' }[key] || key;
+  }
+
+  function heldSentence(parts) {
+    const bits = [];
+    const seen = new Set();
+    (parts || []).forEach(p => {
+      if (!p.heldEqual || !p.heldTo) return;
+      const id = `${p.spec && p.spec.key}>${p.heldTo}`;
+      if (seen.has(id)) return;
+      seen.add(id);
+      const bigger = sizeWord(p.spec.key);
+      bits.push(`The published long-distance price for a ${bigger} is not higher than a ${sizeWord(p.heldTo)}, so those sizes are held equal. No extra dollar is added.`);
+    });
+    return bits.join(' ');
   }
 
   function capDiyToFull(diy, full) {
@@ -587,7 +615,8 @@
   function methodNote(D, mode, parts, road) {
     if (mode !== 'full') {
       const hit = parts.some(p => p.capped) ? ' The full-service cap applies on this move.' : '';
-      return `Rises in a straight line from the HireAHelper local price at 0 miles through the Maryland-to-Florida guide at ${GUIDE_MILES} miles, then keeps that per-mile slope. Kept at or under full-service for the same home. The 0.8 and 1.25 ends at 0 miles are an assumption.${hit}`;
+      const held = heldSentence(parts);
+      return `Rises in a straight line from the HireAHelper local price at 0 miles through the Maryland-to-Florida guide at ${GUIDE_MILES} miles, then keeps that per-mile slope. Kept at or under full-service for the same home. The 0.8 and 1.25 ends at 0 miles are an assumption.${hit}${held ? ' ' + held : ''}`;
     }
     const methods = new Set(parts.map(p => p.method));
     if ([...methods].every(m => m === 'local')) {
@@ -634,7 +663,11 @@
         hi: Math.max(truckAll.hi, box.combined.hi, full.combined.hi)
       });
       notes.unshift('Help level was not chosen. Typical is the full-service price. Low is the cheapest of a DIY truck plus truck fuel, a container, and full-service. High is the highest of those. Truck and container prices rise with miles and stay at or under full-service.');
+      const held = heldSentence(truck.parts.concat(box.parts));
+      if (held) notes.push(held);
       notes.push(seasonText(D, full.parts[0] && full.parts[0].season, miles >= 50));
+      const unsureSources = [source(D.hah), source(D.movers), source(D.routeGuide.full), source(D.assumptions.diyScale), source(D.gas), source(D.assumptions.truckMpg), source(D.cmrSeason)];
+      if (held && D.routeGuide.truck.sizeHold) unsureSources.push(source(D.routeGuide.truck.sizeHold));
       return {
         ok: true,
         mode: 'full',
@@ -644,7 +677,7 @@
           display: 'money',
           lo: env.lo, typ: env.typ, hi: env.hi,
           note: uniqueNotes(notes).join(' '),
-          sources: [source(D.hah), source(D.movers), source(D.routeGuide.full), source(D.assumptions.diyScale), source(D.gas), source(D.assumptions.truckMpg), source(D.cmrSeason)]
+          sources: unsureSources
         })
       };
     }
@@ -678,6 +711,7 @@
       sources.push(source(D.routeGuide[mode]));
       sources.push(source(D.assumptions.diyScale));
       if (mode === 'truck' && built.ref && built.ref.key === '2br') sources.push(source(D.routeGuide.truck.typical2br));
+      if (mode === 'truck' && result.parts.some(p => p.heldEqual) && D.routeGuide.truck.sizeHold) sources.push(source(D.routeGuide.truck.sizeHold));
     }
     if (mode === 'full' && result.parts.some(p => p.method === 'local' || p.method === 'ramp')) sources.push(source(D.assumptions.fullLocal));
     const rowLabel = result.parts.length === 1 ? ` — ${result.parts[0].row}` : '';
@@ -815,17 +849,59 @@
     return last.v;
   }
 
+  function pavaNonDecreasing(values) {
+    const blocks = [];
+    values.forEach(v => {
+      blocks.push({ sum: v, n: 1 });
+      while (blocks.length >= 2) {
+        const a = blocks[blocks.length - 2];
+        const b = blocks[blocks.length - 1];
+        if (a.sum / a.n <= b.sum / b.n) break;
+        blocks.pop();
+        a.sum += b.sum;
+        a.n += b.n;
+      }
+    });
+    const out = [];
+    blocks.forEach(b => {
+      const avg = b.sum / b.n;
+      for (let i = 0; i < b.n; i++) out.push(avg);
+    });
+    return out;
+  }
+
+  function describeLowFit(knots) {
+    const groups = [];
+    knots.forEach(k => {
+      const last = groups[groups.length - 1];
+      if (last && Math.abs(last.v - k.v) < 0.001) last.to = k.m;
+      else groups.push({ from: k.m, to: k.m, v: k.v });
+    });
+    const money = v => '$' + Math.round(v).toLocaleString('en-US');
+    return groups.map((g, i) => {
+      const price = money(g.v);
+      const from = g.from.toLocaleString('en-US');
+      const to = g.to.toLocaleString('en-US');
+      if (!i) return `${price} from ${from} to ${to} miles`;
+      const prev = groups[i - 1];
+      if (g.from > prev.to) return `then rises to ${price} by ${from} miles and holds through ${to} miles`;
+      return `${price} from ${from} to ${to} miles`;
+    }).join(', ');
+  }
+
   function shipCurve(D) {
     const cached = model(D);
     if (cached.ship) return cached.ship;
     const pairs = D.ship.pairs.slice().sort((a, b) => a.miles - b.miles);
-    const loK = monoKnots(pairs, 'lo');
+    const fitted = pavaNonDecreasing(pairs.map(p => p.lo));
+    const loK = pairs.map((p, i) => ({ m: p.miles, v: fitted[i] }));
     const hiK = monoKnots(pairs, 'hi');
     const floorM = pairs[0].miles;
     const ceilM = pairs[pairs.length - 1].miles;
     const long = D.ship.longHaul;
     const fw = D.ship.freightwaves;
-    function at(miles) {
+    const short = D.ship.shortHaul;
+    function spanAt(miles) {
       const clamped = Math.max(floorM, Math.min(miles, ceilM));
       const scale = fw.miles ? clamped / fw.miles : 0;
       let lo = Math.min(interpKnots(loK, clamped), fw.lo * scale);
@@ -850,6 +926,19 @@
       if (hi < typ) hi = typ;
       return { lo, typ, hi };
     }
+    const atFloor = spanAt(floorM);
+    function at(miles) {
+      if (short && miles <= short.miles) return { lo: short.lo, typ: short.typ, hi: short.hi };
+      if (short && miles < floorM) {
+        const t = (miles - short.miles) / (floorM - short.miles);
+        return {
+          lo: lerp(short.lo, atFloor.lo, t),
+          typ: lerp(short.typ, atFloor.typ, t),
+          hi: lerp(short.hi, atFloor.hi, t)
+        };
+      }
+      return spanAt(miles);
+    }
     const N = 4001;
     const lo = new Float64Array(N);
     const typ = new Float64Array(N);
@@ -867,8 +956,21 @@
       hi[m] = v.hi;
       prev = v;
     }
-    cached.ship = { lo, typ, hi, max: N - 1, floorM, ceilM };
+    cached.ship = { lo, typ, hi, max: N - 1, floorM, ceilM, lowKnots: loK, lowFitText: describeLowFit(loK) };
     return cached.ship;
+  }
+
+  function snowSentence(D, when, origin) {
+    const snow = D.ship.snowbird;
+    if (!snow || !origin || !origin.state || origin.state === 'Florida') return '';
+    const month = String(when || '').split(' ')[0];
+    if (snow.months && snow.months.indexOf(month) >= 0) {
+      return ` RoadRunner says: "${snow.quote}" That ${snow.percent}% is not added to this estimate.`;
+    }
+    if (month === 'December') {
+      return ` RoadRunner says rates rise through the fall snowbird season, September through December. The ${snow.percent}% it publishes is for October and November, so it is not added in December.`;
+    }
+    return '';
   }
 
   function shipOpen(D, miles) {
@@ -882,6 +984,69 @@
       typ: lerp(curve.typ[i], curve.typ[i + 1], t),
       hi: lerp(curve.hi[i], curve.hi[i + 1], t)
     });
+  }
+
+  function nearestAirports(D, origin) {
+    const cached = model(D);
+    if (!cached.fareCache) cached.fareCache = new Map();
+    const key = origin.lat + ',' + origin.lon;
+    const hit = cached.fareCache.get(key);
+    if (hit) return hit;
+    const airports = (D.airfare && D.airfare.airports) || [];
+    const by = (D.airfare && D.airfare.byAirport) || {};
+    let nearest = null;
+    let withFare = null;
+    for (let i = 0; i < airports.length; i++) {
+      const row = airports[i];
+      const hop = roadBetween(origin, { lat: row[1], lon: row[2] }, 1);
+      if (!hop) continue;
+      const spot = { code: row[0], d: hop.gc, name: row[3] || row[0] };
+      if (!nearest || spot.d < nearest.d) nearest = spot;
+      if (by[spot.code] && (!withFare || spot.d < withFare.d)) withFare = spot;
+    }
+    const result = { nearest, withFare };
+    cached.fareCache.set(key, result);
+    return result;
+  }
+
+  function pickAirfare(D, origin) {
+    const table = D.airfare;
+    const found = nearestAirports(D, origin);
+    const nearest = found.nearest;
+    const withFare = found.withFare;
+    if (!nearest) return null;
+    const dc = new Set(table.dcAirports || ['BWI', 'DCA', 'IAD']);
+    const far = table.farMiles || 150;
+    const minPax = table.minPassengers || 10;
+    const about = miles => `about ${Math.round(miles).toLocaleString('en-US')} miles`;
+    let used = nearest;
+    let fare = null;
+    let blend = false;
+    let estimate = false;
+    const reasons = [];
+    if (dc.has(nearest.code)) {
+      blend = true;
+      fare = { lo: table.lo, typ: table.typ, hi: table.hi };
+    } else if (table.byAirport && table.byAirport[nearest.code]) {
+      fare = table.byAirport[nearest.code];
+    } else if (withFare && table.byAirport[withFare.code]) {
+      used = withFare;
+      fare = table.byAirport[withFare.code];
+      estimate = true;
+      reasons.push(`The nearest Table 1a airport is ${nearest.code} (${nearest.name}), ${about(nearest.d)} away, and it has no 2026 Q1 Tampa or Sarasota fare with at least ${minPax} passengers a day.`);
+    } else return null;
+    if (used.d > far) {
+      estimate = true;
+      reasons.push(`${used.code} is ${about(used.d)} from the start, past this estimator's ${far}-mile labeling line, so the line is marked as an estimate.`);
+    }
+    let head;
+    if (blend) {
+      head = `Each-way fare, 2026 Q1. The nearest airport is ${nearest.code} (${nearest.name}), ${about(nearest.d)} away, so this uses the Washington-area blend of DCA, IAD, and BWI to Tampa and Sarasota. Low $${table.lo} is the BWI–Tampa lowest-carrier average. Typical $${table.typ} is the passenger-weighted average of those six pairs. High $${table.hi} is the BWI–Sarasota average.`;
+    } else {
+      head = `Each-way fare, 2026 Q1, ${used.code} (${fare.city}), ${about(used.d)} from the start. ${fare.blurb}`;
+    }
+    const why = reasons.length ? ' ' + reasons.join(' ') : '';
+    return { lo: fare.lo, typ: fare.typ, hi: fare.hi, estimate, note: `${head}${why}` };
   }
 
   function applyShipOptions(D, base, answers) {
@@ -1086,15 +1251,23 @@
     else if (A.vehHow === 'Ship them' && vehicles > 0 && dist) {
       const each = which => applyShipOptions(D, shipOpen(D, roadOf(which)), A);
       const priced = order3({ lo: each('lo').lo * vehicles, typ: each('typ').typ * vehicles, hi: each('hi').hi * vehicles });
-      const snow = /^(October|November|December)\b/.test(A.when || '') ? ' RoadRunner says October through December is a demand peak that firms up pricing, but it publishes no percent, so no seasonal car surcharge is added.' : '';
+      const snow = snowSentence(D, A.when, origin);
       const body = A.shipBody === 'SUV' ? ' SUV adder is the published $100–$200, with the midpoint on typical.' : ' Open-carrier sedan.';
       const carrier = A.shipCarrier === 'Enclosed' ? ' Enclosed is 1.5 times the open price.' : '';
+      const curve = shipCurve(D);
+      const sh = D.ship.shortHaul;
+      const maxRoad = Math.max(roadOf('lo'), roadOf('typ'), roadOf('hi'));
+      const minRoad = Math.min(roadOf('lo'), roadOf('typ'), roadOf('hi'));
+      const shipSources = [source(D.ship), source({ source: 'Freightwaves Checkpoint, Maryland to Florida car shipping', url: D.ship.freightwavesUrl, asOf: '2026-10-18', checked: D.ship.checked, status: 'SOURCED' })];
+      if (sh && minRoad < curve.floorM) shipSources.push(source(sh));
+      if (maxRoad > curve.ceilM) shipSources.push(source(D.ship.longHaul));
+      if (snow && D.ship.snowbird) shipSources.push(source(D.ship.snowbird));
       lines.push(moneyLine({
         id: 'ship',
         label: `Vehicle shipping × ${vehicles}`,
         lo: priced.lo, typ: priced.typ, hi: priced.hi,
-        note: `Open-carrier sedan. Low and high do not fall as miles rise. Under ${D.ship.pairs[0].miles} miles, the shortest published pair is used instead of scaling toward $0. From there to ${D.ship.pairs[D.ship.pairs.length - 1].miles} miles, the Maryland-to-Florida city pairs are used and a cheaper later pair is held. Past that, the price moves to RoadRunner's 2,000-mile-and-over open band ($${D.ship.longHaul.lo.toLocaleString('en-US')}–$${D.ship.longHaul.hi.toLocaleString('en-US')}) and the $${D.ship.longHaul.typ.toLocaleString('en-US')} national average, then holds. Freightwaves $${D.ship.freightwaves.lo}–$${D.ship.freightwaves.hi} is applied only inside the city-pair span. Typical inside that span follows the $${D.ship.corridor.average} corridor average over ${D.ship.corridor.miles} miles. 7 or more vehicles are priced as 7.${body}${carrier}${snow}`,
-        sources: [source(D.ship), source({ source: 'Freightwaves Checkpoint, Maryland to Florida car shipping', url: D.ship.freightwavesUrl, asOf: '2026-10-18', checked: D.ship.checked, status: 'SOURCED' })].concat(Math.max(roadOf('lo'), roadOf('typ'), roadOf('hi')) > D.ship.pairs[D.ship.pairs.length - 1].miles ? [source(D.ship.longHaul)] : [])
+        note: `Open-carrier sedan. Low and high do not fall as miles rise. At ${sh.miles} miles and under, the price is RoadRunner's under-500 open band, $${sh.lo.toLocaleString('en-US')}–$${sh.hi.toLocaleString('en-US')}. Typical $${sh.typ.toLocaleString('en-US')} is the midpoint of that band, not a separate published typical. From there it rises in a straight line to the ${curve.floorM}-mile price. Low through ${curve.ceilM.toLocaleString('en-US')} miles is a smoothed fit of the published city-pair lows (pool-adjacent-violators, equal weight on each pair): ${curve.lowFitText}. High follows those city pairs and does not fall. Past that, the price moves to RoadRunner's 2,000-mile-and-over open band ($${D.ship.longHaul.lo.toLocaleString('en-US')}–$${D.ship.longHaul.hi.toLocaleString('en-US')}) and the $${D.ship.longHaul.typ.toLocaleString('en-US')} national average, then holds. Freightwaves $${D.ship.freightwaves.lo}–$${D.ship.freightwaves.hi} is applied only inside the city-pair span. Typical inside that span follows the $${D.ship.corridor.average} corridor average over ${D.ship.corridor.miles} miles. 7 or more vehicles are priced as 7.${body}${carrier}${snow}`,
+        sources: shipSources
       }));
     } else {
       lines.push(Object.assign(missing('Vehicle shipping', 'moving', D.unsourced.ship, vehicles == null ? 'The vehicle count or the shipping choice is not set, so shipping is not priced and is not shown as $0.' : 'Shipping needs a distance, so it is not shown as $0.'), { id: 'ship' }));
@@ -1161,14 +1334,25 @@
     }
 
     if (A.travel === 'Driving') lines.push(Object.assign(chosen(D, 'Airfare', 'You chose to drive, so airfare is not included.'), { id: 'airfare' }));
-    else if (flying) {
-      const fare = D.airfare;
-      const chosen = A.adults && A.adults !== 'Not sure' ? countOf(A.adults, 12) : null;
+    else if (flying && origin && origin.state === 'Florida') {
+      lines.push(line({
+        id: 'airfare',
+        label: 'Airfare',
+        display: 'not-applicable',
+        group: 'moving',
+        note: 'Not priced. The trip starts in Florida, and driving is typical.',
+        sources: [source(D.airfare, 'In-Florida origins are not given an airfare.')]
+      }));
+    } else if (flying && (!origin || origin.lat == null)) {
+      lines.push(Object.assign(missing('Airfare', 'moving', D.airfare, 'The starting point has no coordinates, so a departure airport cannot be chosen and airfare is not priced.'), { id: 'airfare' }));
+    } else if (flying) {
+      const picked = pickAirfare(D, origin);
+      const chosenAdults = A.adults && A.adults !== 'Not sure' ? countOf(A.adults, 12) : null;
       const licenses = countOf(A.licenses, 4);
       let adults;
       let who;
-      if (chosen != null) {
-        adults = Math.max(1, chosen);
+      if (chosenAdults != null) {
+        adults = Math.max(1, chosenAdults);
         who = `${adults} adult${adults === 1 ? '' : 's'} chosen on this trip.`;
       } else if (licenses != null && licenses >= 1) {
         adults = licenses;
@@ -1177,15 +1361,21 @@
         adults = 1;
         who = 'Adults were not asked on a flying trip. The price uses 1 adult.';
       }
-      lines.push(moneyLine({
-        id: 'airfare',
-        label: `Airfare × ${adults}`,
-        lo: fare.lo * adults,
-        typ: fare.typ * adults,
-        hi: fare.hi * adults,
-        note: `Each-way fare, 2026 Q1, Washington-area airports to Tampa and Sarasota. Low $${fare.lo} is the BWI–Tampa lowest-carrier average. Typical $${fare.typ} is the passenger-weighted average of the six airport pairs. High $${fare.hi} is the BWI–Sarasota average. ${who} Not a quoted fare.`,
-        sources: [source(fare)]
-      }));
+      if (!picked) {
+        lines.push(Object.assign(missing('Airfare', 'moving', D.airfare, 'No Table 1a airport could be matched to this starting point, so airfare is not priced.'), { id: 'airfare' }));
+      } else {
+        const src = source(D.airfare);
+        if (picked.estimate) src.status = 'ESTIMATE';
+        lines.push(moneyLine({
+          id: 'airfare',
+          label: `Airfare × ${adults}`,
+          lo: picked.lo * adults,
+          typ: picked.typ * adults,
+          hi: picked.hi * adults,
+          note: `${picked.note} ${who} Not a quoted fare.`,
+          sources: [src]
+        }));
+      }
     } else lines.push(Object.assign(missing('Airfare', 'moving', D.unsourced.airfare, 'Airfare is priced only when you choose Flying. Not sure is not treated as a flight.'), { id: 'airfare' }));
 
     const built = specsFor(A.type, A.size);
