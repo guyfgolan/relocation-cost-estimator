@@ -90,6 +90,9 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 .ctaBand{margin-top:22px;border-radius:8px;padding:28px 16px}
 .ctaBand .primary{margin-top:16px;min-width:min(100%,280px)}
 .siteFooter{padding:22px 16px 28px}
+.siteNav{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;margin:0 0 12px}
+.siteNav a{color:var(--white);min-height:44px;display:inline-flex;align-items:center}
+.siteNav a[aria-current="page"]{font-weight:700;text-decoration:none;border-bottom:2px solid var(--gold)}
 .siteFooter p{margin:0 0 6px}
 .siteFooter a{color:var(--white)}
 .siteFooter .broker{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:1.05rem;letter-spacing:.08em;margin:0 0 8px}
@@ -133,6 +136,11 @@ function gtag(){dataLayer.push(arguments);}
 </header>
 <main id="main"><div id="panel"></div></main>
 <footer class="siteFooter">
+<nav class="siteNav" aria-label="Estimators">
+<a href="../index.html">Moving costs</a>
+<a href="./" aria-current="page">Cost of living</a>
+<a href="../mortgage.html">Mortgage payment</a>
+</nav>
 <p class="broker"><span>Guy Golan · REALTOR<sup>®</sup></span> <img class="expLogo" src="exp_realty_logo_white_official.svg" alt="eXp Realty"></p>
 <p class="contact"><a href="tel:+13019196726">301-919-6726</a> &nbsp;|&nbsp; <a href="mailto:guy@floridagulfcoastguide.com">guy@floridagulfcoastguide.com</a></p>
 <p><a href="https://guyfgolan.github.io/monthly-gulf-coast-guide/">Back to the Guide</a></p>
