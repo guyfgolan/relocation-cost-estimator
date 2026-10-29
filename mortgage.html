@@ -12,9 +12,9 @@ html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family
 button,input,select{font:inherit}
 .skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700}
 .skip:focus{top:8px}
-.bg{position:fixed;inset:0;z-index:0;background:#0d2235}
-.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.overlay{position:fixed;inset:0;z-index:1;background:rgba(13,34,53,.45);pointer-events:none}
+.bg{position:fixed;inset:0;z-index:0;background:#0B1E3F}
+.bg picture,.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.overlay{position:fixed;inset:0;z-index:1;background:rgba(11,30,63,.45);pointer-events:none}
 .shell{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;padding:18px 16px 32px}
 .top{display:flex;flex-direction:column;align-items:center;gap:8px}
 .logo{width:min(168px,46vw);height:auto}
@@ -70,7 +70,12 @@ function gtag(){dataLayer.push(arguments);}
 </head>
 <body>
 <a class="skip" href="#card">Skip to the question</a>
-<div class="bg" id="bg"><img id="bgPhoto" alt="" loading="lazy" hidden></div>
+<div class="bg" id="bg"><picture id="bgPicture">
+<source id="bgMobile" media="(max-width: 828px)" type="image/webp">
+<source id="bgDesktop" media="(min-width: 829px)" type="image/webp">
+<source id="bgJpgMobile" media="(max-width: 828px)" type="image/jpeg">
+<img id="bgPhoto" alt="" hidden>
+</picture></div>
 <div class="overlay" aria-hidden="true"></div>
 <div class="shell">
 <header class="top">
@@ -93,15 +98,16 @@ function gtag(){dataLayer.push(arguments);}
 <script>
 const BOOK_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7';
 const D=window.MORTGAGE_DEFAULTS;
+const PHOTOS=['step1_beach','step2_shore','step3_pool','step4_model_exterior','step5_model_kitchen','step6_lake','step7_sunset_pavilion','step8_sunset_gulf'];
 const STEPS=[
-  {id:'price',image:'assets/mortgage/step1.jpg',title:'What is the home price?',key:'price'},
-  {id:'down',image:'assets/mortgage/step2.jpg',title:'What is the down payment?'},
-  {id:'rate',image:'assets/mortgage/step3.jpg',title:'What is the interest rate?'},
-  {id:'place',image:'assets/mortgage/step4.jpg',title:'Which county or city?'},
-  {id:'tax',image:'assets/mortgage/step5.jpg',title:'What is the yearly property tax?'},
-  {id:'insurance',image:'assets/mortgage/step6.jpg',title:'What is the monthly insurance?'},
-  {id:'hoa',image:'assets/mortgage/step7.jpg',title:'What is the monthly HOA?'},
-  {id:'results',image:'assets/mortgage/step8.jpg',title:'Your monthly range'}
+  {id:'price',photo:PHOTOS[0],title:'What is the home price?',key:'price'},
+  {id:'down',photo:PHOTOS[1],title:'What is the down payment?'},
+  {id:'rate',photo:PHOTOS[2],title:'What is the interest rate?'},
+  {id:'place',photo:PHOTOS[3],title:'Which county or city?'},
+  {id:'tax',photo:PHOTOS[4],title:'What is the yearly property tax?'},
+  {id:'insurance',photo:PHOTOS[5],title:'What is the monthly insurance?'},
+  {id:'hoa',photo:PHOTOS[6],title:'What is the monthly HOA?'},
+  {id:'results',photo:PHOTOS[7],title:'Your monthly range'}
 ];
 const state={
   price:'',downDollars:'',downPercent:'',rate:'',placeId:'',communityId:'',taxAnnual:'',insuranceMonthly:'',hoaMonthly:'',
@@ -180,6 +186,29 @@ function currentInvalid(){
   }
   return '';
 }
+let photoToken=0;
+function showPhoto(name){
+  const token=++photoToken;
+  const base='assets/mortgage/'+name;
+  const mobile=window.matchMedia('(max-width: 828px)').matches;
+  const previous=document.getElementById('bgPreload');
+  if(previous)previous.remove();
+  const preload=document.createElement('link');
+  preload.id='bgPreload';
+  preload.rel='preload';
+  preload.as='image';
+  preload.type='image/webp';
+  preload.href=base+(mobile?'_mobile':'')+'.webp';
+  document.head.appendChild(preload);
+  document.getElementById('bgMobile').srcset=base+'_mobile.webp';
+  document.getElementById('bgDesktop').srcset=base+'.webp';
+  document.getElementById('bgJpgMobile').srcset=base+'_mobile.jpg';
+  const photo=document.getElementById('bgPhoto');
+  photo.hidden=true;
+  photo.onload=function(){if(token===photoToken)photo.hidden=false};
+  photo.onerror=function(){if(token===photoToken)photo.hidden=true};
+  photo.src=base+'.jpg';
+}
 function show(index){
   if(index!=null)step=index;
   if(step<0)step=0;
@@ -188,11 +217,7 @@ function show(index){
   const item=STEPS[step];
   document.getElementById('progressBar').style.width=((step+1)/STEPS.length*100)+'%';
   document.getElementById('stepGold').textContent='Question '+(step+1)+' of '+STEPS.length;
-  const photo=document.getElementById('bgPhoto');
-  photo.hidden=true;
-  photo.onload=function(){photo.hidden=false};
-  photo.onerror=function(){photo.hidden=true};
-  if(item.image)photo.src=item.image;
+  showPhoto(item.photo);
   const backDisabled=step===0?' disabled':'';
   const nextLabel=step===STEPS.length-2?'See the range':'Next';
   let body='';

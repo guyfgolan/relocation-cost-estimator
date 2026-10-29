@@ -167,8 +167,11 @@ const page = fs.readFileSync(path.join(__dirname, '..', 'mortgage.html'), 'utf8'
 const calc = fs.readFileSync(path.join(__dirname, '..', 'mortgage.js'), 'utf8');
 assert.ok(page.includes('https://calendar.app.google/5xtMmGSY9kCY5NRk7'));
 assert.ok(!page.includes('8GQc'));
-assert.ok(page.includes('assets/mortgage/step1.jpg'));
-assert.ok(page.includes('rgba(13,34,53,.45)'));
+assert.ok(page.includes('assets/mortgage/'));
+assert.ok(page.includes('step1_beach'));
+assert.ok(page.includes('step8_sunset_gulf'));
+assert.ok(page.includes('rgba(11,30,63,.45)'));
+assert.ok(page.includes('type="image/webp"'));
 assert.ok(calc.includes('The exact monthly figure depends on the lot.'));
 
 console.log('mortgage checks passed');
