@@ -2,7 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const { monthlyPayment, buildEstimate, cents } = require('../mortgage.js');
+const { monthlyPayment, buildEstimate, num } = require('../mortgage.js');
 
 function near(actual, expected, msg) {
   assert.ok(Math.abs(actual - expected) < 0.02, `${msg}: ${actual} vs ${expected}`);
@@ -68,7 +68,10 @@ assert.strictEqual(typed.loan, 160000);
 const empty = buildEstimate({}, { term: { years: null }, rate: {}, insurance: {}, places: [] });
 assert.strictEqual(empty.complete, false);
 assert.ok(empty.missing.includes('home price'));
-assert.ok(empty.missing.includes('loan term in the data file'));
+assert.ok(empty.missing.includes('loan term'));
+assert.strictEqual(num('$450,000'), 450000);
+assert.strictEqual(num('$ 450,000'), 450000);
+assert.strictEqual(num('7.32%'), 7.32);
 
 const file = fs.readFileSync(path.join(__dirname, '..', 'data', 'mortgage_defaults.js'), 'utf8');
 const sandbox = { window: {} };
@@ -128,10 +131,11 @@ near(cited.lines.find(l => l.id === 'tax').range.low, 400000 * 18.29 / 1000 / 12
 near(cited.lines.find(l => l.id === 'tax').range.high, 400000 * 19.84 / 1000 / 12, 'Hillsborough millage high');
 near(cited.lines.find(l => l.id === 'insurance').range.low, 3181 / 12, 'insurance range low');
 near(cited.lines.find(l => l.id === 'insurance').range.high, 6826 / 12, 'insurance range high');
-assert.strictEqual(cited.lines.find(l => l.id === 'insurance').labelStatus, 'INFERENCE');
+assert.ok(cited.lines.find(l => l.id === 'insurance').range.high > cited.lines.find(l => l.id === 'insurance').range.low);
 near(cited.lines.find(l => l.id === 'hoa').range.low, (111 + 2336) / 12, 'Wildleaf low');
 near(cited.lines.find(l => l.id === 'hoa').range.high, (1541 + 3764) / 12, 'Wildleaf high');
-assert.ok(cited.notes.some(n => /flood/i.test(n)));
+assert.ok(cited.notes.some(n => /Florida insurance averages/.test(n)));
+assert.ok(cited.details.some(n => /flood/i.test(n)));
 
 const estimateOnly = buildEstimate({
   price: 400000,
@@ -147,7 +151,8 @@ const estimateOnly = buildEstimate({
   communityId: 'wellen-park'
 }, data);
 assert.strictEqual(estimateOnly.lines.find(l => l.id === 'hoa').omitted, true);
-assert.ok(estimateOnly.notes.some(n => /estimate/i.test(n)));
+assert.ok(estimateOnly.notes.some(n => /not included/i.test(n)));
+assert.ok(!estimateOnly.notes.some(n => /aggregator|snippet|data file|INFERENCE/i.test(n)));
 
 const cityGap = buildEstimate({
   price: 300000,
@@ -173,5 +178,10 @@ assert.ok(page.includes('step8_sunset_gulf'));
 assert.ok(page.includes('rgba(11,30,63,.45)'));
 assert.ok(page.includes('type="image/webp"'));
 assert.ok(calc.includes('The exact monthly figure depends on the lot.'));
+assert.ok(page.includes('Estimate based on Florida insurance averages; your quote will vary.'));
+assert.ok(page.includes('<summary>Sources</summary>'));
+assert.ok(!page.includes('data file'));
+assert.ok(!page.includes('Third-party aggregator'));
+assert.ok(!page.includes('INFERENCE'));
 
 console.log('mortgage checks passed');

@@ -8,13 +8,15 @@
 @font-face{font-family:Cinzel;src:url("assets/fonts/Cinzel-VF.ttf") format("truetype");font-weight:400 900;font-display:swap}
 :root{--navy:#0d2235;--gold:#c7a25a;--cream:#f7f3eb;--ink:#15202b}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Arial,Helvetica,sans-serif}
+html,body{margin:0;min-height:100%;background:#0B1E3F;color:#fff;font-family:Arial,Helvetica,sans-serif}
 button,input,select{font:inherit}
 .skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700}
 .skip:focus{top:8px}
-.bg{position:fixed;inset:0;z-index:0;background:#0B1E3F}
-.bg picture,.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.overlay{position:fixed;inset:0;z-index:1;background:rgba(11,30,63,.45);pointer-events:none}
+.bg,.overlay{position:fixed;inset:0;width:100%;height:100%;min-height:100vh;min-height:100dvh}
+.bg{z-index:0;background:#0B1E3F}
+.bg picture{display:block;position:absolute;inset:0;width:100%;height:100%;min-height:100vh;min-height:100dvh}
+.bg img{position:absolute;inset:0;width:100%;height:100%;min-height:100vh;min-height:100dvh;object-fit:cover}
+.overlay{z-index:1;background:rgba(11,30,63,.45);pointer-events:none}
 .shell{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;padding:18px 16px 32px}
 .top{display:flex;flex-direction:column;align-items:center;gap:8px}
 .logo{width:min(168px,46vw);height:auto}
@@ -49,6 +51,10 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
 .figures strong{display:block;margin-top:6px;font-size:clamp(22px,4vw,32px);font-variant-numeric:tabular-nums}
 .tableWrap{overflow-x:auto;max-width:100%}
 .tableWrap:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+details.fold{margin:12px 0;border-top:1px solid #d9d0c2;padding-top:8px}
+details.fold summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+details.fold p,details.fold li{font-size:15px;color:#3d4a57;margin:0 0 8px}
+details.fold ul{margin:0;padding-left:1.2em}
 table{width:100%;border-collapse:collapse}
 th,td{padding:8px 6px;border-bottom:1px solid #d9d0c2;text-align:left;vertical-align:top}
 th{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
@@ -120,14 +126,12 @@ const live=document.getElementById('live');
 function track(name,params){if(typeof window.gtag==='function')window.gtag('event',name,Object.assign({page_location:location.href,transport_type:'beacon',tool:'mortgage'},params||{}))}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function money(n){if(n==null||!Number.isFinite(n))return '—';return n.toLocaleString('en-US',{style:'currency',currency:'USD'})}
-function cited(group){
-  if(!group)return 'Source and as-of date are not in the data file yet.';
-  const bits=[];
-  if(group.source)bits.push(group.source);
-  if(group.asOf)bits.push('as of '+group.asOf);
-  if(!bits.length)return 'Source and as-of date are not in the data file yet.';
-  const text=bits.join(', ');
-  return group.url?'<a href="'+esc(group.url)+'">'+esc(text)+'</a>':esc(text);
+function sourceItem(label, group){
+  if(!group||!group.source)return '';
+  const when=group.asOf?' as of '+group.asOf:'';
+  const text=label+': '+group.source+when+'.';
+  const body=group.url?'<a href="'+esc(group.url)+'">'+esc(text)+'</a>':esc(text);
+  return '<li>'+body+'</li>';
 }
 function place(){return Mortgage.placeById(D,state.placeId)}
 function prefill(){
@@ -187,6 +191,42 @@ function currentInvalid(){
   return '';
 }
 let photoToken=0;
+function sourceList(){
+  const here=place();
+  const items=[
+    sourceItem('Interest rate', state.rateMeta.source?state.rateMeta:D.rate),
+    sourceItem('Loan term', D.term),
+    sourceItem('Property tax', here&&here.millage),
+    sourceItem('Insurance', Mortgage.countyInsurance(D, here)||D.insurance.range),
+    sourceItem('HOA', Mortgage.communityById(D, state.communityId))
+  ].filter(Boolean);
+  return items.length?items.join(''):'<li>Published sources appear here when a figure has one.</li>';
+}
+const CAPS={price:100000000,downDollars:100000000,downPercent:100,rate:30,tax:1000000,insurance:50000,hoa:50000};
+function gentleClamp(){
+  const rules={
+    price:[['price','price',CAPS.price,'home price']],
+    down:[['downDollars','downDollars',CAPS.downDollars,'down payment'],['downPercent','downPercent',CAPS.downPercent,'percent']],
+    rate:[['rate','rate',CAPS.rate,'interest rate']],
+    tax:[['tax','taxAnnual',CAPS.tax,'property tax']],
+    insurance:[['insurance','insuranceMonthly',CAPS.insurance,'insurance']],
+    hoa:[['hoa','hoaMonthly',CAPS.hoa,'HOA']]
+  };
+  const list=rules[STEPS[step].id]||[];
+  let message='';
+  list.forEach(function(row){
+    const el=document.getElementById(row[0]);
+    if(!el)return;
+    const n=Mortgage.num(el.value);
+    if(n!=null&&n>row[2]){
+      el.value=String(row[2]);
+      state[row[1]]=String(row[2]);
+      snapshot[row[0]]=el.value;
+      message=row[0]==='downPercent'||row[0]==='rate'?'That '+row[3]+' was higher than this page allows, so it was set to '+row[2]+(row[0]==='rate'?'%.':'.'):'That '+row[3]+' was higher than this page allows, so it was set to '+money(row[2])+'.';
+    }
+  });
+  return message;
+}
 function showPhoto(name){
   const token=++photoToken;
   const base='assets/mortgage/'+name;
@@ -218,35 +258,37 @@ function show(index){
   document.getElementById('progressBar').style.width=((step+1)/STEPS.length*100)+'%';
   document.getElementById('stepGold').textContent='Question '+(step+1)+' of '+STEPS.length;
   showPhoto(item.photo);
-  const backDisabled=step===0?' disabled':'';
   const nextLabel=step===STEPS.length-2?'See the range':'Next';
   let body='';
   if(item.id==='price'){
-    body=field('price','Home price, in dollars',state.price,cited(D.price),'inputmode="decimal" autocomplete="off"');
+    body=field('price','Home price, in dollars',state.price,'You can include a dollar sign or commas.','inputmode="decimal" autocomplete="off"');
   }else if(item.id==='down'){
-    body=field('downDollars','Down payment, in dollars',state.downDollars,'Fill dollars or percent. If both are filled, the dollar amount is used. '+cited(D.downPayment),'inputmode="decimal" autocomplete="off"')+
+    body=field('downDollars','Down payment, in dollars',state.downDollars,'Fill dollars or percent. If both are filled, the dollar amount is used.','inputmode="decimal" autocomplete="off"')+
       field('downPercent','Down payment, percent of the price',state.downPercent,'For example, 20 means 20 percent. Leave this blank if you used dollars.','inputmode="decimal" autocomplete="off"');
   }else if(item.id==='rate'){
-    body=field('rate','Interest rate, percent per year',state.rate,cited(state.rateMeta.source?state.rateMeta:D.rate),'inputmode="decimal" autocomplete="off"');
+    const rateWhen=D.rate&&D.rate.asOf?' The starting rate is the 30-year fixed survey for the week of '+D.rate.asOf+'.':'';
+    body=field('rate','Interest rate, percent per year',state.rate,'You can type a different rate.'+rateWhen,'inputmode="decimal" autocomplete="off"');
   }else if(item.id==='place'){
     const options=['<option value="">Choose a county or city</option>'].concat(D.places.map(p=>'<option value="'+esc(p.id)+'"'+(p.id===state.placeId?' selected':'')+'>'+esc(p.name)+'</option>'));
-    body='<div class="field"><label for="place">County or city</label><select id="place">'+options.join('')+'</select><p class="hint" id="placeHint">Venice and North Port are listed with Sarasota County. The choice fills the tax and HOA fields only when those defaults are in the data file.</p></div>';
+    body='<div class="field"><label for="place">County or city</label><select id="place">'+options.join('')+'</select><p class="hint" id="placeHint">Venice and North Port are in Sarasota County. This choice fills property tax from the published county figure.</p></div>';
   }else if(item.id==='tax'){
-    const mill=place()&&place().millage;
-    const taxNote=(mill&&mill.note?mill.note+' ':'')+'The box starts from the millage value. If a low and a high mill are in the file, the monthly range uses those until you change this box. Taxable value is the home price. ';
-    body=field('tax','Property tax, dollars per year',state.taxAnnual,taxNote+cited(mill),'inputmode="decimal" autocomplete="off"');
+    const here=place();
+    const mill=here&&here.millage;
+    let taxNote='Enter the yearly property tax. The taxable value used here is the home price. ';
+    if(mill&&mill.value!=null&&(mill.low==null||mill.high==null))taxNote+='A separate city total was not available, so this starts from the county average. ';
+    else if(mill&&mill.low!=null&&mill.high!=null)taxNote+='The box starts from the county average. The range uses the published low and high millage until you change this box. ';
+    body=field('tax','Property tax, dollars per year',state.taxAnnual,taxNote,'inputmode="decimal" autocomplete="off"');
   }else if(item.id==='insurance'){
     const county=Mortgage.countyInsurance(D,place());
-    const range=D.insurance.range;
-    const insNote=(county?'The box is the '+county.label.toLowerCase()+' '+place().county+' average, $'+county.annual.toLocaleString('en-US')+' a year, divided by 12. ':'Choose a county to see its average. ')+(range?'The monthly range uses $'+range.low.toLocaleString('en-US')+' to $'+range.high.toLocaleString('en-US')+' a year until you change this box. That range is an inference, not a confirmed premium. ':'');
-    body=field('insurance','Homeowners insurance, dollars per month',state.insuranceMonthly,insNote+cited(county||range),'inputmode="decimal" autocomplete="off"');
+    const insNote='Estimate based on Florida insurance averages; your quote will vary.'+(county?' The box starts at the '+place().county+' average.':'');
+    body=field('insurance','Homeowners insurance, dollars per month',state.insuranceMonthly,insNote,'inputmode="decimal" autocomplete="off"');
   }else if(item.id==='hoa'){
-    const options=['<option value="">No community preset</option>'].concat((D.communities||[]).map(function(c){
-      const tag=c.label==='MEASURED'?'measured':'estimate, not confirmed';
+    const options=['<option value="">No community selected</option>'].concat((D.communities||[]).map(function(c){
+      const tag=c.label==='MEASURED'?'published range':'enter your own';
       return '<option value="'+esc(c.id)+'"'+(c.id===state.communityId?' selected':'')+'>'+esc(c.name)+' ('+tag+')</option>';
     }));
     const chosen=Mortgage.communityById(D,state.communityId);
-    const hoaHint=chosen?(chosen.label==='MEASURED'?chosen.note+' The monthly range divides the measured annual amounts by 12 until you type a number. '+cited(chosen):chosen.name+' is an estimate and is not put in the range. '+chosen.note+' '+cited(chosen)):'Optional. A measured community fills the range. An estimate is shown here and left out of the total until you type an amount.';
+    const hoaHint=chosen&&chosen.label==='MEASURED'?'A published range for this community is included until you type your own monthly amount.':chosen?'Enter the monthly HOA from your paperwork. A published amount for this community is not included.':'Optional. Leave this blank to leave HOA out.';
     body='<div class="field"><label for="community">Community</label><select id="community">'+options.join('')+'</select></div>'+field('hoa','HOA dues, dollars per month',state.hoaMonthly,hoaHint,'inputmode="decimal" autocomplete="off"');
   }else{
     const result=Mortgage.buildEstimate({
@@ -257,19 +299,20 @@ function show(index){
       hoaMonthly:state.hoaMonthly,hoaTouched:!!state.touched.hoa,communityId:state.communityId
     },D);
     const rows=result.lines.map(line=>{
-      const status=line.labelStatus==='INFERENCE'?' <span class="hint">Inference, not a confirmed amount.</span>':line.labelStatus==='UNVERIFIED'?' <span class="hint">Estimate, not confirmed.</span>':'';
-      const cells=line.range?'<td class="n">'+money(line.range.low)+'</td><td class="n">'+money(line.range.high)+'</td>':'<td colspan="2">'+(line.omitted?'Not entered':'Not calculated yet')+'</td>';
-      return '<tr><th scope="row">'+esc(line.label)+status+'</th>'+cells+'</tr>';
+      const cells=line.range?'<td class="n">'+money(line.range.low)+'</td><td class="n">'+money(line.range.high)+'</td>':'<td colspan="2">'+(line.omitted?'Not included':'—')+'</td>';
+      return '<tr><th scope="row">'+esc(line.label)+'</th>'+cells+'</tr>';
     }).join('');
-    const figures=result.total?'<div class="figures" aria-label="Low and high monthly payment"><div><small>Low</small><strong>'+money(result.total.low)+'</strong></div><div><small>High</small><strong>'+money(result.total.high)+'</strong></div></div>':'<p>A full monthly range needs a home price, a down payment, an interest rate, property tax, and insurance. The loan term also has to be in the data file. Still needed: '+esc(result.missing.join(', '))+'. </p>';
-    const termText=result.term?'The loan term in the data file is '+esc(result.term)+' years. '+cited(D.term):'The loan term is not in the data file yet. '+cited(D.term);
-    body=figures+'<div class="tableWrap" tabindex="0" role="region" aria-label="Monthly payment breakdown"><table><caption class="sr">Low and high for each part of the monthly payment</caption><thead><tr><th scope="col">Item</th><th scope="col">Low</th><th scope="col">High</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>'+result.notes.map(esc).join(' ')+'</p><p class="src">'+termText+'</p><p class="src">Interest rate: '+cited(state.rateMeta.source?state.rateMeta:D.rate)+'</p><p><a class="primary" href="'+BOOK_URL+'" target="_blank" rel="noopener noreferrer">Book a Call with Guy</a></p>';
+    const figures=result.total?'<div class="figures" aria-label="Low and high monthly payment"><div><small>Low</small><strong>'+money(result.total.low)+'</strong></div><div><small>High</small><strong>'+money(result.total.high)+'</strong></div></div>':'<p>Enter a home price, a down payment, an interest rate, property tax, and insurance to see the full range.'+(result.missing.length?' Still needed: '+esc(result.missing.join(', '))+'.':'')+'</p>';
+    const detailHtml=(result.details||[]).length?'<details class="fold"><summary>Details</summary>'+result.details.map(function(line){return '<p>'+esc(line)+'</p>'}).join('')+'</details>':'';
+    const sourceHtml='<details class="fold"><summary>Sources</summary><ul>'+sourceList()+'</ul></details>';
+    body=figures+'<div class="tableWrap" tabindex="0" role="region" aria-label="Monthly payment breakdown"><table><caption class="sr">Low and high for each part of the monthly payment</caption><thead><tr><th scope="col">Item</th><th scope="col">Low</th><th scope="col">High</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>'+result.notes.map(esc).join(' ')+'</p>'+detailHtml+sourceHtml+'<p><a class="primary" href="'+BOOK_URL+'" target="_blank" rel="noopener noreferrer">Book a Call with Guy</a></p>';
     const doneSig=result.complete?JSON.stringify([state.price,state.downDollars,state.downPercent,state.rate,state.placeId,state.communityId,state.taxAnnual,state.insuranceMonthly,state.hoaMonthly]):'';
     if(doneSig && doneSig!==state.doneSig){state.doneSig=doneSig;track('mortgage_complete',{place:state.placeId||'none'})}
   }
+  const backButton=step===0&&item.id!=='results'?'':'<button type="button" class="secondary" id="backBtn">Back</button>';
   const actions=item.id==='results'
-    ?'<div class="actions"><button type="button" class="secondary" id="backBtn">Back</button></div>'
-    :'<div class="actions"><button type="button" class="secondary" id="backBtn"'+backDisabled+'>Back</button><button type="button" class="primary" id="nextBtn">'+nextLabel+'</button></div>';
+    ?'<div class="actions">'+backButton+'</div>'
+    :'<div class="actions">'+backButton+'<button type="button" class="primary" id="nextBtn">'+nextLabel+'</button></div>';
   card.innerHTML='<h2 id="question">'+esc(item.title)+'</h2>'+body+actions+'<p class="status" id="status" role="alert">'+esc(error)+'</p>';
   error='';
   const heading=document.getElementById('question');
@@ -281,8 +324,9 @@ function show(index){
   if(back)back.onclick=function(){readInputs();error='';show(step-1)};
   if(next)next.onclick=function(){
     readInputs();
+    const capped=gentleClamp();
     const problem=currentInvalid();
-    if(problem){error=problem;show(step);return}
+    if(capped||problem){error=capped||problem;show(step);return}
     show(step+1);
   };
   ['price','downDollars','downPercent','rate','tax','insurance','hoa'].forEach(function(id){

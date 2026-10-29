@@ -3,8 +3,13 @@
   else root.Mortgage = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   function num(value) {
-    if (value == null || value === '') return null;
-    const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, '').trim());
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    if (value == null) return null;
+    let text = String(value).trim();
+    if (!text) return null;
+    text = text.replace(/[$,\s]/g, '').replace(/[^0-9.eE+-]/g, '');
+    if (!/\d/.test(text)) return null;
+    const n = Number(text);
     return Number.isFinite(n) ? n : null;
   }
 
@@ -67,6 +72,7 @@
   function buildEstimate(input, defaults) {
     const D = defaults || {};
     const notes = ['The exact monthly figure depends on the lot.'];
+    const details = [];
     const missing = [];
     const price = num(input.price);
     const downDollars = num(input.downDollars);
@@ -89,7 +95,8 @@
     else missing.push('down payment');
 
     if (down != null && price != null && down > price) {
-      missing.push('down payment within the home price');
+      notes.push('The down payment is higher than the home price.');
+      missing.push('down payment');
       down = null;
     }
     if (down != null && down < 0) {
@@ -111,7 +118,7 @@
       rateHigh = rateFile.high;
     }
 
-    if (!(term > 0)) missing.push('loan term in the data file');
+    if (!(term > 0)) missing.push('loan term');
 
     let principal = null;
     if (loan != null && loan >= 0 && rateLow != null && rateHigh != null && term > 0) {
@@ -139,27 +146,25 @@
     const ins = D.insurance || {};
     const countyPremium = countyInsurance(D, place);
     let insurance = null;
-    let insuranceLabel = null;
     if (input.insuranceTouched) {
       if (insuranceMonthly == null) missing.push('insurance');
       else insurance = pair(insuranceMonthly, insuranceMonthly);
     } else if (ins.range && ins.range.low != null && ins.range.high != null) {
       insurance = pair(ins.range.low / 12, ins.range.high / 12);
-      insuranceLabel = ins.range.label || null;
-      notes.push(ins.range.note || 'The insurance range is an inference. The high end is not a confirmed premium.');
+      notes.push('Estimate based on Florida insurance averages; your quote will vary.');
+      details.push('The insurance range runs from a Florida county average to a published estimate for a Sarasota home. It is not a quote for your house.');
     } else if (countyPremium && countyPremium.annual != null) {
       insurance = pair(countyPremium.annual / 12, countyPremium.annual / 12);
-      insuranceLabel = countyPremium.label || null;
+      notes.push('Estimate based on Florida insurance averages; your quote will vary.');
     } else if (insuranceMonthly != null) insurance = pair(insuranceMonthly, insuranceMonthly);
     else missing.push('insurance');
-    if (ins.floodNote) notes.push(ins.floodNote);
-    if (ins.effectiveTaxNote) notes.push(ins.effectiveTaxNote);
+    details.push('Homeowners insurance does not include flood. A lender may require a separate flood policy in a high-risk flood zone. This estimate does not add one.');
+    details.push('A new home\'s first tax bill often covers only the land or a partial value as of January 1. The full bill usually arrives the next year.');
 
     const community = communityById(D, input.communityId);
     const measuredHoa = measuredCommunityMonthly(community);
     let hoa = null;
     let hoaEntered = false;
-    let hoaLabel = null;
     if (input.hoaTouched) {
       if (hoaMonthly != null) {
         hoa = pair(hoaMonthly, hoaMonthly);
@@ -168,18 +173,17 @@
     } else if (measuredHoa) {
       hoa = pair(measuredHoa.low, measuredHoa.high);
       hoaEntered = true;
-      hoaLabel = 'MEASURED';
-      notes.push(community.note);
+      notes.push('HOA and community development dues for ' + community.name + ' are included. You can type your own amount.');
     } else if (community && community.label === 'UNVERIFIED') {
-      notes.push(community.name + ' is an estimate and is not included. ' + (community.note || 'Type an amount to include one.'));
+      notes.push('Enter your own HOA amount for ' + community.name + '. A published dues figure is not included.');
     }
-    if (!hoaEntered) notes.push('HOA is not in this range because no confirmed amount was entered.');
+    if (!hoaEntered && !(community && community.label === 'UNVERIFIED')) notes.push('HOA dues are not included.');
 
     const lines = [
       { id: 'principal', label: 'Principal and interest', range: principal },
       { id: 'tax', label: 'Property tax', range: tax },
-      { id: 'insurance', label: 'Insurance', range: insurance, labelStatus: insuranceLabel },
-      { id: 'hoa', label: 'HOA', range: hoaEntered ? hoa : null, omitted: !hoaEntered, labelStatus: hoaLabel }
+      { id: 'insurance', label: 'Insurance', range: insurance },
+      { id: 'hoa', label: 'HOA', range: hoaEntered ? hoa : null, omitted: !hoaEntered }
     ];
 
     const required = [principal, tax, insurance];
@@ -199,6 +203,7 @@
       complete,
       missing,
       notes,
+      details,
       lines,
       total,
       loan,
