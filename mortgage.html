@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mortgage Payment Calculator | Florida Gulf Coast Guide</title>
+<style>
+@font-face{font-family:Cinzel;src:url("assets/fonts/Cinzel-VF.ttf") format("truetype");font-weight:400 900;font-display:swap}
+:root{--navy:#0d2235;--gold:#c7a25a;--cream:#f7f3eb;--ink:#15202b}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Arial,Helvetica,sans-serif}
+button,input,select{font:inherit}
+.skip{position:absolute;left:12px;top:-48px;background:var(--gold);color:var(--navy);padding:8px 12px;z-index:9;font-weight:700}
+.skip:focus{top:8px}
+.bg{position:fixed;inset:0;z-index:0;background:#0d2235}
+.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.overlay{position:fixed;inset:0;z-index:1;background:rgba(13,34,53,.45);pointer-events:none}
+.shell{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;padding:18px 16px 32px}
+.top{display:flex;flex-direction:column;align-items:center;gap:8px}
+.logo{width:min(168px,46vw);height:auto}
+.siteNav{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}
+.siteNav a{color:#f7f3eb;min-height:44px;display:inline-flex;align-items:center}
+.siteNav a[aria-current="page"]{font-weight:700;text-decoration:none;border-bottom:2px solid var(--gold)}
+.progress{width:min(420px,100%);height:5px;background:rgba(255,255,255,.28);margin:8px auto 0}
+.progress>div{height:100%;background:var(--gold);width:0}
+.stepGold{margin:14px 0 0;color:#f7f3eb;letter-spacing:.12em;text-transform:uppercase;font-family:Cinzel,Georgia,serif;font-size:13px;text-align:center}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:16px 0 8px}
+.card{width:min(640px,100%);background:var(--cream);color:var(--ink);border:2px solid var(--gold);padding:clamp(20px,4vw,36px);box-shadow:0 0 0 6px rgba(13,34,53,.35)}
+h1,h2{font-family:Cinzel,Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;margin:0 0 12px;color:var(--navy)}
+h1{font-size:clamp(26px,4vw,40px)}
+h2{font-size:clamp(22px,3.4vw,34px)}
+h2::after{content:"";display:block;width:64px;height:2px;margin-top:12px;background:var(--gold)}
+p{margin:0 0 12px;line-height:1.5}
+label{font-weight:700;display:block;margin:0 0 6px}
+.field{margin:0 0 14px}
+input,select{width:100%;min-height:44px;padding:12px 14px;border:1px solid #8a8172;border-radius:2px;background:#fff;color:var(--ink);font-size:16px}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--navy);outline-offset:2px;box-shadow:0 0 0 2px var(--gold)}
+.hint,.src{font-size:15px;line-height:1.45;color:#3d4a57}
+.src a{color:#0d2235}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.primary,.secondary{min-height:44px;padding:12px 18px;cursor:pointer;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.primary{background:var(--gold);color:var(--navy);border:1px solid var(--gold)}
+.secondary{background:transparent;color:var(--navy);border:1px solid var(--navy)}
+.secondary:disabled{opacity:.45;cursor:not-allowed}
+.status{min-height:1.4em;font-weight:700;margin:8px 0 0}
+.figures{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.figures div{border:1px solid var(--gold);padding:12px;text-align:center}
+.figures small{display:block;font-family:Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
+.figures strong{display:block;margin-top:6px;font-size:clamp(22px,4vw,32px);font-variant-numeric:tabular-nums}
+.tableWrap{overflow-x:auto;max-width:100%}
+.tableWrap:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px 6px;border-bottom:1px solid #d9d0c2;text-align:left;vertical-align:top}
+th{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:720px){.card{box-shadow:0 0 0 5px rgba(13,34,53,.45)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}
+</style>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+(function(){
+  if(/^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname))return;
+  var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-CF6TKV3NLK';document.head.appendChild(s);
+  gtag('js',new Date());
+  gtag('config','G-CF6TKV3NLK',{linker:{domains:['guyfgolan.github.io','floridagulfcoastguide.com']}});
+})();
+</script>
+</head>
+<body>
+<a class="skip" href="#card">Skip to the question</a>
+<div class="bg" id="bg"><img id="bgPhoto" alt="" loading="lazy" hidden></div>
+<div class="overlay" aria-hidden="true"></div>
+<div class="shell">
+<header class="top">
+<img class="logo" src="assets/fgcg-logo-white.svg" alt="Florida Gulf Coast Guide">
+<nav class="siteNav" aria-label="Estimators">
+<a href="index.html">Moving costs</a>
+<a href="cost-of-living/">Cost of living</a>
+<a href="mortgage.html" aria-current="page">Mortgage payment</a>
+</nav>
+<div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+<p class="stepGold" id="stepGold"></p>
+</header>
+<div id="live" class="sr" aria-live="polite"></div>
+<main>
+<article class="card" id="card" aria-labelledby="question"></article>
+</main>
+</div>
+<script src="data/mortgage_defaults.js"></script>
+<script src="mortgage.js"></script>
+<script>
+const BOOK_URL='https://calendar.app.google/5xtMmGSY9kCY5NRk7';
+const D=window.MORTGAGE_DEFAULTS;
+const STEPS=[
+  {id:'price',image:'assets/mortgage/step1.jpg',title:'What is the home price?',key:'price'},
+  {id:'down',image:'assets/mortgage/step2.jpg',title:'What is the down payment?'},
+  {id:'rate',image:'assets/mortgage/step3.jpg',title:'What is the interest rate?'},
+  {id:'place',image:'assets/mortgage/step4.jpg',title:'Which county or city?'},
+  {id:'tax',image:'assets/mortgage/step5.jpg',title:'What is the yearly property tax?'},
+  {id:'insurance',image:'assets/mortgage/step6.jpg',title:'What is the monthly insurance?'},
+  {id:'hoa',image:'assets/mortgage/step7.jpg',title:'What is the monthly HOA?'},
+  {id:'results',image:'assets/mortgage/step8.jpg',title:'Your monthly range'}
+];
+const state={
+  price:'',downDollars:'',downPercent:'',rate:'',placeId:'',taxAnnual:'',insuranceMonthly:'',hoaMonthly:'',
+  touched:{},rateMeta:{source:null,url:null,asOf:null,fromFred:false}
+};
+let step=0;
+let error='';
+const card=document.getElementById('card');
+const live=document.getElementById('live');
+function track(name,params){if(typeof window.gtag==='function')window.gtag('event',name,Object.assign({page_location:location.href,transport_type:'beacon',tool:'mortgage'},params||{}))}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function money(n){if(n==null||!Number.isFinite(n))return '—';return n.toLocaleString('en-US',{style:'currency',currency:'USD'})}
+function cited(group){
+  if(!group)return 'Source and as-of date are not in the data file yet.';
+  const bits=[];
+  if(group.source)bits.push(group.source);
+  if(group.asOf)bits.push('as of '+group.asOf);
+  if(!bits.length)return 'Source and as-of date are not in the data file yet.';
+  const text=bits.join(', ');
+  return group.url?'<a href="'+esc(group.url)+'">'+esc(text)+'</a>':esc(text);
+}
+function place(){return Mortgage.placeById(D,state.placeId)}
+function prefill(){
+  if(!state.touched.price && D.price && typeof D.price.value==='number')state.price=String(D.price.value);
+  if(!state.touched.downDollars && D.downPayment && typeof D.downPayment.dollars==='number')state.downDollars=String(D.downPayment.dollars);
+  if(!state.touched.downPercent && D.downPayment && typeof D.downPayment.percent==='number')state.downPercent=String(D.downPayment.percent);
+  if(!state.touched.rate && state.rate==='' && D.rate && typeof D.rate.value==='number')state.rate=String(D.rate.value);
+  if(!state.touched.insurance){
+    const q=D.insurance&&D.insurance.quarterly;
+    state.insuranceMonthly=typeof q==='number'?String(Mortgage.cents(q/3)):'';
+  }
+  const here=place();
+  if(!state.touched.tax){
+    const price=Mortgage.num(state.price);
+    const mill=here&&here.millage&&here.millage.value;
+    state.taxAnnual=price!=null&&typeof mill==='number'?String(Mortgage.cents(price*mill/1000)):'';
+  }
+  if(!state.touched.hoa){
+    const hoa=here&&here.hoa&&here.hoa.monthly;
+    state.hoaMonthly=typeof hoa==='number'?String(hoa):'';
+  }
+  if(!state.rateMeta.source && D.rate)state.rateMeta={source:D.rate.source,url:D.rate.url,asOf:D.rate.asOf,fromFred:false};
+}
+function field(id,label,value,hint,attrs){
+  return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" '+attrs+' value="'+esc(value)+'" aria-describedby="'+id+'Hint">'+
+    '<p class="hint" id="'+id+'Hint">'+hint+'</p></div>';
+}
+const snapshot={};
+function readInputs(){
+  [['price','price','price'],['downDollars','downDollars','downDollars'],['downPercent','downPercent','downPercent'],['rate','rate','rate'],['tax','taxAnnual','tax'],['insurance','insuranceMonthly','insurance'],['hoa','hoaMonthly','hoa']].forEach(function(row){
+    const el=document.getElementById(row[0]);
+    if(!el)return;
+    if(el.value!==snapshot[row[0]])state.touched[row[2]]=true;
+    state[row[1]]=el.value;
+  });
+  const placeEl=document.getElementById('place');
+  if(placeEl){
+    const prev=state.placeId;
+    state.placeId=placeEl.value;
+    if(prev!==state.placeId){state.touched.tax=false;state.touched.hoa=false;prefill()}
+  }
+}
+function currentInvalid(){
+  const id=STEPS[step].id;
+  const checks={price:['price'],down:['downDollars','downPercent'],rate:['rate'],tax:['tax'],insurance:['insurance'],hoa:['hoa']};
+  const ids=checks[id]||[];
+  for(let i=0;i<ids.length;i++){
+    const el=document.getElementById(ids[i]);
+    if(!el)continue;
+    const raw=el.value.trim();
+    if(raw==='' )continue;
+    if(Mortgage.num(raw)==null || Mortgage.num(raw)<0)return 'Enter a number, or leave the field blank.';
+    if(ids[i]==='downPercent' && Mortgage.num(raw)>100)return 'Enter a percent from 0 to 100.';
+  }
+  return '';
+}
+function show(index){
+  if(index!=null)step=index;
+  if(step<0)step=0;
+  if(step>STEPS.length-1)step=STEPS.length-1;
+  prefill();
+  const item=STEPS[step];
+  document.getElementById('progressBar').style.width=((step+1)/STEPS.length*100)+'%';
+  document.getElementById('stepGold').textContent='Question '+(step+1)+' of '+STEPS.length;
+  const photo=document.getElementById('bgPhoto');
+  photo.hidden=true;
+  photo.onload=function(){photo.hidden=false};
+  photo.onerror=function(){photo.hidden=true};
+  if(item.image)photo.src=item.image;
+  const backDisabled=step===0?' disabled':'';
+  const nextLabel=step===STEPS.length-2?'See the range':'Next';
+  let body='';
+  if(item.id==='price'){
+    body=field('price','Home price, in dollars',state.price,cited(D.price),'inputmode="decimal" autocomplete="off"');
+  }else if(item.id==='down'){
+    body=field('downDollars','Down payment, in dollars',state.downDollars,'Fill dollars or percent. If both are filled, the dollar amount is used. '+cited(D.downPayment),'inputmode="decimal" autocomplete="off"')+
+      field('downPercent','Down payment, percent of the price',state.downPercent,'For example, 20 means 20 percent. Leave this blank if you used dollars.','inputmode="decimal" autocomplete="off"');
+  }else if(item.id==='rate'){
+    body=field('rate','Interest rate, percent per year',state.rate,cited(state.rateMeta.source?state.rateMeta:D.rate),'inputmode="decimal" autocomplete="off"');
+  }else if(item.id==='place'){
+    const options=['<option value="">Choose a county or city</option>'].concat(D.places.map(p=>'<option value="'+esc(p.id)+'"'+(p.id===state.placeId?' selected':'')+'>'+esc(p.name)+'</option>'));
+    body='<div class="field"><label for="place">County or city</label><select id="place">'+options.join('')+'</select><p class="hint" id="placeHint">Venice and North Port are listed with Sarasota County. The choice fills the tax and HOA fields only when those defaults are in the data file.</p></div>';
+  }else if(item.id==='tax'){
+    const mill=place()&&place().millage;
+    body=field('tax','Property tax, dollars per year',state.taxAnnual,'The county or city choice fills this from millage when that figure is in the data file. You can type over it. Taxable value is the home price. '+cited(mill),'inputmode="decimal" autocomplete="off"');
+  }else if(item.id==='insurance'){
+    body=field('insurance','Homeowners insurance, dollars per month',state.insuranceMonthly,'A quarterly Florida average in the data file is divided by 3 to fill this field. '+cited(D.insurance),'inputmode="decimal" autocomplete="off"');
+  }else if(item.id==='hoa'){
+    const hoa=place()&&place().hoa;
+    body=field('hoa','HOA dues, dollars per month',state.hoaMonthly,'Optional. Leave this blank to leave HOA out of the range. '+cited(hoa),'inputmode="decimal" autocomplete="off"');
+  }else{
+    const result=Mortgage.buildEstimate({
+      price:state.price,downDollars:state.downDollars,downPercent:state.downPercent,
+      rate:state.rate,rateTouched:!!state.touched.rate,placeId:state.placeId,
+      taxAnnual:state.taxAnnual,taxTouched:!!state.touched.tax,
+      insuranceMonthly:state.insuranceMonthly,insuranceTouched:!!state.touched.insurance,
+      hoaMonthly:state.hoaMonthly,hoaTouched:!!state.touched.hoa
+    },D);
+    const rows=result.lines.map(line=>{
+      const cells=line.range?'<td class="n">'+money(line.range.low)+'</td><td class="n">'+money(line.range.high)+'</td>':'<td colspan="2">'+(line.omitted?'Not entered':'Not calculated yet')+'</td>';
+      return '<tr><th scope="row">'+esc(line.label)+'</th>'+cells+'</tr>';
+    }).join('');
+    const figures=result.total?'<div class="figures" aria-label="Low and high monthly payment"><div><small>Low</small><strong>'+money(result.total.low)+'</strong></div><div><small>High</small><strong>'+money(result.total.high)+'</strong></div></div>':'<p>A full monthly range needs a home price, a down payment, an interest rate, property tax, and insurance. The loan term also has to be in the data file. Still needed: '+esc(result.missing.join(', '))+'. </p>';
+    const termText=result.term?'The loan term in the data file is '+esc(result.term)+' years. '+cited(D.term):'The loan term is not in the data file yet. '+cited(D.term);
+    body=figures+'<div class="tableWrap" tabindex="0" role="region" aria-label="Monthly payment breakdown"><table><caption class="sr">Low and high for each part of the monthly payment</caption><thead><tr><th scope="col">Item</th><th scope="col">Low</th><th scope="col">High</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>'+result.notes.map(esc).join(' ')+'</p><p class="src">'+termText+'</p><p class="src">Interest rate: '+cited(state.rateMeta.source?state.rateMeta:D.rate)+'</p><p><a class="primary" href="'+BOOK_URL+'" target="_blank" rel="noopener noreferrer">Book a Call with Guy</a></p>';
+    const doneSig=result.complete?JSON.stringify([state.price,state.downDollars,state.downPercent,state.rate,state.placeId,state.taxAnnual,state.insuranceMonthly,state.hoaMonthly]):'';
+    if(doneSig && doneSig!==state.doneSig){state.doneSig=doneSig;track('mortgage_complete',{place:state.placeId||'none'})}
+  }
+  const actions=item.id==='results'
+    ?'<div class="actions"><button type="button" class="secondary" id="backBtn">Back</button></div>'
+    :'<div class="actions"><button type="button" class="secondary" id="backBtn"'+backDisabled+'>Back</button><button type="button" class="primary" id="nextBtn">'+nextLabel+'</button></div>';
+  card.innerHTML='<h2 id="question">'+esc(item.title)+'</h2>'+body+actions+'<p class="status" id="status" role="alert">'+esc(error)+'</p>';
+  error='';
+  const heading=document.getElementById('question');
+  heading.tabIndex=-1;
+  heading.focus({focusVisible:false});
+  live.textContent='Question '+(step+1)+' of '+STEPS.length+'. '+item.title;
+  const back=document.getElementById('backBtn');
+  const next=document.getElementById('nextBtn');
+  if(back)back.onclick=function(){readInputs();error='';show(step-1)};
+  if(next)next.onclick=function(){
+    readInputs();
+    const problem=currentInvalid();
+    if(problem){error=problem;show(step);return}
+    show(step+1);
+  };
+  ['price','downDollars','downPercent','rate','tax','insurance','hoa'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el)snapshot[id]=el.value;
+  });
+  card.querySelectorAll('input').forEach(input=>{
+    input.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();if(next)next.click()}});
+  });
+}
+function loadFred(){
+  const key=D.fred&&D.fred.apiKey;
+  if(!key)return;
+  const url='https://api.stlouisfed.org/fred/series/observations?series_id='+encodeURIComponent(D.fred.seriesId||'MORTGAGE30US')+'&api_key='+encodeURIComponent(key)+'&file_type=json&sort_order=desc&limit=1';
+  fetch(url).then(function(res){if(!res.ok)throw new Error('fred');return res.json()}).then(function(data){
+    const obs=data.observations&&data.observations[0];
+    const value=obs&&Mortgage.num(obs.value);
+    if(value==null)return;
+    state.rateMeta={source:'FRED series '+(D.fred.seriesId||'MORTGAGE30US'),url:D.fred.url,asOf:obs.date,fromFred:true};
+    if(state.touched.rate)return;
+    state.rate=String(value);
+    if(STEPS[step].id==='rate'||STEPS[step].id==='results')show(step);
+  }).catch(function(){
+    state.rateMeta.source=state.rateMeta.source||null;
+  });
+}
+document.addEventListener('click',function(event){
+  const link=event.target.closest&&event.target.closest('a[href="'+BOOK_URL+'"]');
+  if(link)track('book_call',{link_url:BOOK_URL,link_text:(link.textContent||'').trim()});
+});
+prefill();
+show(0);
+loadFred();
+</script>
+</body>
+</html>
