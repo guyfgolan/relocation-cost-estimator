@@ -76,31 +76,92 @@ vm.runInNewContext(file, sandbox);
 const data = sandbox.window.MORTGAGE_DEFAULTS;
 assert.strictEqual(data.fred.apiKey, null);
 assert.strictEqual(data.fred.seriesId, 'MORTGAGE30US');
-for (const group of [data.rate, data.term, data.price, data.downPayment, data.insurance]) {
-  assert.ok('source' in group && 'asOf' in group, 'each default group has source and as-of');
-}
-assert.strictEqual(data.rate.value, null);
+assert.strictEqual(data.rate.value, 7.32);
 assert.strictEqual(data.rate.low, null);
 assert.strictEqual(data.rate.high, null);
-assert.strictEqual(data.term.years, null);
+assert.strictEqual(data.rate.asOf, '2026-10-22');
+assert.strictEqual(data.term.years, 30);
 assert.strictEqual(data.price.value, null);
 assert.strictEqual(data.downPayment.dollars, null);
-assert.strictEqual(data.downPayment.percent, null);
-assert.strictEqual(data.insurance.quarterly, null);
-assert.strictEqual(data.insurance.lowQuarterly, null);
-assert.strictEqual(data.insurance.highQuarterly, null);
-const ids = data.places.map(p => p.id);
-assert.strictEqual(ids.join(','), 'manatee,hillsborough,pinellas,sarasota,venice,north-port');
-for (const place of data.places) {
-  assert.strictEqual(place.millage.value, null);
-  assert.strictEqual(place.millage.low, null);
-  assert.strictEqual(place.millage.high, null);
-  assert.strictEqual(place.hoa.monthly, null);
-  assert.ok(place.millage.source === null && place.millage.asOf === null);
-  assert.ok(place.hoa.source === null && place.hoa.asOf === null);
-}
+assert.strictEqual(data.insurance.range.low, 3181);
+assert.strictEqual(data.insurance.range.high, 6826);
+assert.strictEqual(data.insurance.range.label, 'INFERENCE');
+assert.strictEqual(data.insurance.counties.Manatee.annual, 3181);
+assert.strictEqual(data.insurance.counties.Sarasota.annual, 3457);
+assert.strictEqual(data.insurance.counties.Hillsborough.annual, 3525);
+assert.strictEqual(data.insurance.counties.Pinellas.annual, 4063);
+const hills = data.places.find(p => p.id === 'hillsborough').millage;
+assert.strictEqual(hills.value, 18.8553);
+assert.strictEqual(hills.low, 18.29);
+assert.strictEqual(hills.high, 19.84);
+const venice = data.places.find(p => p.id === 'venice').millage;
+assert.strictEqual(venice.value, 12.7527);
+assert.strictEqual(venice.low, null);
+assert.strictEqual(data.places.find(p => p.id === 'north-port').millage.value, 12.7527);
+assert.strictEqual(data.places.find(p => p.id === 'pinellas').millage.low, null);
+assert.strictEqual(data.places.find(p => p.id === 'manatee').millage.value, 14.5524);
+const sara = data.places.find(p => p.id === 'sarasota').millage;
+assert.strictEqual(sara.value, 12.7527);
+assert.strictEqual(sara.low, 10.7437);
+assert.strictEqual(sara.high, 11.4737);
+assert.strictEqual(data.communities.find(c => c.id === 'wildleaf-nrr').hoaAnnualLow, 111);
+assert.strictEqual(data.communities.find(c => c.id === 'wildleaf-nrr').cddAnnualHigh, 3764);
+assert.strictEqual(data.communities.find(c => c.id === 'wellen-park').label, 'UNVERIFIED');
+assert.strictEqual(data.communities.find(c => c.id === 'lakewood-ranch').label, 'UNVERIFIED');
+assert.strictEqual(data.communities.find(c => c.id === 'del-webb-nrr').label, 'UNVERIFIED');
 assert.ok(!/charlotte|lee county/i.test(JSON.stringify(data)));
-assert.strictEqual(cents(10.1 + 10.2), 20.3);
+
+const cited = buildEstimate({
+  price: 400000,
+  downDollars: 80000,
+  rate: 7.32,
+  rateTouched: false,
+  placeId: 'hillsborough',
+  taxTouched: false,
+  insuranceTouched: false,
+  hoaTouched: false,
+  communityId: 'wildleaf-nrr'
+}, data);
+assert.strictEqual(cited.complete, true, cited.missing.join(','));
+assert.ok(cited.total.low < cited.total.high);
+near(cited.lines.find(l => l.id === 'tax').range.low, 400000 * 18.29 / 1000 / 12, 'Hillsborough millage low');
+near(cited.lines.find(l => l.id === 'tax').range.high, 400000 * 19.84 / 1000 / 12, 'Hillsborough millage high');
+near(cited.lines.find(l => l.id === 'insurance').range.low, 3181 / 12, 'insurance range low');
+near(cited.lines.find(l => l.id === 'insurance').range.high, 6826 / 12, 'insurance range high');
+assert.strictEqual(cited.lines.find(l => l.id === 'insurance').labelStatus, 'INFERENCE');
+near(cited.lines.find(l => l.id === 'hoa').range.low, (111 + 2336) / 12, 'Wildleaf low');
+near(cited.lines.find(l => l.id === 'hoa').range.high, (1541 + 3764) / 12, 'Wildleaf high');
+assert.ok(cited.notes.some(n => /flood/i.test(n)));
+
+const estimateOnly = buildEstimate({
+  price: 400000,
+  downDollars: 80000,
+  rate: 7.32,
+  rateTouched: true,
+  placeId: 'sarasota',
+  taxAnnual: 5000,
+  taxTouched: true,
+  insuranceMonthly: 200,
+  insuranceTouched: true,
+  hoaTouched: false,
+  communityId: 'wellen-park'
+}, data);
+assert.strictEqual(estimateOnly.lines.find(l => l.id === 'hoa').omitted, true);
+assert.ok(estimateOnly.notes.some(n => /estimate/i.test(n)));
+
+const cityGap = buildEstimate({
+  price: 300000,
+  downDollars: 60000,
+  rate: 7.32,
+  rateTouched: true,
+  placeId: 'venice',
+  taxTouched: false,
+  insuranceMonthly: 100,
+  insuranceTouched: true,
+  hoaTouched: false
+}, data);
+near(cityGap.lines.find(l => l.id === 'tax').range.low, 300000 * 12.7527 / 1000 / 12, 'Venice uses the county average');
+near(cityGap.lines.find(l => l.id === 'tax').range.high, cityGap.lines.find(l => l.id === 'tax').range.low, 'Venice has no city millage range');
 
 const page = fs.readFileSync(path.join(__dirname, '..', 'mortgage.html'), 'utf8');
 const calc = fs.readFileSync(path.join(__dirname, '..', 'mortgage.js'), 'utf8');

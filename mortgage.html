@@ -104,7 +104,7 @@ const STEPS=[
   {id:'results',image:'assets/mortgage/step8.jpg',title:'Your monthly range'}
 ];
 const state={
-  price:'',downDollars:'',downPercent:'',rate:'',placeId:'',taxAnnual:'',insuranceMonthly:'',hoaMonthly:'',
+  price:'',downDollars:'',downPercent:'',rate:'',placeId:'',communityId:'',taxAnnual:'',insuranceMonthly:'',hoaMonthly:'',
   touched:{},rateMeta:{source:null,url:null,asOf:null,fromFred:false}
 };
 let step=0;
@@ -130,8 +130,8 @@ function prefill(){
   if(!state.touched.downPercent && D.downPayment && typeof D.downPayment.percent==='number')state.downPercent=String(D.downPayment.percent);
   if(!state.touched.rate && state.rate==='' && D.rate && typeof D.rate.value==='number')state.rate=String(D.rate.value);
   if(!state.touched.insurance){
-    const q=D.insurance&&D.insurance.quarterly;
-    state.insuranceMonthly=typeof q==='number'?String(Mortgage.cents(q/3)):'';
+    const county=Mortgage.countyInsurance(D,place());
+    state.insuranceMonthly=county&&typeof county.annual==='number'?String(Mortgage.cents(county.annual/12)):'';
   }
   const here=place();
   if(!state.touched.tax){
@@ -161,8 +161,10 @@ function readInputs(){
   if(placeEl){
     const prev=state.placeId;
     state.placeId=placeEl.value;
-    if(prev!==state.placeId){state.touched.tax=false;state.touched.hoa=false;prefill()}
+    if(prev!==state.placeId){state.touched.tax=false;prefill()}
   }
+  const communityEl=document.getElementById('community');
+  if(communityEl)state.communityId=communityEl.value;
 }
 function currentInvalid(){
   const id=STEPS[step].id;
@@ -206,28 +208,38 @@ function show(index){
     body='<div class="field"><label for="place">County or city</label><select id="place">'+options.join('')+'</select><p class="hint" id="placeHint">Venice and North Port are listed with Sarasota County. The choice fills the tax and HOA fields only when those defaults are in the data file.</p></div>';
   }else if(item.id==='tax'){
     const mill=place()&&place().millage;
-    body=field('tax','Property tax, dollars per year',state.taxAnnual,'The county or city choice fills this from millage when that figure is in the data file. You can type over it. Taxable value is the home price. '+cited(mill),'inputmode="decimal" autocomplete="off"');
+    const taxNote=(mill&&mill.note?mill.note+' ':'')+'The box starts from the millage value. If a low and a high mill are in the file, the monthly range uses those until you change this box. Taxable value is the home price. ';
+    body=field('tax','Property tax, dollars per year',state.taxAnnual,taxNote+cited(mill),'inputmode="decimal" autocomplete="off"');
   }else if(item.id==='insurance'){
-    body=field('insurance','Homeowners insurance, dollars per month',state.insuranceMonthly,'A quarterly Florida average in the data file is divided by 3 to fill this field. '+cited(D.insurance),'inputmode="decimal" autocomplete="off"');
+    const county=Mortgage.countyInsurance(D,place());
+    const range=D.insurance.range;
+    const insNote=(county?'The box is the '+county.label.toLowerCase()+' '+place().county+' average, $'+county.annual.toLocaleString('en-US')+' a year, divided by 12. ':'Choose a county to see its average. ')+(range?'The monthly range uses $'+range.low.toLocaleString('en-US')+' to $'+range.high.toLocaleString('en-US')+' a year until you change this box. That range is an inference, not a confirmed premium. ':'');
+    body=field('insurance','Homeowners insurance, dollars per month',state.insuranceMonthly,insNote+cited(county||range),'inputmode="decimal" autocomplete="off"');
   }else if(item.id==='hoa'){
-    const hoa=place()&&place().hoa;
-    body=field('hoa','HOA dues, dollars per month',state.hoaMonthly,'Optional. Leave this blank to leave HOA out of the range. '+cited(hoa),'inputmode="decimal" autocomplete="off"');
+    const options=['<option value="">No community preset</option>'].concat((D.communities||[]).map(function(c){
+      const tag=c.label==='MEASURED'?'measured':'estimate, not confirmed';
+      return '<option value="'+esc(c.id)+'"'+(c.id===state.communityId?' selected':'')+'>'+esc(c.name)+' ('+tag+')</option>';
+    }));
+    const chosen=Mortgage.communityById(D,state.communityId);
+    const hoaHint=chosen?(chosen.label==='MEASURED'?chosen.note+' The monthly range divides the measured annual amounts by 12 until you type a number. '+cited(chosen):chosen.name+' is an estimate and is not put in the range. '+chosen.note+' '+cited(chosen)):'Optional. A measured community fills the range. An estimate is shown here and left out of the total until you type an amount.';
+    body='<div class="field"><label for="community">Community</label><select id="community">'+options.join('')+'</select></div>'+field('hoa','HOA dues, dollars per month',state.hoaMonthly,hoaHint,'inputmode="decimal" autocomplete="off"');
   }else{
     const result=Mortgage.buildEstimate({
       price:state.price,downDollars:state.downDollars,downPercent:state.downPercent,
       rate:state.rate,rateTouched:!!state.touched.rate,placeId:state.placeId,
       taxAnnual:state.taxAnnual,taxTouched:!!state.touched.tax,
       insuranceMonthly:state.insuranceMonthly,insuranceTouched:!!state.touched.insurance,
-      hoaMonthly:state.hoaMonthly,hoaTouched:!!state.touched.hoa
+      hoaMonthly:state.hoaMonthly,hoaTouched:!!state.touched.hoa,communityId:state.communityId
     },D);
     const rows=result.lines.map(line=>{
+      const status=line.labelStatus==='INFERENCE'?' <span class="hint">Inference, not a confirmed amount.</span>':line.labelStatus==='UNVERIFIED'?' <span class="hint">Estimate, not confirmed.</span>':'';
       const cells=line.range?'<td class="n">'+money(line.range.low)+'</td><td class="n">'+money(line.range.high)+'</td>':'<td colspan="2">'+(line.omitted?'Not entered':'Not calculated yet')+'</td>';
-      return '<tr><th scope="row">'+esc(line.label)+'</th>'+cells+'</tr>';
+      return '<tr><th scope="row">'+esc(line.label)+status+'</th>'+cells+'</tr>';
     }).join('');
     const figures=result.total?'<div class="figures" aria-label="Low and high monthly payment"><div><small>Low</small><strong>'+money(result.total.low)+'</strong></div><div><small>High</small><strong>'+money(result.total.high)+'</strong></div></div>':'<p>A full monthly range needs a home price, a down payment, an interest rate, property tax, and insurance. The loan term also has to be in the data file. Still needed: '+esc(result.missing.join(', '))+'. </p>';
     const termText=result.term?'The loan term in the data file is '+esc(result.term)+' years. '+cited(D.term):'The loan term is not in the data file yet. '+cited(D.term);
     body=figures+'<div class="tableWrap" tabindex="0" role="region" aria-label="Monthly payment breakdown"><table><caption class="sr">Low and high for each part of the monthly payment</caption><thead><tr><th scope="col">Item</th><th scope="col">Low</th><th scope="col">High</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>'+result.notes.map(esc).join(' ')+'</p><p class="src">'+termText+'</p><p class="src">Interest rate: '+cited(state.rateMeta.source?state.rateMeta:D.rate)+'</p><p><a class="primary" href="'+BOOK_URL+'" target="_blank" rel="noopener noreferrer">Book a Call with Guy</a></p>';
-    const doneSig=result.complete?JSON.stringify([state.price,state.downDollars,state.downPercent,state.rate,state.placeId,state.taxAnnual,state.insuranceMonthly,state.hoaMonthly]):'';
+    const doneSig=result.complete?JSON.stringify([state.price,state.downDollars,state.downPercent,state.rate,state.placeId,state.communityId,state.taxAnnual,state.insuranceMonthly,state.hoaMonthly]):'';
     if(doneSig && doneSig!==state.doneSig){state.doneSig=doneSig;track('mortgage_complete',{place:state.placeId||'none'})}
   }
   const actions=item.id==='results'

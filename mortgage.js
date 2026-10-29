@@ -33,6 +33,37 @@
     return null;
   }
 
+  function communityById(defaults, id) {
+    const rows = (defaults && defaults.communities) || [];
+    for (let i = 0; i < rows.length; i++) if (rows[i].id === id) return rows[i];
+    return null;
+  }
+
+  function countyInsurance(defaults, place) {
+    const counties = defaults && defaults.insurance && defaults.insurance.counties;
+    if (!counties || !place) return null;
+    return counties[place.county] || null;
+  }
+
+  function measuredCommunityMonthly(community) {
+    if (!community || community.label !== 'MEASURED') return null;
+    let low = 0;
+    let high = 0;
+    let any = false;
+    if (community.hoaAnnualLow != null && community.hoaAnnualHigh != null) {
+      low += community.hoaAnnualLow;
+      high += community.hoaAnnualHigh;
+      any = true;
+    }
+    if (community.cddAnnualLow != null && community.cddAnnualHigh != null) {
+      low += community.cddAnnualLow;
+      high += community.cddAnnualHigh;
+      any = true;
+    }
+    if (!any) return null;
+    return { low: low / 12, high: high / 12 };
+  }
+
   function buildEstimate(input, defaults) {
     const D = defaults || {};
     const notes = ['The exact monthly figure depends on the lot.'];
@@ -100,41 +131,55 @@
       else tax = pair(taxAnnual / 12, taxAnnual / 12);
     } else if (millage && millage.low != null && millage.high != null && price != null) {
       tax = pair(price * millage.low / 1000 / 12, price * millage.high / 1000 / 12);
+    } else if (millage && millage.value != null && price != null) {
+      tax = pair(price * millage.value / 1000 / 12, price * millage.value / 1000 / 12);
     } else if (taxAnnual != null) tax = pair(taxAnnual / 12, taxAnnual / 12);
     else missing.push('property tax');
 
     const ins = D.insurance || {};
+    const countyPremium = countyInsurance(D, place);
     let insurance = null;
+    let insuranceLabel = null;
     if (input.insuranceTouched) {
       if (insuranceMonthly == null) missing.push('insurance');
       else insurance = pair(insuranceMonthly, insuranceMonthly);
-    } else if (ins.lowQuarterly != null && ins.highQuarterly != null) {
-      insurance = pair(ins.lowQuarterly / 3, ins.highQuarterly / 3);
+    } else if (ins.range && ins.range.low != null && ins.range.high != null) {
+      insurance = pair(ins.range.low / 12, ins.range.high / 12);
+      insuranceLabel = ins.range.label || null;
+      notes.push(ins.range.note || 'The insurance range is an inference. The high end is not a confirmed premium.');
+    } else if (countyPremium && countyPremium.annual != null) {
+      insurance = pair(countyPremium.annual / 12, countyPremium.annual / 12);
+      insuranceLabel = countyPremium.label || null;
     } else if (insuranceMonthly != null) insurance = pair(insuranceMonthly, insuranceMonthly);
     else missing.push('insurance');
+    if (ins.floodNote) notes.push(ins.floodNote);
+    if (ins.effectiveTaxNote) notes.push(ins.effectiveTaxNote);
 
-    const hoaFile = place && place.hoa;
+    const community = communityById(D, input.communityId);
+    const measuredHoa = measuredCommunityMonthly(community);
     let hoa = null;
     let hoaEntered = false;
+    let hoaLabel = null;
     if (input.hoaTouched) {
       if (hoaMonthly != null) {
         hoa = pair(hoaMonthly, hoaMonthly);
         hoaEntered = true;
       }
-    } else if (hoaFile && hoaFile.low != null && hoaFile.high != null) {
-      hoa = pair(hoaFile.low, hoaFile.high);
+    } else if (measuredHoa) {
+      hoa = pair(measuredHoa.low, measuredHoa.high);
       hoaEntered = true;
-    } else if (hoaMonthly != null) {
-      hoa = pair(hoaMonthly, hoaMonthly);
-      hoaEntered = true;
+      hoaLabel = 'MEASURED';
+      notes.push(community.note);
+    } else if (community && community.label === 'UNVERIFIED') {
+      notes.push(community.name + ' is an estimate and is not included. ' + (community.note || 'Type an amount to include one.'));
     }
-    if (!hoaEntered) notes.push('HOA is not in this range because no amount was entered.');
+    if (!hoaEntered) notes.push('HOA is not in this range because no confirmed amount was entered.');
 
     const lines = [
       { id: 'principal', label: 'Principal and interest', range: principal },
       { id: 'tax', label: 'Property tax', range: tax },
-      { id: 'insurance', label: 'Insurance', range: insurance },
-      { id: 'hoa', label: 'HOA', range: hoaEntered ? hoa : null, omitted: !hoaEntered }
+      { id: 'insurance', label: 'Insurance', range: insurance, labelStatus: insuranceLabel },
+      { id: 'hoa', label: 'HOA', range: hoaEntered ? hoa : null, omitted: !hoaEntered, labelStatus: hoaLabel }
     ];
 
     const required = [principal, tax, insurance];
@@ -167,6 +212,9 @@
     cents,
     monthlyPayment,
     placeById,
+    communityById,
+    countyInsurance,
+    measuredCommunityMonthly,
     buildEstimate
   };
 });
