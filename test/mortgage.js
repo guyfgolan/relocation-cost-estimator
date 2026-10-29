@@ -79,10 +79,11 @@ vm.runInNewContext(file, sandbox);
 const data = sandbox.window.MORTGAGE_DEFAULTS;
 assert.strictEqual(data.fred.apiKey, null);
 assert.strictEqual(data.fred.seriesId, 'MORTGAGE30US');
-assert.strictEqual(data.rate.value, 7.32);
+assert.strictEqual(data.rate.value, 7.24);
 assert.strictEqual(data.rate.low, null);
 assert.strictEqual(data.rate.high, null);
-assert.strictEqual(data.rate.asOf, '2026-10-22');
+assert.strictEqual(data.rate.asOf, '2026-10-29');
+assert.strictEqual(data.rate.url, 'https://www.freddiemac.com/pmms');
 assert.strictEqual(data.term.years, 30);
 assert.strictEqual(data.price.value, null);
 assert.strictEqual(data.downPayment.dollars, null);
@@ -117,7 +118,7 @@ assert.ok(!/charlotte|lee county/i.test(JSON.stringify(data)));
 const cited = buildEstimate({
   price: 400000,
   downDollars: 80000,
-  rate: 7.32,
+  rate: 7.24,
   rateTouched: false,
   placeId: 'hillsborough',
   taxTouched: false,
@@ -140,7 +141,7 @@ assert.ok(cited.details.some(n => /flood/i.test(n)));
 const estimateOnly = buildEstimate({
   price: 400000,
   downDollars: 80000,
-  rate: 7.32,
+  rate: 7.24,
   rateTouched: true,
   placeId: 'sarasota',
   taxAnnual: 5000,
@@ -157,7 +158,7 @@ assert.ok(!estimateOnly.notes.some(n => /aggregator|snippet|data file|INFERENCE/
 const cityGap = buildEstimate({
   price: 300000,
   downDollars: 60000,
-  rate: 7.32,
+  rate: 7.24,
   rateTouched: true,
   placeId: 'venice',
   taxTouched: false,

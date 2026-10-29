@@ -13,21 +13,21 @@ window.MORTGAGE_DEFAULTS = {
     asOf: null
   },
   rate: {
-    value: 7.32,
+    value: 7.24,
     low: null,
     high: null,
     unit: 'percent per year',
-    source: 'Freddie Mac Primary Mortgage Market Survey, 30-year fixed, week of 2026-10-22',
+    source: 'Freddie Mac PMMS, 30-year fixed',
     url: 'https://www.freddiemac.com/pmms',
-    asOf: '2026-10-22',
+    asOf: '2026-10-29',
     label: 'MEASURED',
-    note: 'Prior week was 7.40%. That prior week is not used as a high. The next PMMS release was scheduled Thu 2026-10-29 at 12pm ET.'
+    note: 'Freddie Mac PMMS week ending 2026-10-29. Prior week was 7.32%. The 15-year rate that week was 6.60% and is not used.'
   },
   term: {
     years: 30,
-    source: 'Freddie Mac Primary Mortgage Market Survey, 30-year fixed',
+    source: 'Freddie Mac PMMS, 30-year fixed',
     url: 'https://www.freddiemac.com/pmms',
-    asOf: '2026-10-22',
+    asOf: '2026-10-29',
     label: 'MEASURED'
   },
   price: {

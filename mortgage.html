@@ -126,9 +126,11 @@ const live=document.getElementById('live');
 function track(name,params){if(typeof window.gtag==='function')window.gtag('event',name,Object.assign({page_location:location.href,transport_type:'beacon',tool:'mortgage'},params||{}))}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function money(n){if(n==null||!Number.isFinite(n))return '—';return n.toLocaleString('en-US',{style:'currency',currency:'USD'})}
+function moneyWhole(n){return n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}
 function sourceItem(label, group){
   if(!group||!group.source)return '';
-  const when=group.asOf?' as of '+group.asOf:'';
+  const asOf=group.asOf||'';
+  const when=asOf&&String(group.source).indexOf(asOf)<0?' as of '+asOf:'';
   const text=label+': '+group.source+when+'.';
   const body=group.url?'<a href="'+esc(group.url)+'">'+esc(text)+'</a>':esc(text);
   return '<li>'+body+'</li>';
@@ -198,7 +200,7 @@ function sourceList(){
     sourceItem('Loan term', D.term),
     sourceItem('Property tax', here&&here.millage),
     sourceItem('Insurance', Mortgage.countyInsurance(D, here)||D.insurance.range),
-    sourceItem('HOA', Mortgage.communityById(D, state.communityId))
+    (function(){const community=Mortgage.communityById(D, state.communityId);return community&&community.label==='MEASURED'&&!state.touched.hoa?sourceItem('HOA', community):''})()
   ].filter(Boolean);
   return items.length?items.join(''):'<li>Published sources appear here when a figure has one.</li>';
 }
@@ -222,7 +224,7 @@ function gentleClamp(){
       el.value=String(row[2]);
       state[row[1]]=String(row[2]);
       snapshot[row[0]]=el.value;
-      message=row[0]==='downPercent'||row[0]==='rate'?'That '+row[3]+' was higher than this page allows, so it was set to '+row[2]+(row[0]==='rate'?'%.':'.'):'That '+row[3]+' was higher than this page allows, so it was set to '+money(row[2])+'.';
+      message=row[0]==='downPercent'||row[0]==='rate'?'That '+row[3]+' was higher than this page allows, so it was set to '+row[2]+(row[0]==='rate'?'%.':'.'):'That '+row[3]+' was higher than this page allows, so it was set to '+moneyWhole(row[2])+'.';
     }
   });
   return message;
