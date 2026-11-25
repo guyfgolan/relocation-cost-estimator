@@ -112,6 +112,18 @@ input{width:100%;background:var(--white);border:1px solid var(--line);border-rad
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
+
+/* FGCG area-page Back link — added so tools match floridagulfcoastguide.com area pages */
+.back-link{display:inline-flex;align-items:center;gap:6px;min-width:44px;min-height:44px;padding:0 12px 0 0;border-right:1px solid rgba(199,162,90,.35);border-radius:0;color:#fff;text-decoration:none;font:500 15.5px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+.back-link svg{color:#f1d79f;flex:none}
+.back-link:hover,.back-link:focus-visible{color:#f1d79f}
+.back-link:focus-visible{outline:2px solid #f1d79f;outline-offset:2px}
+@media(max-width:420px){.back-link{font-size:14px;padding-right:10px;gap:4px}}
+.brandLeft{display:flex;align-items:center;gap:10px;min-width:0}
+.brandLeft .logo{margin:0}
+.siteHeader{position:relative}
+.siteHeader .back-link{position:absolute;top:18px;left:16px;z-index:2}
+@media(max-width:420px){.siteHeader .back-link{top:12px;left:8px}}
 </style>
 <!-- Google tag (gtag.js), GA4 G-CF6TKV3NLK. Not loaded on localhost or file:// so local tests never reach Guy's analytics. -->
 <script>
@@ -128,6 +140,7 @@ function gtag(){dataLayer.push(arguments);}
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="siteHeader">
+<a class="back-link" href="https://floridagulfcoastguide.com/" aria-label="Back"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M10.5 2.5 5 8l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg><span>Back</span></a>
 <img class="logo" src="logo_h_white.png" alt="Florida Gulf Coast Guide">
 <h1 class="siteTitle"><span class="titleLine">Cost of living</span><span class="titleLine titleGold">Estimator</span></h1>
 </header>
